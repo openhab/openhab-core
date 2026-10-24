@@ -68,6 +68,7 @@ public class MqttBrokerConnection {
     public static final MqttVersion DEFAULT_MQTT_VERSION = MqttVersion.V3;
     public static final int DEFAULT_KEEPALIVE_INTERVAL = 60;
     public static final int DEFAULT_QOS = 0;
+    public static final String DEFAULT_WEBSOCKET_SUBPROTOCOL = "mqtt";
 
     /**
      * MQTT transport protocols
@@ -94,6 +95,7 @@ public class MqttBrokerConnection {
     protected final MqttVersion mqttVersion;
     private boolean cleanSessionStart = true;
     private String webSocketPath = "";
+    private String webSocketSubprotocol = DEFAULT_WEBSOCKET_SUBPROTOCOL;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
     protected final String clientId;
@@ -548,6 +550,30 @@ public class MqttBrokerConnection {
     }
 
     /**
+     * Sets the value offered in the {@code Sec-WebSocket-Protocol} header of the WebSocket handshake when
+     * {@link #protocol} is {@link Protocol#WEBSOCKETS}. Some brokers react to the exact value offered, e.g. rejecting a
+     * lone {@code mqtt} while accepting a list such as {@code mqtt, mqttv3.1, mqttv3.11}.
+     * <p>
+     * Defaults to {@link #DEFAULT_WEBSOCKET_SUBPROTOCOL}, which is what the MQTT client library offers by default. A
+     * + * blank value restores that default.
+     *
+     * @param webSocketSubprotocol the subprotocol(s) to offer, as the raw header value; an empty string uses the
+     *            default
+     */
+    public void setWebSocketSubprotocol(String webSocketSubprotocol) {
+        this.webSocketSubprotocol = webSocketSubprotocol.isBlank() ? DEFAULT_WEBSOCKET_SUBPROTOCOL
+                : webSocketSubprotocol;
+    }
+
+    /**
+     * Return the WebSocket subprotocol value configured via {@link #setWebSocketSubprotocol(String)}, or
+     * {@link #DEFAULT_WEBSOCKET_SUBPROTOCOL} if none was set.
+     */
+    public String getWebSocketSubprotocol() {
+        return webSocketSubprotocol;
+    }
+
+    /**
      * Return true if there are subscribers registered via {@link #subscribe(String, MqttMessageSubscriber)}.
      * Call {@link #unsubscribe(String, MqttMessageSubscriber)} or {@link #unsubscribeAll()} if necessary.
      */
@@ -756,11 +782,11 @@ public class MqttBrokerConnection {
 
     protected MqttAsyncClientWrapper createClient() {
         if (mqttVersion == MqttVersion.V3) {
-            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, secure, hostnameValidated,
-                    connectionCallback, trustManagerFactory);
+            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, webSocketSubprotocol,
+                    secure, hostnameValidated, connectionCallback, trustManagerFactory);
         } else {
-            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, secure, hostnameValidated,
-                    connectionCallback, trustManagerFactory);
+            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, webSocketSubprotocol,
+                    secure, hostnameValidated, connectionCallback, trustManagerFactory);
         }
     }
 
