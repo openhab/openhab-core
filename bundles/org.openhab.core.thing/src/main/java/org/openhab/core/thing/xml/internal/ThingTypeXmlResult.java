@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.NodeValue;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -29,8 +30,6 @@ import org.openhab.core.thing.type.ChannelGroupDefinition;
 import org.openhab.core.thing.type.ChannelGroupTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
-
-import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
  * The {@link ThingTypeXmlResult} is an intermediate XML conversion result object which

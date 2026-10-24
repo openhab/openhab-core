@@ -29,14 +29,13 @@ import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.config.core.xml.util.ConversionException;
+import org.openhab.core.config.core.xml.util.XmlDocumentException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
  * The {@link AddonInfoAddonsXmlProvider} reads the {@code runtime/etc/addons.xml} file, which
@@ -101,7 +100,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
             logger.warn("File '{}' could not be read", file.getName());
         } catch (ConversionException e) {
             logger.warn("File '{}' has invalid content: {}", file.getName(), e.getMessage());
-        } catch (XStreamException e) {
+        } catch (XmlDocumentException e) {
             logger.warn("File '{}' could not be deserialized", file.getName());
         } catch (SecurityException e) {
             logger.warn("File '{}' threw a security exception: {}", file, e.getMessage());

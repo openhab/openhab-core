@@ -20,8 +20,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-
 /**
  * The {@link NodeIterator} is an {@link Iterator} for nodes of an XML document.
  * <p>

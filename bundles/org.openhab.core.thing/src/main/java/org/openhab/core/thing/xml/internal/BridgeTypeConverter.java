@@ -16,16 +16,15 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.NodeIterator;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.thing.ThingTypeUID;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link BridgeTypeConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link BridgeTypeConverter} is a concrete implementation of the {@link XmlConverter} interface used
  * to convert bridge type information within an XML document
  * into a {@link BridgeTypeXmlResult} object.
  * <p>
@@ -45,7 +44,7 @@ public class BridgeTypeConverter extends ThingTypeConverter {
     }
 
     @Override
-    protected @Nullable BridgeTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected @Nullable BridgeTypeXmlResult unmarshalType(XmlNodeReader reader, XmlUnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         return new BridgeTypeXmlResult(new ThingTypeUID(getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), readLabel(nodeIterator),

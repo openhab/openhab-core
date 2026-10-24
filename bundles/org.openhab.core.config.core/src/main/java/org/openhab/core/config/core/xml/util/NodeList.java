@@ -20,8 +20,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-
 /**
  * The {@link NodeList} class contains the node name and its according list of values for an XML tag.
  * <p>

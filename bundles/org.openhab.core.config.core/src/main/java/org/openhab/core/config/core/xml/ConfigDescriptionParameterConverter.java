@@ -24,19 +24,18 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.ConverterValueMap;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeValue;
-
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 
 /**
  * The {@link ConfigDescriptionParameterConverter} is a concrete implementation
- * of the {@code XStream} {@link Converter} interface used to convert config
+ * of the {@link XmlConverter} interface used to convert config
  * description parameters information within an XML document into a {@link ConfigDescriptionParameter} object.
  * <p>
  * This converter converts {@code parameter} XML tags.
@@ -92,7 +91,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         ConfigDescriptionParameter configDescriptionParam;
 
         // read attributes

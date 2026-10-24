@@ -17,12 +17,8 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link NodeValueConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link NodeValueConverter} is a concrete implementation of the {@link XmlConverter} interface used
  * to convert the value of an XML tag within an XML
  * document into a {@link NodeValue} object.
  *
@@ -36,7 +32,7 @@ public class NodeValueConverter extends GenericUnmarshaller<NodeValue> {
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         Map<String, String> attributes = ConverterAttributeMapValidator.readValidatedAttributes(reader, null);
 
         return new NodeValue(reader.getNodeName(), attributes, reader.getValue());

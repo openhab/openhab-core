@@ -15,24 +15,17 @@ package org.openhab.core.config.core.xml.util;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-
 /**
- * The {@link GenericUnmarshaller} is an abstract implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link GenericUnmarshaller} is an abstract implementation of the {@link XmlConverter} interface used
  * to convert XML tags within an XML document into its
  * according objects.
- * <p>
- * <b>Hint:</b> This class only supports unmarshalling functionality.
  *
  * @author Michael Grammling - Initial contribution
  *
  * @param <T> the result type of the conversion
  */
 @NonNullByDefault
-public abstract class GenericUnmarshaller<T> implements Converter {
+public abstract class GenericUnmarshaller<T> implements XmlConverter {
 
     private Class<T> clazz;
 
@@ -54,15 +47,9 @@ public abstract class GenericUnmarshaller<T> implements Converter {
         return this.clazz;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public final boolean canConvert(@Nullable Class paramClass) {
+    public final boolean canConvert(Class<?> paramClass) {
         return (clazz.equals(paramClass));
-    }
-
-    @Override
-    public final void marshal(@Nullable Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
-        throw new UnsupportedOperationException();
     }
 
     /**

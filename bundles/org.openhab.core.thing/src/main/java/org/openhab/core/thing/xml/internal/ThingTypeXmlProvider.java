@@ -22,6 +22,7 @@ import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.xml.AbstractXmlConfigDescriptionProvider;
 import org.openhab.core.config.core.xml.osgi.XmlDocumentBundleTracker;
 import org.openhab.core.config.core.xml.osgi.XmlDocumentProvider;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelType;
@@ -29,8 +30,6 @@ import org.openhab.core.thing.type.ThingType;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
  * The {@link ThingTypeXmlProvider} is responsible managing any created {@link ThingType} objects by a

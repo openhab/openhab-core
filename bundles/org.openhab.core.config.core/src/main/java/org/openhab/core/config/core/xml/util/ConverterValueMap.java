@@ -19,10 +19,6 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
  * The {@link ConverterValueMap} reads all children elements of a node and provides
  * them as key-value pair map.
@@ -36,9 +32,9 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 @NonNullByDefault
 public class ConverterValueMap {
 
-    private HierarchicalStreamReader reader;
+    private XmlNodeReader reader;
     private Map<String, Object> valueMap;
-    private UnmarshallingContext context;
+    private XmlUnmarshallingContext context;
 
     /**
      * Creates a new instance of this class with the specified parameter.
@@ -46,7 +42,7 @@ public class ConverterValueMap {
      * @param reader the reader to be used to read-in all children
      * @param context
      */
-    public ConverterValueMap(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public ConverterValueMap(XmlNodeReader reader, XmlUnmarshallingContext context) {
         this(reader, -1, context);
     }
 
@@ -58,7 +54,7 @@ public class ConverterValueMap {
      * @param context
      * @throws ConversionException if not all children could be read-in
      */
-    public ConverterValueMap(HierarchicalStreamReader reader, int numberOfValues, UnmarshallingContext context)
+    public ConverterValueMap(XmlNodeReader reader, int numberOfValues, XmlUnmarshallingContext context)
             throws ConversionException {
         this.reader = reader;
         this.context = context;
@@ -83,15 +79,15 @@ public class ConverterValueMap {
      * @return the key-value map containing the read-in children (not null, could be empty)
      * @throws ConversionException if not all children could be read-in
      */
-    public static Map<String, Object> readValueMap(HierarchicalStreamReader reader, int numberOfValues,
-            UnmarshallingContext context) throws ConversionException {
+    public static Map<String, Object> readValueMap(XmlNodeReader reader, int numberOfValues,
+            XmlUnmarshallingContext context) throws ConversionException {
         Map<String, Object> valueMap = new HashMap<>((numberOfValues >= 0) ? numberOfValues : 10);
         int counter = 0;
 
         while (reader.hasMoreChildren() && ((counter < numberOfValues) || (numberOfValues == -1))) {
             reader.moveDown();
             if (reader.hasMoreChildren()) {
-                List<?> list = (List<?>) context.convertAnother(context, List.class);
+                List<?> list = (List<?>) context.convertAnother(List.class);
                 valueMap.put(reader.getNodeName(), list);
             } else {
                 valueMap.put(reader.getNodeName(), reader.getValue());
