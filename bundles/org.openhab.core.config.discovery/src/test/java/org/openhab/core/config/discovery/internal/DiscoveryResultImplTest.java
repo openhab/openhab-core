@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -38,7 +39,7 @@ import org.openhab.core.thing.ThingUID;
  * @author Mark Herwege - Added property normalization tests
  */
 @NonNullByDefault
-public class DiscoveryResultImplTest {
+public class DiscoveryResultImplTest extends JavaTest {
 
     private static final int DEFAULT_TTL = 60;
 
@@ -158,20 +159,47 @@ public class DiscoveryResultImplTest {
     }
 
     @Test
-    public void testNormalizeRemovesNullValues() {
+    public void testNormalizeHandlesNullValues() {
         Map<String, @Nullable Object> properties = new HashMap<>();
         properties.put("address", null);
         properties.put("vendor", null);
         properties.put("host", "192.168.1.10");
         DiscoveryResult discoveryResult = createDiscoveryResult(properties);
 
-        assertDoesNotThrow(() -> discoveryResult.normalizePropertiesOnConfigDescription(List.of("address", "host")));
+        setupInterceptedLogger(DiscoveryResultImpl.class, LogLevel.WARN);
+        try {
+            assertDoesNotThrow(
+                    () -> discoveryResult.normalizePropertiesOnConfigDescription(List.of("address", "host")));
+
+            assertLogMessage(DiscoveryResultImpl.class, LogLevel.WARN,
+                    "Discovery result 'bindingId:thingType:thingId' has property 'address' with null value");
+        } finally {
+            stopInterceptedLogger(DiscoveryResultImpl.class);
+        }
 
         Map<String, Object> normalized = discoveryResult.getProperties();
-        assertFalse(normalized.containsKey("address"), "Null configuration value must be removed");
-        assertFalse(normalized.containsKey("vendor"), "Null non-configuration value must be removed");
+        assertTrue(normalized.containsKey("address"), "Null configuration value must be kept");
+        assertNull(normalized.get("address"));
+        assertEquals("null", normalized.get("vendor"), "Null non-configuration value must be converted to string");
         assertEquals("192.168.1.10", normalized.get("host"));
-        assertEquals(1, normalized.size());
+        assertEquals(3, normalized.size());
+    }
+
+    @Test
+    public void testNormalizeDoesNotLogWithoutNullConfigurationValues() {
+        Map<String, @Nullable Object> properties = new HashMap<>();
+        properties.put("host", "192.168.1.10");
+        properties.put("vendor", null);
+        DiscoveryResult discoveryResult = createDiscoveryResult(properties);
+
+        setupInterceptedLogger(DiscoveryResultImpl.class, LogLevel.WARN);
+        try {
+            discoveryResult.normalizePropertiesOnConfigDescription(List.of("host"));
+
+            assertNoLogMessage(DiscoveryResultImpl.class);
+        } finally {
+            stopInterceptedLogger(DiscoveryResultImpl.class);
+        }
     }
 
     @Test
@@ -208,7 +236,7 @@ public class DiscoveryResultImplTest {
         assertEquals(Integer.valueOf(8080), normalized.get("port"));
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({ "unchecked", "null" })
     private DiscoveryResult createDiscoveryResult(Map<String, @Nullable Object> properties) {
         // bindings can pass null property values, which the null annotations on the builder do not express
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");

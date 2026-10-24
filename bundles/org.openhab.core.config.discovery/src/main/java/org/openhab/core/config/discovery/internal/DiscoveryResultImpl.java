@@ -166,13 +166,13 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     public void normalizePropertiesOnConfigDescription(List<String> configurationParameters) {
         Map<String, Object> normalized = new HashMap<>();
         properties.forEach((key, value) -> {
-            if (value == null) {
-                // Bindings may return null values for properties if not properly guarded. Make sure to get meaningful
-                // information.
-                logger.warn("Discovery result '{}' has property '{}' with null value, ignoring it", thingUID, key);
-            } else if (!configurationParameters.contains(key)) {
+            if (!configurationParameters.contains(key)) {
                 normalized.put(key, String.valueOf(value));
             } else {
+                if (value == null) {
+                    // Bindings may return null values for properties if not properly guarded. Warn about it.
+                    logger.warn("Discovery result '{}' has property '{}' with null value", thingUID, key);
+                }
                 normalized.put(key, value);
             }
         });
