@@ -115,17 +115,11 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Log Stream Service -->
+    <!-- Log Service -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.log</artifactId>
       <version>1.5.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.equinox.log.stream</artifactId>
-      <version>1.2.100</version>
       <scope>compile</scope>
     </dependency>
 
@@ -269,14 +263,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- OSGi PushStream -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.util.pushstream</artifactId>
-      <version>1.1.0</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- OSGi Converter -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -285,52 +271,11 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- OSGi Transaction Control -->
-    <dependency>
-      <groupId>org.apache.aries.tx-control</groupId>
-      <artifactId>tx-control-service-xa</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.tx-control</groupId>
-      <artifactId>tx-control-provider-jdbc-xa</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.tx-control</groupId>
-      <artifactId>tx-control-provider-jpa-xa</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- OSGi Configurator -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configurator</artifactId>
       <version>1.0.16</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- OSGi JPA Service -->
-    <dependency>
-      <groupId>org.apache.aries.jpa</groupId>
-      <artifactId>org.apache.aries.jpa.container</artifactId>
-      <version>2.7.3</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.aries.jpa.javax.persistence</groupId>
-          <artifactId>javax.persistence_2.0</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <!-- Used heavily in conjunction with JDBC -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.jdbc</artifactId>
-      <version>1.1.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -579,12 +524,6 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jsp</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-runtime</artifactId>
       <version>${pax.web.version}</version>
       <scope>compile</scope>
@@ -612,12 +551,6 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-continuation</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-deploy</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -672,12 +605,6 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-security</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-jaspi</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -783,20 +710,6 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-alpn-java-client</artifactId>
       <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- Xbean -->
-    <dependency>
-      <groupId>org.apache.xbean</groupId>
-      <artifactId>xbean-bundleutils</artifactId>
-      <version>4.31</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.xbean</groupId>
-      <artifactId>xbean-finder</artifactId>
-      <version>4.31</version>
       <scope>compile</scope>
     </dependency>
 
