@@ -103,7 +103,8 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
     }
 
     /**
-     * Adds the given UPnP remote device to the set of discovered devices.
+     * Adds the given UPnP remote device and its embedded devices to the set of discovered devices.
+     * Registry events only report root devices, while e.g. media renderers are often embedded devices.
      *
      * @param device the UPnP remote device to be added.
      */
@@ -117,6 +118,10 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
                     logger.trace("Added device: {}", device.getDisplayString());
                 }
             }
+        }
+
+        for (RemoteDevice embeddedDevice : device.getEmbeddedDevices()) {
+            addDevice(embeddedDevice);
         }
     }
 
