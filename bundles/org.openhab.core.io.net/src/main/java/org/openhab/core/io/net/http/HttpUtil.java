@@ -295,9 +295,8 @@ public class HttpUtil {
                 HttpProxy proxy = new HttpProxy(proxyHost, proxyPort);
                 client.getProxyConfiguration().getProxies().add(proxy);
                 if (!key.user().isBlank()) {
-                    client.getAuthenticationStore().addAuthentication(
-                            new BasicAuthentication(proxy.getURI(), Authentication.ANY_REALM, key.user(),
-                                    key.password()));
+                    client.getAuthenticationStore().addAuthentication(new BasicAuthentication(proxy.getURI(),
+                            Authentication.ANY_REALM, key.user(), key.password()));
                 }
                 client.start();
             } catch (Exception e) {
