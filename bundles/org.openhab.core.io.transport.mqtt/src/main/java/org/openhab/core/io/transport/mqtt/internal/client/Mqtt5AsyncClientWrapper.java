@@ -18,6 +18,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.ConnectionCallback;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.Protocol;
 import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
@@ -47,16 +48,18 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
     private final Mqtt5AsyncClient client;
 
     public Mqtt5AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, String webSocketPath,
-            boolean secure, boolean hostnameValidated, ConnectionCallback connectionCallback,
-            @Nullable TrustManagerFactory trustManagerFactory) {
+            String webSocketSubprotocol, boolean secure, boolean hostnameValidated,
+            ConnectionCallback connectionCallback, @Nullable TrustManagerFactory trustManagerFactory) {
         Mqtt5ClientBuilder clientBuilder = Mqtt5Client.builder().serverHost(host).serverPort(port).identifier(clientId)
                 .addConnectedListener(connectionCallback).addDisconnectedListener(connectionCallback);
 
         if (protocol == Protocol.WEBSOCKETS) {
-            if (webSocketPath.isEmpty()) {
+            if (webSocketPath.isEmpty()
+                    && MqttBrokerConnection.DEFAULT_WEBSOCKET_SUBPROTOCOL.equals(webSocketSubprotocol)) {
                 clientBuilder.webSocketWithDefaultConfig();
             } else {
-                clientBuilder.webSocketConfig().serverPath(webSocketPath).applyWebSocketConfig();
+                clientBuilder.webSocketConfig().serverPath(webSocketPath).subprotocol(webSocketSubprotocol)
+                        .applyWebSocketConfig();
             }
         }
         if (secure) {
