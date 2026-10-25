@@ -1077,10 +1077,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                 org.openhab.core.sitemap.Condition conditionCopy = sitemapFactory.createCondition();
                 conditionCopy.setItem(condition.getItem());
                 conditionCopy.setCondition(condition.getCondition());
-                conditionCopy.setValue(condition.getValue());
+                conditionCopy.setArgument(condition.getArgument());
                 return conditionCopy;
             }).toList());
-            ruleCopy.setArgument(rule.getArgument());
+            ruleCopy.setValue(rule.getValue());
             return ruleCopy;
         }).toList();
     }
@@ -1681,7 +1681,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         for (Rule rule : colorList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 // We have the color for this value - break!
-                colorString = rule.getArgument();
+                colorString = rule.getValue();
                 break;
             }
         }
@@ -1748,7 +1748,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
 
         for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
-                String arg = rule.getArgument();
+                String arg = rule.getValue();
                 return arg != null && !arg.isBlank() ? arg : getDefaultConfirmCmdMessage();
             }
         }
@@ -1786,7 +1786,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 // We have the icon for this value - break!
-                icon = rule.getArgument();
+                icon = rule.getValue();
                 break;
             }
         }
@@ -1830,9 +1830,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                     }
                 }
 
-                String value = condition.getValue();
+                String argument = condition.getArgument();
 
-                if (state == null || !matchStateToValue(state, value, condition.getCondition())) {
+                if (state == null || !matchStateToValue(state, argument, condition.getCondition())) {
                     allConditionsOk = false;
                     break;
                 }

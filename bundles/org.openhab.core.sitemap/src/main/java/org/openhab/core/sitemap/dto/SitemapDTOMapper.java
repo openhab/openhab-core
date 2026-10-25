@@ -221,7 +221,7 @@ public class SitemapDTOMapper {
         if (!conditions.isEmpty()) {
             ruleDTO.conditions = conditions.stream().map(SitemapDTOMapper::map).toList();
         }
-        ruleDTO.argument = rule.getArgument();
+        ruleDTO.value = rule.getValue();
         return ruleDTO;
     }
 
@@ -229,7 +229,7 @@ public class SitemapDTOMapper {
         ConditionDTO conditionDTO = new ConditionDTO();
         conditionDTO.item = condition.getItem();
         conditionDTO.condition = condition.getCondition();
-        conditionDTO.value = condition.getValue();
+        conditionDTO.argument = condition.getArgument();
         return conditionDTO;
     }
 
@@ -390,7 +390,7 @@ public class SitemapDTOMapper {
 
     private static Rule map(RuleDTO ruleDTO, SitemapFactory sitemapFactory) {
         Rule rule = sitemapFactory.createRule();
-        rule.setArgument(ruleDTO.argument);
+        rule.setValue(ruleDTO.value);
         List<ConditionDTO> conditions = ruleDTO.conditions != null ? ruleDTO.conditions : List.of();
         rule.setConditions(conditions.stream().map(condition -> map(condition, sitemapFactory)).toList());
         return rule;
@@ -400,8 +400,8 @@ public class SitemapDTOMapper {
         Condition condition = sitemapFactory.createCondition();
         condition.setItem(conditionDTO.item);
         condition.setCondition(conditionDTO.condition);
-        if (conditionDTO.value != null) {
-            condition.setValue(conditionDTO.value);
+        if (conditionDTO.argument != null) {
+            condition.setArgument(conditionDTO.argument);
         }
         return condition;
     }

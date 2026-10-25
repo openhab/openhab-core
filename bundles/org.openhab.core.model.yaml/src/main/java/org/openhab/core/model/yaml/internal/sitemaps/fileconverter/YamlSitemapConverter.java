@@ -364,7 +364,7 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
                     YamlRuleWithAndConditionsDTO dto = new YamlRuleWithAndConditionsDTO();
                     dto.and = buildConditions(conditions);
                     if (!ignoreValue) {
-                        dto.value = rule.getArgument();
+                        dto.value = rule.getValue();
                     }
                     dtos.add(dto);
                 } else {
@@ -372,16 +372,16 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
                     YamlRuleWithUniqueConditionDTO dto = new YamlRuleWithUniqueConditionDTO();
                     dto.item = first.getItem();
                     dto.operator = first.getCondition();
-                    dto.argument = first.getValue();
+                    dto.argument = first.getArgument();
                     if (!ignoreValue) {
-                        dto.value = rule.getArgument();
+                        dto.value = rule.getValue();
                     }
                     dtos.add(dto);
                 }
             } else {
                 YamlRuleWithUniqueConditionDTO dto = new YamlRuleWithUniqueConditionDTO();
                 if (!ignoreValue) {
-                    dto.value = rule.getArgument();
+                    dto.value = rule.getValue();
                 }
                 dtos.add(dto);
             }
@@ -395,7 +395,7 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
             YamlConditionDTO dto = new YamlConditionDTO();
             dto.item = condition.getItem();
             dto.operator = condition.getCondition();
-            dto.argument = condition.getValue();
+            dto.argument = condition.getArgument();
             dtos.add(dto);
         });
         return dtos;

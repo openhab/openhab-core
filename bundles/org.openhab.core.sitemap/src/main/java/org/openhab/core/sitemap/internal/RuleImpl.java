@@ -27,14 +27,14 @@ import org.openhab.core.sitemap.Rule;
 public class RuleImpl implements Rule {
 
     private List<Condition> conditions = new CopyOnWriteArrayList<>();
-    private @Nullable String argument;
+    private @Nullable String value;
 
     public RuleImpl() {
     }
 
     public RuleImpl(Rule rule) {
         this.conditions = rule.getConditions();
-        this.argument = rule.getArgument();
+        this.value = rule.getValue();
     }
 
     @Override
@@ -48,12 +48,12 @@ public class RuleImpl implements Rule {
     }
 
     @Override
-    public @Nullable String getArgument() {
-        return argument;
+    public @Nullable String getValue() {
+        return value;
     }
 
     @Override
-    public void setArgument(@Nullable String argument) {
-        this.argument = argument;
+    public void setValue(@Nullable String argument) {
+        this.value = argument;
     }
 }
