@@ -555,7 +555,7 @@ public class MqttBrokerConnection {
      * lone {@code mqtt} while accepting a list such as {@code mqtt, mqttv3.1, mqttv3.11}.
      * <p>
      * Defaults to {@link #DEFAULT_WEBSOCKET_SUBPROTOCOL}, which is what the MQTT client library offers by default. A
-     * + * blank value restores that default.
+     * blank value restores that default.
      *
      * @param webSocketSubprotocol the subprotocol(s) to offer, as the raw header value; an empty string uses the
      *            default
