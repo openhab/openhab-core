@@ -24,17 +24,15 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.api.Authentication;
-import org.eclipse.jetty.client.api.AuthenticationStore;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.BasicAuthentication;
@@ -63,7 +61,19 @@ public class HttpUtil {
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
+    private static final String PROXY_CLIENT_CONSUMER_NAME = "HttpUtil-proxy";
+
     private static HttpClientFactory httpClientFactory;
+
+    /**
+     * Dedicated http clients for requests that have to be routed through a proxy, one per distinct proxy
+     * configuration. The shared common http client must never be modified, since it is used concurrently by
+     * everyone else.
+     */
+    private static final Map<ProxyKey, HttpClient> PROXY_HTTP_CLIENTS = new ConcurrentHashMap<>();
+
+    private record ProxyKey(String host, int port, String user, String password) {
+    }
 
     private static class ProxyParams {
         String proxyHost;
@@ -189,9 +199,6 @@ public class HttpUtil {
         if (httpClientFactory == null) {
             throw new IllegalStateException("Http client factory not available");
         }
-        // Get shared http client from factory "on-demand"
-        final HttpClient httpClient = httpClientFactory.getCommonHttpClient();
-
         URI uri = null;
         try {
             uri = new URI(url);
@@ -200,18 +207,14 @@ public class HttpUtil {
             throw new IOException(e);
         }
 
-        HttpProxy proxy = null;
-        // Only configure a proxy if a host is provided
+        // Only use a proxy if a host is provided. Requests without proxy use the shared http client from the
+        // factory "on-demand", requests with proxy use a dedicated client, so that the shared client is never
+        // modified.
+        final HttpClient httpClient;
         if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(uri, nonProxyHosts)) {
-            AuthenticationStore authStore = httpClient.getAuthenticationStore();
-            ProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();
-            List<Proxy> proxies = proxyConfig.getProxies();
-
-            proxy = new HttpProxy(proxyHost, proxyPort);
-            proxies.add(proxy);
-
-            authStore.addAuthentication(
-                    new BasicAuthentication(proxy.getURI(), Authentication.ANY_REALM, proxyUser, proxyPassword));
+            httpClient = getProxyHttpClient(proxyHost, proxyPort, proxyUser, proxyPassword);
+        } else {
+            httpClient = httpClientFactory.getCommonHttpClient();
         }
 
         final HttpMethod method = HttpUtil.createHttpMethod(httpMethod);
@@ -265,11 +268,59 @@ public class HttpUtil {
             return response;
         } catch (Exception e) {
             throw new IOException(e);
-        } finally {
-            if (proxy != null) {
-                // Remove the proxy, that has been added for this request
-                httpClient.getProxyConfiguration().getProxies().remove(proxy);
+        }
+    }
+
+    private static HttpClient getProxyHttpClient(String proxyHost, int proxyPort, String proxyUser,
+            String proxyPassword) throws IOException {
+        final HttpClientFactory factory = httpClientFactory;
+        if (factory == null) {
+            throw new IllegalStateException("Http client factory not available");
+        }
+        final ProxyKey key = new ProxyKey(proxyHost, proxyPort, proxyUser == null ? "" : proxyUser,
+                proxyPassword == null ? "" : proxyPassword);
+        HttpClient client = PROXY_HTTP_CLIENTS.get(key);
+        if (client != null) {
+            return client;
+        }
+        synchronized (PROXY_HTTP_CLIENTS) {
+            client = PROXY_HTTP_CLIENTS.get(key);
+            if (client != null) {
+                return client;
             }
+            client = factory.createHttpClient(PROXY_CLIENT_CONSUMER_NAME);
+            try {
+                // drop proxies inherited from system properties, this client must only use the given one
+                client.getProxyConfiguration().getProxies().clear();
+                HttpProxy proxy = new HttpProxy(proxyHost, proxyPort);
+                client.getProxyConfiguration().getProxies().add(proxy);
+                if (!key.user().isBlank()) {
+                    client.getAuthenticationStore().addAuthentication(
+                            new BasicAuthentication(proxy.getURI(), Authentication.ANY_REALM, key.user(),
+                                    key.password()));
+                }
+                client.start();
+            } catch (Exception e) {
+                stopQuietly(client);
+                throw new IOException("Could not start http client for proxy " + proxyHost + ":" + proxyPort, e);
+            }
+            PROXY_HTTP_CLIENTS.put(key, client);
+            return client;
+        }
+    }
+
+    private static void stopProxyHttpClients() {
+        synchronized (PROXY_HTTP_CLIENTS) {
+            PROXY_HTTP_CLIENTS.values().forEach(HttpUtil::stopQuietly);
+            PROXY_HTTP_CLIENTS.clear();
+        }
+    }
+
+    private static void stopQuietly(HttpClient client) {
+        try {
+            client.stop();
+        } catch (Exception e) {
+            LOGGER.debug("Error while stopping proxy http client", e);
         }
     }
 
@@ -592,6 +643,7 @@ public class HttpUtil {
     }
 
     protected void unsetHttpClientFactory(final HttpClientFactory httpClientFactory) {
+        stopProxyHttpClients();
         HttpUtil.httpClientFactory = null;
     }
 }

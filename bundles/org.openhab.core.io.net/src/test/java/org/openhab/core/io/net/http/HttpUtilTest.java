@@ -15,6 +15,8 @@ package org.openhab.core.io.net.http;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +27,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.client.HttpAuthenticationStore;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -103,5 +108,34 @@ public class HttpUtilTest extends BaseHttpUtilTest {
         verify(requestMock).timeout(500, TimeUnit.MILLISECONDS);
         verify(requestMock).content(any(), eq("text/plain"));
         verify(requestMock).send();
+    }
+
+    @Test
+    public void proxyRequestsDoNotTouchTheCommonHttpClient() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient proxyClientMock = mock(HttpClient.class);
+        ProxyConfiguration proxyConfigMock = new ProxyConfiguration();
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(proxyClientMock);
+        when(proxyClientMock.getProxyConfiguration()).thenReturn(proxyConfigMock);
+        when(proxyClientMock.getAuthenticationStore()).thenReturn(new HttpAuthenticationStore());
+        when(proxyClientMock.newRequest(URI.create(URL))).thenReturn(requestMock);
+
+        HttpUtil.executeUrl("GET", URL, null, null, null, 500, "proxy.example.org", 8080, "user", "secret", null);
+
+        // the shared client must neither be used nor modified
+        verify(clientFactoryMock, never()).getCommonHttpClient();
+        verify(httpClientMock, never()).getProxyConfiguration();
+        verify(httpClientMock, never()).getAuthenticationStore();
+        assertEquals(1, proxyConfigMock.getProxies().size());
+    }
+
+    @Test
+    public void requestsWithoutProxyUseTheCommonHttpClient() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+
+        HttpUtil.executeUrl("GET", URL, 500);
+
+        verify(clientFactoryMock).getCommonHttpClient();
+        verify(clientFactoryMock, never()).createHttpClient(any());
     }
 }
