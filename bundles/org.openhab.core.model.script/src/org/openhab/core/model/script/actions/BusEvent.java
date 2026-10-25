@@ -15,8 +15,11 @@ package org.openhab.core.model.script.actions;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.model.script.internal.engine.action.BusEventActionService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
@@ -26,16 +29,17 @@ import org.openhab.core.types.TimeSeries;
  * The {@link BusEvent} is a wrapper for the BusEvent actions.
  *
  * @author Florian Hotze - Initial contribution
+ * @author Mark Herwege - DecimalType and QuantityType overrides
  */
 public class BusEvent {
 
-    public static Object sendCommand(Item item, String commandString) {
-        BusEventActionService.getBusEvent().sendCommand(item, commandString);
+    public static Object sendCommand(Item item, Command command) {
+        BusEventActionService.getBusEvent().sendCommand(item, command);
         return null;
     }
 
-    public static Object sendCommand(Item item, String commandString, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, commandString, source);
+    public static Object sendCommand(Item item, Command command, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, command, source);
         return null;
     }
 
@@ -49,6 +53,36 @@ public class BusEvent {
         return null;
     }
 
+    public static Object sendCommand(Item item, DecimalType command) {
+        BusEventActionService.getBusEvent().sendCommand(item, command);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, DecimalType command, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, QuantityType<?> command) {
+        BusEventActionService.getBusEvent().sendCommand(item, command);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, QuantityType<?> command, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, String commandString) {
+        BusEventActionService.getBusEvent().sendCommand(item, commandString);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, String commandString, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, commandString, source);
+        return null;
+    }
+
     public static Object sendCommand(String itemName, String commandString) {
         BusEventActionService.getBusEvent().sendCommand(itemName, commandString);
         return null;
@@ -59,13 +93,13 @@ public class BusEvent {
         return null;
     }
 
-    public static Object sendCommand(Item item, Command command) {
-        BusEventActionService.getBusEvent().sendCommand(item, command);
+    public static Object postUpdate(Item item, State state) {
+        BusEventActionService.getBusEvent().postUpdate(item, state);
         return null;
     }
 
-    public static Object sendCommand(Item item, Command command, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, command, source);
+    public static Object postUpdate(Item item, State state, String source) {
+        BusEventActionService.getBusEvent().postUpdate(item, state, source);
         return null;
     }
 
@@ -75,6 +109,26 @@ public class BusEvent {
     }
 
     public static Object postUpdate(Item item, Number state, String source) {
+        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        return null;
+    }
+
+    public static Object postUpdate(Item item, DecimalType state) {
+        BusEventActionService.getBusEvent().postUpdate(item, state);
+        return null;
+    }
+
+    public static Object postUpdate(Item item, DecimalType state, String source) {
+        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        return null;
+    }
+
+    public static Object postUpdate(Item item, QuantityType<?> state) {
+        BusEventActionService.getBusEvent().postUpdate(item, state);
+        return null;
+    }
+
+    public static Object postUpdate(Item item, QuantityType<?> state, String source) {
         BusEventActionService.getBusEvent().postUpdate(item, state, source);
         return null;
     }
@@ -121,12 +175,7 @@ public class BusEvent {
         return null;
     }
 
-    public static Object postUpdate(Item item, State state) {
-        BusEventActionService.getBusEvent().postUpdate(item, state);
-        return null;
-    }
-
-    public static Map<Item, State> storeStates(Item... items) {
+    public static Map<@NonNull Item, @NonNull State> storeStates(Item... items) {
         return BusEventActionService.getBusEvent().storeStates(items);
     }
 
