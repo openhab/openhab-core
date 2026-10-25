@@ -736,12 +736,8 @@ public class MqttBrokerConnection {
         MqttAsyncClientWrapper client = createClient();
         this.client = client;
 
-        // connect
-        client.connect(lastWill, keepAliveInterval, user, password, cleanSessionStart);
-
-        logger.info("Starting MQTT broker connection to '{}' with clientid {}", host, getClientId());
-
-        // Connect timeout
+        // Connect timeout. Must be scheduled before connecting: if the broker answers quickly, onConnected() may run
+        // before this method returns and must find the timeout to cancel it.
         ScheduledExecutorService executor = timeoutExecutor;
         if (executor != null) {
             final ScheduledFuture<?> timeoutFuture = this.timeoutFuture.getAndSet(executor.schedule(
@@ -751,6 +747,12 @@ public class MqttBrokerConnection {
                 timeoutFuture.cancel(false);
             }
         }
+
+        logger.info("Starting MQTT broker connection to '{}' with clientid {}", host, getClientId());
+
+        // connect
+        client.connect(lastWill, keepAliveInterval, user, password, cleanSessionStart);
+
         return future;
     }
 
