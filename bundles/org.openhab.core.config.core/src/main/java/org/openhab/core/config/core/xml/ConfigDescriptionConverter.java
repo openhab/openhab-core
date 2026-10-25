@@ -24,17 +24,16 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
-
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 
 /**
- * The {@link ConfigDescriptionConverter} is a concrete implementation of the {@code XStream} {@link Converter}
+ * The {@link ConfigDescriptionConverter} is a concrete implementation of the {@link XmlConverter}
  * interface used to convert config
  * description information within an XML document into a {@link ConfigDescription} object.
  * <p>
@@ -55,7 +54,7 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
         String uriText = attributes.get("uri");
@@ -82,7 +81,7 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
         List<ConfigDescriptionParameterGroup> configDescriptionGroups = new ArrayList<>();
 
         // read values
-        List<?> nodes = (List<?>) context.convertAnother(context, List.class);
+        List<?> nodes = (List<?>) context.convertAnother(List.class);
         NodeIterator nodeIterator = new NodeIterator(nodes);
 
         // iterate through the nodes, putting the different types into their

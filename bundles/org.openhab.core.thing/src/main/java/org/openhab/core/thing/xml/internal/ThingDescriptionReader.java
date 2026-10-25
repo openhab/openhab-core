@@ -30,18 +30,17 @@ import org.openhab.core.config.core.xml.util.NodeListConverter;
 import org.openhab.core.config.core.xml.util.NodeValue;
 import org.openhab.core.config.core.xml.util.NodeValueConverter;
 import org.openhab.core.config.core.xml.util.XmlDocumentReader;
+import org.openhab.core.config.core.xml.util.XmlMapping;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
-
-import com.thoughtworks.xstream.XStream;
 
 /**
  * The {@link ThingDescriptionReader} reads XML documents, which contain the {@code thing-description} XML tag, and
  * converts them to {@link ThingDescriptionList} objects consisting of {@link ThingTypeXmlResult},
  * {@link BridgeTypeXmlResult} and {@link ChannelTypeXmlResult} objects.
  * <p>
- * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.
+ * This reader uses {@code StAX} to parse and convert the XML document.
  *
  * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Extended by options and filter criteria
@@ -53,74 +52,64 @@ import com.thoughtworks.xstream.XStream;
 @NonNullByDefault
 public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
 
-    /**
-     * The default constructor of this class.
-     */
-    public ThingDescriptionReader() {
-        ClassLoader classLoader = ThingDescriptionReader.class.getClassLoader();
-        if (classLoader != null) {
-            super.setClassLoader(classLoader);
-        }
+    @Override
+    public void registerConverters(XmlMapping mapping) {
+        mapping.registerConverter(new NodeAttributesConverter());
+        mapping.registerConverter(new NodeValueConverter());
+        mapping.registerConverter(new NodeListConverter());
+        mapping.registerConverter(new ThingDescriptionConverter());
+        mapping.registerConverter(new ThingTypeConverter());
+        mapping.registerConverter(new BridgeTypeConverter());
+        mapping.registerConverter(new ChannelConverter());
+        mapping.registerConverter(new ChannelTypeConverter());
+        mapping.registerConverter(new ChannelGroupTypeConverter());
+        mapping.registerConverter(new StateDescriptionConverter());
+        mapping.registerConverter(new CommandDescriptionConverter());
+        mapping.registerConverter(new EventDescriptionConverter());
+        mapping.registerConverter(new ConfigDescriptionConverter());
+        mapping.registerConverter(new ConfigDescriptionParameterConverter());
+        mapping.registerConverter(new ConfigDescriptionParameterGroupConverter());
+        mapping.registerConverter(new FilterCriteriaConverter());
     }
 
     @Override
-    public void registerConverters(XStream xstream) {
-        xstream.registerConverter(new NodeAttributesConverter());
-        xstream.registerConverter(new NodeValueConverter());
-        xstream.registerConverter(new NodeListConverter());
-        xstream.registerConverter(new ThingDescriptionConverter());
-        xstream.registerConverter(new ThingTypeConverter());
-        xstream.registerConverter(new BridgeTypeConverter());
-        xstream.registerConverter(new ChannelConverter());
-        xstream.registerConverter(new ChannelTypeConverter());
-        xstream.registerConverter(new ChannelGroupTypeConverter());
-        xstream.registerConverter(new StateDescriptionConverter());
-        xstream.registerConverter(new CommandDescriptionConverter());
-        xstream.registerConverter(new EventDescriptionConverter());
-        xstream.registerConverter(new ConfigDescriptionConverter());
-        xstream.registerConverter(new ConfigDescriptionParameterConverter());
-        xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
-        xstream.registerConverter(new FilterCriteriaConverter());
-    }
-
-    @Override
-    public void registerAliases(XStream xstream) {
-        xstream.alias("thing-descriptions", ThingDescriptionList.class);
-        xstream.alias("thing-type", ThingTypeXmlResult.class);
-        xstream.alias("bridge-type", BridgeTypeXmlResult.class);
-        xstream.alias("channel-type", ChannelTypeXmlResult.class);
-        xstream.alias("channel-group-type", ChannelGroupTypeXmlResult.class);
-        xstream.alias("supported-bridge-type-refs", NodeList.class);
-        xstream.alias("bridge-type-ref", NodeAttributes.class);
-        xstream.alias("item-type", NodeValue.class);
-        xstream.alias("dimension", NodeValue.class);
-        xstream.alias("kind", NodeValue.class);
-        xstream.alias("label", NodeValue.class);
-        xstream.alias("description", NodeValue.class);
-        xstream.alias("channels", NodeList.class);
-        xstream.alias("channel", ChannelXmlResult.class);
-        xstream.alias("channel-groups", NodeList.class);
-        xstream.alias("channel-group", ChannelXmlResult.class);
-        xstream.alias("category", NodeValue.class);
-        xstream.alias("tags", NodeList.class);
-        xstream.alias("tag", NodeValue.class);
-        xstream.alias("state", StateDescription.class);
-        xstream.alias("command", CommandDescription.class);
-        xstream.alias("event", EventDescription.class);
-        xstream.alias("options", NodeList.class);
-        xstream.alias("option", NodeValue.class);
-        xstream.alias("config-descriptions", NodeList.class);
-        xstream.alias("config-description", ConfigDescription.class);
-        xstream.alias("config-description-ref", NodeAttributes.class);
-        xstream.alias("parameter", ConfigDescriptionParameter.class);
-        xstream.alias("parameter-group", ConfigDescriptionParameterGroup.class);
-        xstream.alias("filter", List.class);
-        xstream.alias("criteria", FilterCriteria.class);
-        xstream.alias("properties", NodeList.class);
-        xstream.alias("property", NodeValue.class);
-        xstream.alias("representation-property", NodeValue.class);
-        xstream.alias("command-options", NodeList.class);
-        xstream.alias("autoUpdatePolicy", NodeValue.class);
-        xstream.alias("semantic-equipment-tag", NodeValue.class);
+    public void registerAliases(XmlMapping mapping) {
+        mapping.alias("thing-descriptions", ThingDescriptionList.class);
+        mapping.alias("thing-type", ThingTypeXmlResult.class);
+        mapping.alias("bridge-type", BridgeTypeXmlResult.class);
+        mapping.alias("channel-type", ChannelTypeXmlResult.class);
+        mapping.alias("channel-group-type", ChannelGroupTypeXmlResult.class);
+        mapping.alias("supported-bridge-type-refs", NodeList.class);
+        mapping.alias("bridge-type-ref", NodeAttributes.class);
+        mapping.alias("item-type", NodeValue.class);
+        mapping.alias("dimension", NodeValue.class);
+        mapping.alias("kind", NodeValue.class);
+        mapping.alias("label", NodeValue.class);
+        mapping.alias("description", NodeValue.class);
+        mapping.alias("channels", NodeList.class);
+        mapping.alias("channel", ChannelXmlResult.class);
+        mapping.alias("channel-groups", NodeList.class);
+        mapping.alias("channel-group", ChannelXmlResult.class);
+        mapping.alias("category", NodeValue.class);
+        mapping.alias("tags", NodeList.class);
+        mapping.alias("tag", NodeValue.class);
+        mapping.alias("state", StateDescription.class);
+        mapping.alias("command", CommandDescription.class);
+        mapping.alias("event", EventDescription.class);
+        mapping.alias("options", NodeList.class);
+        mapping.alias("option", NodeValue.class);
+        mapping.alias("config-descriptions", NodeList.class);
+        mapping.alias("config-description", ConfigDescription.class);
+        mapping.alias("config-description-ref", NodeAttributes.class);
+        mapping.alias("parameter", ConfigDescriptionParameter.class);
+        mapping.alias("parameter-group", ConfigDescriptionParameterGroup.class);
+        mapping.alias("filter", List.class);
+        mapping.alias("criteria", FilterCriteria.class);
+        mapping.alias("properties", NodeList.class);
+        mapping.alias("property", NodeValue.class);
+        mapping.alias("representation-property", NodeValue.class);
+        mapping.alias("command-options", NodeList.class);
+        mapping.alias("autoUpdatePolicy", NodeValue.class);
+        mapping.alias("semantic-equipment-tag", NodeValue.class);
     }
 }

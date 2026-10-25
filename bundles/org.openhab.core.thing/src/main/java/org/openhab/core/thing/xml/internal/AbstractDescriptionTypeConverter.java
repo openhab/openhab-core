@@ -20,18 +20,17 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.thing.type.AbstractDescriptionType;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link AbstractDescriptionTypeConverter} is an abstract implementation of the {@code XStream} {@link Converter}
+ * The {@link AbstractDescriptionTypeConverter} is an abstract implementation of the {@link XmlConverter}
  * interface used as helper class to convert type
  * definition information within an XML document into a concrete type object.
  * <p>
@@ -78,7 +77,7 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
      *
      * @return the UID of the type definition (not empty)
      */
-    protected String getUID(Map<String, String> attributes, UnmarshallingContext context) {
+    protected String getUID(Map<String, String> attributes, XmlUnmarshallingContext context) {
         String bindingId = (String) context.get("thing-descriptions.bindingId");
         String typeId = getID(attributes);
         return String.format("%s:%s", bindingId, typeId);
@@ -174,11 +173,11 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
      *
      * @throws ConversionException if any conversion error occurs
      */
-    protected abstract @Nullable T unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected abstract @Nullable T unmarshalType(XmlNodeReader reader, XmlUnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException;
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = attributeMapValidator.readValidatedAttributes(reader);
 
@@ -186,7 +185,7 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
         context.put("config-description.uri", type + ":" + getUID(attributes, context));
 
         // read values
-        List<?> nodes = (List<?>) context.convertAnother(context, List.class);
+        List<?> nodes = (List<?>) context.convertAnother(List.class);
         NodeIterator nodeIterator = new NodeIterator(nodes);
 
         // create object

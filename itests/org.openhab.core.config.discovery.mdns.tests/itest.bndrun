@@ -23,7 +23,6 @@ Fragment-Host: org.openhab.core.config.discovery.mdns
 	org.apache.felix.configadmin;version='[1.9.26,1.9.27)',\
 	org.apache.felix.http.servlet-api;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.5.1,1.5.2)',\
-	xstream;version='[1.4.21,1.4.22)',\
 	net.bytebuddy.byte-buddy;version='[1.17.7,1.17.8)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.17.7,1.17.8)',\
 	org.mockito.mockito-core;version='[5.23.0,5.23.1)',\

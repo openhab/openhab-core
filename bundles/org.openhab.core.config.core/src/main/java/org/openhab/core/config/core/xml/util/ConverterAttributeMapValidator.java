@@ -18,9 +18,6 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
  * The {@link ConverterAttributeMapValidator} class reads any attributes of a node, validates
  * if they appear or not, and returns the validated key-value pair map.
@@ -83,7 +80,7 @@ public class ConverterAttributeMapValidator {
      * @return the key-value map (not null, could be empty)
      * @throws ConversionException if the validation check fails
      */
-    public Map<String, String> readValidatedAttributes(HierarchicalStreamReader reader) throws ConversionException {
+    public Map<String, String> readValidatedAttributes(XmlNodeReader reader) throws ConversionException {
         return readValidatedAttributes(reader, validationMaskTemplate);
     }
 
@@ -99,7 +96,7 @@ public class ConverterAttributeMapValidator {
      * @return the key-value map (not null, could be empty)
      * @throws ConversionException if the validation check fails
      */
-    public static Map<String, String> readValidatedAttributes(HierarchicalStreamReader reader,
+    public static Map<String, String> readValidatedAttributes(XmlNodeReader reader,
             @Nullable Map<String, Boolean> validationMaskTemplate) throws ConversionException {
         Map<String, String> attributeMap = new HashMap<>(reader.getAttributeCount());
 

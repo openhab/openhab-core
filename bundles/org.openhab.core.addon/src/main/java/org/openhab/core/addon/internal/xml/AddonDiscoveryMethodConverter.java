@@ -21,13 +21,12 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
-
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 
 /**
- * The {@link AddonDiscoveryMethodConverter} is a concrete implementation of the {@code XStream}
- * {@link com.thoughtworks.xstream.converters.Converter}
+ * The {@link AddonDiscoveryMethodConverter} is a concrete implementation of the
+ * {@link org.openhab.core.config.core.xml.util.XmlConverter}
  * interface used to convert add-on discovery method information within an XML document into a
  * {@link AddonDiscoveryMethod} object.
  *
@@ -41,8 +40,8 @@ public class AddonDiscoveryMethodConverter extends GenericUnmarshaller<AddonDisc
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        List<?> nodes = (List<?>) context.convertAnother(context, List.class);
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
+        List<?> nodes = (List<?>) context.convertAnother(List.class);
         NodeIterator nodeIterator = new NodeIterator(nodes);
 
         String serviceType = requireNonEmpty((String) nodeIterator.nextValue("service-type", true),

@@ -18,9 +18,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroupBuilder;
 import org.openhab.core.config.core.xml.util.ConverterValueMap;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
-
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 
 /**
  * The {@link ConfigDescriptionParameterGroupConverter} creates a {@link ConfigDescriptionParameterGroup} instance from
@@ -36,7 +35,7 @@ public class ConfigDescriptionParameterGroupConverter extends GenericUnmarshalle
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext marshallingContext) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext marshallingContext) {
         String name = reader.getAttribute("name");
 
         // Read values
