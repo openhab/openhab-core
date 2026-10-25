@@ -130,4 +130,35 @@ public class UpnpAddonFinderTests {
         assertFalse(addons.stream().anyMatch(a -> "aardvark".equals(a.getUID())));
         assertTrue(addons.stream().anyMatch(a -> "binding-hue".equals(a.getUID())));
     }
+
+    /**
+     * Media renderers are often embedded devices (e.g. in AV receivers), while registry events only report the root
+     * device.
+     */
+    @Test
+    public void testGetSuggestedAddonsForEmbeddedDevice() throws Exception {
+        URL url = URI.create("http://www.openhab.org/").toURL();
+        InetAddress address = InetAddress.getByName("127.0.0.1");
+        DeviceDetails details = new DeviceDetails("friendlyName", new ManufacturerDetails("Denon"),
+                new ModelDetails("modelName"));
+        RemoteDevice renderer = new RemoteDevice(
+                new RemoteDeviceIdentity(new UDN("renderer"), 0, url, new byte[] {}, address),
+                new DeviceType("schemas-upnp-org", "MediaRenderer"), details, (RemoteService) null);
+        RemoteDevice root = new RemoteDevice(new RemoteDeviceIdentity(new UDN("root"), 0, url, new byte[] {}, address),
+                new DeviceType("schemas-denon-com", "AiosDevice"), details, new RemoteService[0],
+                new RemoteDevice[] { renderer });
+
+        UpnpService upnpService = mock(UpnpService.class, Mockito.RETURNS_DEEP_STUBS);
+        when(upnpService.getRegistry().getRemoteDevices()).thenReturn(List.of(root));
+        UpnpAddonFinder finder = new UpnpAddonFinder(upnpService);
+
+        AddonDiscoveryMethod renderers = new AddonDiscoveryMethod()
+                .setServiceType(AddonFinderConstants.SERVICE_TYPE_UPNP)
+                .setMatchProperties(List.of(new AddonMatchProperty("deviceType", ".*MediaRenderer.*")));
+        finder.setAddonCandidates(List.of(AddonInfo.builder("upnpcontrol", "binding").withName("UpnpControl")
+                .withDescription("UPnP Control").withDiscoveryMethods(List.of(renderers)).build()));
+
+        Set<AddonInfo> addons = finder.getSuggestedAddons();
+        assertTrue(addons.stream().anyMatch(a -> "binding-upnpcontrol".equals(a.getUID())));
+    }
 }
