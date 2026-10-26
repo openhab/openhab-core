@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link ThingActionsResource} - verifies the regular expression used in the REST path template for
  * executing thing actions, i.e. the accepted forms of an action UID.
  *
- * @author DrRSatzteil - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class ThingActionsResourceTest {
