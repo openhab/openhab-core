@@ -14,7 +14,6 @@ package org.openhab.core.library.types;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
@@ -23,7 +22,7 @@ import org.openhab.core.types.State;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public enum OpenClosedType implements PrimitiveType, State, Command {
+public enum OpenClosedType implements PrimitiveType, State {
     OPEN,
     CLOSED;
 
