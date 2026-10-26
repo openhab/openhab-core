@@ -96,6 +96,11 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
                     builder.withStep(getBigDecimal(step));
                 }
 
+                Object rangeUnit = metadata.getConfiguration().get("rangeUnit");
+                if (rangeUnit != null) {
+                    builder.withRangeUnit((String) rangeUnit);
+                }
+
                 Object readOnly = metadata.getConfiguration().get("readOnly");
                 if (readOnly != null) {
                     builder.withReadOnly(getBoolean(readOnly));

@@ -31,6 +31,7 @@ public class StateDescriptionFragmentBuilder {
     private @Nullable BigDecimal minimum;
     private @Nullable BigDecimal maximum;
     private @Nullable BigDecimal step;
+    private @Nullable String rangeUnit;
     private @Nullable String pattern;
     private @Nullable Boolean readOnly;
     private @Nullable List<StateOption> options;
@@ -43,6 +44,7 @@ public class StateDescriptionFragmentBuilder {
         this.minimum = fragment.getMinimum();
         this.maximum = fragment.getMaximum();
         this.step = fragment.getStep();
+        this.rangeUnit = fragment.getRangeUnit();
         this.pattern = fragment.getPattern();
         this.readOnly = fragment.isReadOnly();
         final List<StateOption> stateOptions = fragment.getOptions();
@@ -55,6 +57,7 @@ public class StateDescriptionFragmentBuilder {
         this.minimum = legacy.getMinimum();
         this.maximum = legacy.getMaximum();
         this.step = legacy.getStep();
+        this.rangeUnit = legacy.getRangeUnit();
         this.pattern = legacy.getPattern();
         this.readOnly = Boolean.valueOf(legacy.isReadOnly());
         if (!legacy.getOptions().isEmpty()) {
@@ -100,7 +103,7 @@ public class StateDescriptionFragmentBuilder {
      */
     @SuppressWarnings("deprecation")
     public StateDescriptionFragment build() {
-        return new StateDescriptionFragmentImpl(minimum, maximum, step, pattern, readOnly, options);
+        return new StateDescriptionFragmentImpl(minimum, maximum, step, rangeUnit, pattern, readOnly, options);
     }
 
     /**
@@ -133,6 +136,17 @@ public class StateDescriptionFragmentBuilder {
      */
     public StateDescriptionFragmentBuilder withStep(BigDecimal step) {
         this.step = step;
+        return this;
+    }
+
+    /**
+     * Set the range unit for the resulting {@link StateDescriptionFragment}.
+     *
+     * @param rangeUnit the range unit for the resulting {@link StateDescriptionFragment}.
+     * @return this builder.
+     */
+    public StateDescriptionFragmentBuilder withRangeUnit(String rangeUnit) {
+        this.rangeUnit = rangeUnit;
         return this;
     }
 

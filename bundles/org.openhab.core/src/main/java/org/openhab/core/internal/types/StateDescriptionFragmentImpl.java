@@ -33,14 +33,16 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
     private static class StateDescriptionImpl extends StateDescription {
         StateDescriptionImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
-                @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
-            super(minimum, maximum, step, pattern, readOnly, options);
+                @Nullable String rangeUnit, @Nullable String pattern, boolean readOnly,
+                @Nullable List<StateOption> options) {
+            super(minimum, maximum, step, rangeUnit, pattern, readOnly, options);
         }
     }
 
     private @Nullable BigDecimal minimum;
     private @Nullable BigDecimal maximum;
     private @Nullable BigDecimal step;
+    private @Nullable String rangeUnit;
     private @Nullable String pattern;
     private @Nullable Boolean readOnly;
     private @Nullable List<StateOption> options;
@@ -58,6 +60,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * @param minimum minimum value of the state
      * @param maximum maximum value of the state
      * @param step step size
+     * @param rangeUnit unit that applies to the min, max and step value
      * @param pattern pattern to render the state
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
@@ -65,11 +68,12 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      */
     @Deprecated
     public StateDescriptionFragmentImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum,
-            @Nullable BigDecimal step, @Nullable String pattern, @Nullable Boolean readOnly,
+            @Nullable BigDecimal step, @Nullable String rangeUnit, @Nullable String pattern, @Nullable Boolean readOnly,
             @Nullable List<StateOption> options) {
         this.minimum = minimum;
         this.maximum = maximum;
         this.step = step;
+        this.rangeUnit = rangeUnit;
         this.pattern = pattern;
         this.readOnly = readOnly;
         this.options = options == null || options.isEmpty() ? List.of() : Collections.unmodifiableList(options);
@@ -87,6 +91,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.minimum = legacy.getMinimum();
         this.maximum = legacy.getMaximum();
         this.step = legacy.getStep();
+        this.rangeUnit = legacy.getRangeUnit();
         this.pattern = legacy.getPattern();
         this.readOnly = Boolean.valueOf(legacy.isReadOnly());
         if (!legacy.getOptions().isEmpty()) {
@@ -103,6 +108,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.minimum = source.getMinimum();
         this.maximum = source.getMaximum();
         this.step = source.getStep();
+        this.rangeUnit = source.getRangeUnit();
         this.pattern = source.getPattern();
         this.readOnly = source.isReadOnly();
         this.options = source.getOptions();
@@ -136,6 +142,15 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
+    public @Nullable String getRangeUnit() {
+        return rangeUnit;
+    }
+
+    public void setRangeUnit(String rangeUnit) {
+        this.rangeUnit = rangeUnit;
+    }
+
+    @Override
     public @Nullable String getPattern() {
         return pattern;
     }
@@ -164,30 +179,48 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
     @Override
     public @Nullable StateDescription toStateDescription() {
-        if (minimum == null && maximum == null && step == null && readOnly == null && pattern == null
-                && options == null) {
+        if (minimum == null && maximum == null && step == null && rangeUnit == null && readOnly == null
+                && pattern == null && options == null) {
             return null;
         }
         final Boolean ro = readOnly;
-        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro != null && ro.booleanValue(), options);
+        return new StateDescriptionImpl(minimum, maximum, step, rangeUnit, pattern, ro != null && ro.booleanValue(),
+                options);
     }
 
     /**
-     * Merge the given {@link StateDescriptionFragment}. Set all unset ({@code null}) fields of this instance to the
-     * values from the given {@link StateDescriptionFragment}.
+     * Merge the given {@link StateDescriptionFragment}. If either fragment specifies a range unit, keep the first
+     * range definition as a whole. Otherwise, merge missing range fields individually.
      *
      * @param fragment a {@link StateDescriptionFragment} this instance should merge in.
      * @return this instance with the fields merged.
      */
     public StateDescriptionFragment merge(StateDescriptionFragment fragment) {
-        if (minimum == null) {
-            minimum = fragment.getMinimum();
-        }
-        if (maximum == null) {
-            maximum = fragment.getMaximum();
-        }
-        if (step == null) {
-            step = fragment.getStep();
+        return merge(fragment, rangeUnit == null && fragment.getRangeUnit() == null);
+    }
+
+    /**
+     * Merge the given fragment using the range policy determined across all contributing providers.
+     *
+     * @param fragment the fragment to merge in
+     * @param mergeRangeFields whether missing range fields can be filled individually; otherwise, copy the range only
+     *            if this instance has no range information
+     * @return this instance with the fields merged
+     */
+    public StateDescriptionFragment merge(StateDescriptionFragment fragment, boolean mergeRangeFields) {
+        if (mergeRangeFields || (minimum == null && maximum == null && step == null && rangeUnit == null)) {
+            if (minimum == null) {
+                minimum = fragment.getMinimum();
+            }
+            if (maximum == null) {
+                maximum = fragment.getMaximum();
+            }
+            if (step == null) {
+                step = fragment.getStep();
+            }
+            if (rangeUnit == null) {
+                rangeUnit = fragment.getRangeUnit();
+            }
         }
         if (pattern == null) {
             pattern = fragment.getPattern();
@@ -209,6 +242,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         result = prime * result + Objects.hashCode(minimum);
         result = prime * result + Objects.hashCode(maximum);
         result = prime * result + Objects.hashCode(step);
+        result = prime * result + Objects.hashCode(rangeUnit);
         result = prime * result + Objects.hashCode(pattern);
         result = prime * result + (readOnly ? 1231 : 1237);
         result = prime * result + Objects.hashCode(options);
@@ -228,13 +262,15 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         }
         StateDescriptionFragmentImpl other = (StateDescriptionFragmentImpl) obj;
         return Objects.equals(minimum, other.minimum) && Objects.equals(maximum, other.maximum)
-                && Objects.equals(step, other.step) && Objects.equals(pattern, other.pattern)
-                && Objects.equals(readOnly, other.readOnly) && Objects.equals(options, other.options);
+                && Objects.equals(step, other.step) && Objects.equals(rangeUnit, other.rangeUnit)
+                && Objects.equals(pattern, other.pattern) && Objects.equals(readOnly, other.readOnly)
+                && Objects.equals(options, other.options);
     }
 
     @Override
     public String toString() {
-        return "StateDescription [minimum=" + minimum + ", maximum=" + maximum + ", step=" + step + ", pattern="
-                + pattern + ", readOnly=" + readOnly + ", channelStateOptions=" + options + "]";
+        return "StateDescription [minimum=" + minimum + ", maximum=" + maximum + ", step=" + step + ", rangeUnit="
+                + rangeUnit + ", pattern=" + pattern + ", readOnly=" + readOnly + ", channelStateOptions=" + options
+                + "]";
     }
 }
