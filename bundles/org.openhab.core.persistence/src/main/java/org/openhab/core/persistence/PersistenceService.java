@@ -12,6 +12,7 @@
  */
 package org.openhab.core.persistence;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
+import org.openhab.core.types.State;
 
 /**
  * A persistence service which can be used to store data from openHAB.
@@ -50,7 +52,60 @@ public interface PersistenceService {
     String getLabel(@Nullable Locale locale);
 
     /**
+     * <p>
+     * Stores the historic item value. This allows the item, time and value to be specified.
+     *
+     * <p>
+     * Adding data with the same time as an existing record should update the current record value rather than adding a
+     * new record.
+     *
+     * <p>
+     * Implementors SHOULD NOT rely on the default. It is provided solely for compatibility with existing
+     * implementations which do not provide a store method which allows date and state to be specified.
+     *
+     * <p>
+     * Implementors should keep in mind that all registered {@link PersistenceService}s are called synchronously. Hence
+     * long running operations should be processed asynchronously. E.g. <code>store</code> adds things to a queue which
+     * is processed by some asynchronous workers (Quartz Job, Thread, etc.).
+     *
+     * @param item the data to be stored
+     * @param date the date of the record
+     * @param state the state to be recorded
+     */
+    default void store(Item item, ZonedDateTime date, State state) {
+        store(item);
+    }
+
+    /**
+     * <p>
+     * Stores the historic item value under a specified alias. This allows the item, time and value to be specified.
+     *
+     * <p>
+     * Adding data with the same time as an existing record should update the current record value rather than adding a
+     * new record.
+     *
+     * <p>
+     * Implementors SHOULD NOT rely on the default. It is provided solely for compatibility with existing
+     * implementations which do not provide a store method which allows date and state to be specified.
+     *
+     * <p>
+     * Implementors should keep in mind that all registered {@link PersistenceService}s are called synchronously. Hence
+     * long running operations should be processed asynchronously. E.g. <code>store</code> adds things to a queue which
+     * is processed by some asynchronous workers (Quartz Job, Thread, etc.).
+     *
+     * @param item the data to be stored
+     * @param date the date of the record
+     * @param state the state to be recorded
+     */
+    default void store(Item item, ZonedDateTime date, State state, @Nullable String alias) {
+        store(item, alias);
+    }
+
+    /**
      * Stores the current value of the given item.
+     *
+     * This method has been deprecated and {@link #store(Item, ZonedDateTime, State, String)} MUST be used instead.
+     *
      * <p>
      * Implementors should keep in mind that all registered {@link PersistenceService}s are called synchronously. Hence
      * long running operations should be processed asynchronously. E.g. <code>store</code> adds things to a queue which
@@ -58,11 +113,16 @@ public interface PersistenceService {
      *
      * @param item the item which state should be persisted.
      */
-    void store(Item item);
+    @Deprecated
+    default void store(Item item) {
+        store(item, ZonedDateTime.now(), item.getState(), null);
+    }
 
     /**
      * <p>
      * Stores the current value of the given item under a specified alias.
+     *
+     * This method has been deprecated and {@link #store(Item, ZonedDateTime, State, String)} MUST be used instead.
      *
      * <p>
      * Implementors should keep in mind that all registered {@link PersistenceService}s are called synchronously. Hence
@@ -72,7 +132,10 @@ public interface PersistenceService {
      * @param item the item which state should be persisted.
      * @param alias the alias under which the item should be persisted.
      */
-    void store(Item item, @Nullable String alias);
+    @Deprecated
+    default void store(Item item, @Nullable String alias) {
+        store(item, ZonedDateTime.now(), item.getState(), alias);
+    }
 
     /**
      * Provides default persistence strategies that are used for all items if no user defined configuration is found.
