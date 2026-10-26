@@ -21,6 +21,8 @@ import static org.mockito.Mockito.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -265,6 +267,29 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertNotNull(connection.timeoutFuture);
 
         assertThat(future.get(5, TimeUnit.SECONDS), is(false));
+    }
+
+    /**
+     * The mocked client answers synchronously, so {@link MqttBrokerConnection.ConnectionCallback#onConnected} runs
+     * while {@link MqttBrokerConnection#start()} is still connecting. The connect timeout must already be scheduled at
+     * that point, otherwise it is never cancelled and fires later although the connection is established.
+     */
+    @Test
+    public void timeoutIsCancelledWhenConnectSucceedsImmediately()
+            throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
+        MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("10.0.10.10", null, false, false,
+                "MqttBrokerConnectionTests");
+
+        ScheduledExecutorService scheduler = mock(ScheduledExecutorService.class);
+        ScheduledFuture<?> timeoutFuture = mock(ScheduledFuture.class);
+        doReturn(timeoutFuture).when(scheduler).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+        connection.setTimeoutExecutor(scheduler, 10);
+
+        assertTrue(connection.start().get(5, TimeUnit.SECONDS));
+
+        verify(scheduler).schedule(any(Runnable.class), eq(10L), eq(TimeUnit.MILLISECONDS));
+        verify(timeoutFuture).cancel(false);
+        assertNull(connection.timeoutFuture.get());
     }
 
     @Test
