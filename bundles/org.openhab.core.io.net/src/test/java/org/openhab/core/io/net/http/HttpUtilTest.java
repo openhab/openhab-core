@@ -169,7 +169,8 @@ public class HttpUtilTest extends BaseHttpUtilTest {
     @Test
     public void proxyClientIsReusedForTheSameProxyConfiguration() throws Exception {
         mockResponse(HttpStatus.OK_200);
-        when(clientFactoryMock.createHttpClient(any())).thenReturn(mockProxyClient());
+        HttpClient proxyClientMock = mockProxyClient();
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(proxyClientMock);
 
         executeViaProxy(8080);
         executeViaProxy(8080);
