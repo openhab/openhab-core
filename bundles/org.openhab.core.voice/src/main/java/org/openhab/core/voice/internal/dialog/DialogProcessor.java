@@ -60,6 +60,7 @@ import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -385,6 +386,10 @@ public class DialogProcessor implements KSListener, STTListener {
                             error = null;
                             logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(),
                                     answer);
+                            break;
+                        } catch (UnrecoverableInterpretationException e) {
+                            logger.debug("Unrecoverable interpretation exception: {}", e.getMessage());
+                            error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
                             break;
                         } catch (InterpretationException e) {
                             logger.debug("Interpretation exception: {}", e.getMessage());

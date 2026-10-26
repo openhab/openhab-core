@@ -83,6 +83,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationManager;
@@ -461,6 +462,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                     String answer = interpreter.interpret(locale, context);
                     logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
                     return answer;
+                } catch (UnrecoverableInterpretationException e) {
+                    logger.debug("Unrecoverable interpretation exception from interpreter '{}': {}",
+                            interpreter.getId(), e.getMessage());
+                    throw e;
                 } catch (InterpretationException e) {
                     logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
                             e.getMessage());

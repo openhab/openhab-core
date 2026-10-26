@@ -35,16 +35,28 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
     private static final String INTERPRETED_TEXT = "Interpreted text";
     private static final String EXCEPTION_MESSAGE = "interpretation exception";
 
+    private static final String UNRECOVERABLE_EXCEPTION_MESSAGE = "unrecoverable interpretation exception";
+
     private static final String HLI_STUB_ID = "HLIStubID";
     private static final String HLI_STUB_LABEL = "HLIStubLabel";
 
+    private final String id;
     private boolean exceptionExpected;
+    private boolean unrecoverableExceptionExpected;
     private String question = "";
     private String answer = "";
 
+    public HumanLanguageInterpreterStub() {
+        this(HLI_STUB_ID);
+    }
+
+    public HumanLanguageInterpreterStub(String id) {
+        this.id = id;
+    }
+
     @Override
     public String getId() {
-        return HLI_STUB_ID;
+        return id;
     }
 
     @Override
@@ -55,7 +67,9 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
         question = text;
-        if (exceptionExpected) {
+        if (unrecoverableExceptionExpected) {
+            throw new UnrecoverableInterpretationException(UNRECOVERABLE_EXCEPTION_MESSAGE);
+        } else if (exceptionExpected) {
             throw new InterpretationException(EXCEPTION_MESSAGE);
         } else {
             answer = INTERPRETED_TEXT;
@@ -82,6 +96,10 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
 
     public void setExceptionExpected(boolean exceptionExpected) {
         this.exceptionExpected = exceptionExpected;
+    }
+
+    public void setUnrecoverableExceptionExpected(boolean unrecoverableExceptionExpected) {
+        this.unrecoverableExceptionExpected = unrecoverableExceptionExpected;
     }
 
     public String getQuestion() {

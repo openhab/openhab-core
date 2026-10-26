@@ -150,9 +150,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
         }
 
         public Builder withLLMTools(Collection<LLMTool> llmTools) {
-            if (!llmTools.isEmpty()) {
-                this.llmTools = llmTools;
-            }
+            this.llmTools = llmTools;
             return this;
         }
 

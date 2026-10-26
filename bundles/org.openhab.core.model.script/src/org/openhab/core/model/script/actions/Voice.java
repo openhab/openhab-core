@@ -206,7 +206,7 @@ public class Voice {
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(),
                     new InterpretationArguments(Objects.requireNonNullElse(interpreters, ""),
-                            Objects.requireNonNullElse(conversationId, ""), Objects.requireNonNullElse(llmTools, ""),
+                            Objects.requireNonNullElse(conversationId, ""), Objects.requireNonNullElse(llmTools, "*"),
                             null, null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
