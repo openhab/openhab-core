@@ -30,6 +30,8 @@ public class SitemapConverters extends DefaultTerminalConverters {
     private static final String PERIOD_PART = "(?:P(?=\\d|T\\d)(?:\\d+Y)?(?:\\d+M)?(?:\\d+W)?(?:\\d+D)?"
             + "(?:T(?=\\d)(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?)?|\\d*[YMWDh])";
     private static final Pattern PERIOD_PATTERN = Pattern.compile("(?:" + PERIOD_PART + "?-)?" + PERIOD_PART);
+    // Mirrors the Number rule: optional '-', then INT or FLOAT (INT '.' INT)
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(?:\\.[0-9]+)?");
 
     @ValueConverter(rule = "Icon")
     public IValueConverter<String> Icon() {
@@ -154,11 +156,18 @@ public class SitemapConverters extends DefaultTerminalConverters {
                         || (string.startsWith("\"") && string.endsWith("\""))) {
                     return STRING().toValue(string, node);
                 }
+                if (NUMBER_PATTERN.matcher(string).matches()) {
+                    // keep the text as is, to preserve leading zeros and trailing decimals
+                    return string;
+                }
                 return ID().toValue(string, node);
             }
 
             @Override
             protected String internalToString(String value) throws ValueConverterException {
+                if (NUMBER_PATTERN.matcher(value).matches()) {
+                    return value;
+                }
                 if (ID_PATTERN.matcher(value).matches()) {
                     return ID().toString(value);
                 } else {
