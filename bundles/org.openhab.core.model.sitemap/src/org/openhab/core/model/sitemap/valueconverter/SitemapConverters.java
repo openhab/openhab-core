@@ -84,10 +84,15 @@ public class SitemapConverters extends DefaultTerminalConverters {
                     if (i != 0) {
                         sb.append(":");
                     }
-                    if (!ICON_SEGMENT_PATTERN.matcher(segments[i]).matches()) {
+                    String segment = segments[i];
+                    if (!ICON_SEGMENT_PATTERN.matcher(segment).matches()) {
                         return STRING().toString(value);
                     }
-                    sb.append(ID().toString(segments[i]));
+                    if (INT_PATTERN.matcher(segment).matches()) {
+                        sb.append(segment); // lexed as INT, not ID
+                    } else {
+                        sb.append(ID().toString(segment));
+                    }
                 }
                 return sb.toString();
             }
