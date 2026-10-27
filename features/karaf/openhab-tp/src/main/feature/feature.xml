@@ -60,7 +60,7 @@
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
 		<capability>openhab.tp;feature=gson;version=${gson.version}</capability>
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
-		<bundle>mvn:com.google.errorprone/error_prone_annotations/2.48.0</bundle>
+		<bundle>mvn:com.google.errorprone/error_prone_annotations/2.50.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-hivemqclient" description="MQTT Client" version="${project.version}">
