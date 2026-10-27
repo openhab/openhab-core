@@ -51,7 +51,8 @@ import org.osgi.framework.Bundle;
 public class DialogProcessorTest {
 
     @Test
-    public void interpreterLoopReturnsFastAfterUnrecoverableInterpretationException() throws InterpretationException, TTSException {
+    public void interpreterLoopReturnsFastAfterUnrecoverableInterpretationException()
+            throws InterpretationException, TTSException {
         HumanLanguageInterpreter hli1 = mock(HumanLanguageInterpreter.class);
         HumanLanguageInterpreter hli2 = mock(HumanLanguageInterpreter.class);
         when(hli1.getId()).thenReturn("hli1");
@@ -97,7 +98,8 @@ public class DialogProcessorTest {
     }
 
     @Test
-    public void interpreterLoopContinuesAfterRecoverableInterpretationException() throws InterpretationException, TTSException {
+    public void interpreterLoopContinuesAfterRecoverableInterpretationException()
+            throws InterpretationException, TTSException {
         HumanLanguageInterpreter hli1 = mock(HumanLanguageInterpreter.class);
         HumanLanguageInterpreter hli2 = mock(HumanLanguageInterpreter.class);
         when(hli1.getId()).thenReturn("hli1");
