@@ -96,6 +96,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ThingActionsResource implements RESTResource {
     public static final String PATH_THINGS = "actions";
 
+    // regex matching an actionUid of the form "scope.actionName" or "scope.actionName#signatureHash", where the
+    // scope itself may contain further dot-separated segments (e.g. "mqtt.awtrixlight.reboot") - only the final
+    // segment is the action type id. "#" is URL encoded as "%23".
+    static final String ACTION_UID_PATH_REGEX = "[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)+(?:%23[A-Fa-f0-9]+)?";
+
     private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
     private final ActionInputsHelper actionInputsHelper;
@@ -218,9 +223,11 @@ public class ThingActionsResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    // accept actionUid in the form of "scope.actionTypeUid" or "scope.actionTypeUid#signatureHash"
+    // accept actionUid in the form of "scope.actionTypeUid" or "scope.actionTypeUid#signatureHash", where the scope
+    // itself may contain further dot-separated segments (e.g. "mqtt.awtrixlight.reboot") - only the final segment
+    // is the action type id, see ACTION_UID_PATH_REGEX
     // # is URL encoded as %23
-    @Path("/{thingUID}/{actionUid: [a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)?\\.[a-zA-Z0-9]+(%23[A-Fa-f0-9]+)?}")
+    @Path("/{thingUID}/{actionUid: " + ACTION_UID_PATH_REGEX + "}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "executeThingAction", summary = "Executes a thing action.", responses = {
