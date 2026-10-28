@@ -15,23 +15,42 @@ package org.openhab.core.io.http.auth.internal;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
+import org.openhab.core.auth.AuthenticationProvider;
+import org.openhab.core.auth.ManagedUser;
+import org.openhab.core.auth.Role;
+import org.openhab.core.auth.User;
+import org.openhab.core.auth.UserRegistry;
+import org.openhab.core.i18n.LocaleProvider;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * Tests the validation of the OAuth2 authorization request performed by the {@link AuthorizePageServlet}, which
  * decides where an authorization code may be delivered to.
  *
  * @author Holger Friedrich - Initial contribution
+ * @author Dan Cunningham - Confirmation of redirect URIs on other origins
  */
 @NonNullByDefault
 public class AuthorizePageServletTest {
@@ -189,10 +208,8 @@ public class AuthorizePageServletTest {
         HttpServletRequest req = request("http", "openhab.local", 8080);
         String redirectUri = "http://openhab.local:8080";
         Map<String, String[]> params = params(redirectUri, redirectUri, "code", CHALLENGE, "S256");
-        assertDoesNotThrow(() -> {
-            AuthorizePageServlet.validateAuthorizationRequest(params);
-            AuthorizePageServlet.validateRedirectUriOrigin(req, redirectUri);
-        });
+        assertDoesNotThrow(() -> AuthorizePageServlet.validateAuthorizationRequest(params));
+        assertTrue(AuthorizePageServlet.isSafeRedirectUri(req, redirectUri));
     }
 
     /**
@@ -232,18 +249,285 @@ public class AuthorizePageServletTest {
 
     /**
      * The attack of GHSA-3523-gpwr-558p. It passes every other check - an attacker can set client_id to their own
-     * redirect_uri and supply a code challenge of their own - so only the origin check refuses it.
+     * redirect_uri and supply a code challenge of their own - so the user has to confirm the external host by typing
+     * it before any code is issued.
      */
     @Test
-    public void authorizationRequestRedirectingToAThirdPartyIsRejected() {
+    public void authorizationRequestRedirectingToAThirdPartyNeedsConfirmation() {
         HttpServletRequest req = request("http", "openhab.local", 8080);
         String redirectUri = "https://attacker.com";
         Map<String, String[]> params = params(redirectUri, redirectUri, "code", CHALLENGE, "S256");
         assertDoesNotThrow(() -> AuthorizePageServlet.validateAuthorizationRequest(params));
 
+        assertEquals("attacker.com", servlet(true).externalHost(req, redirectUri));
+    }
+
+    @Test
+    public void sameOriginRedirectNeedsNoConfirmation() {
+        HttpServletRequest req = request("http", "openhab.local", 8080);
+        assertNull(servlet(true).externalHost(req, "http://openhab.local:8080"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "http://attacker.com/cb", "ftp://example.com", "https://user@claude.ai/cb",
+            "https://claude.ai/cb#frag", "javascript:alert(1)", "/relative", "", "ht tp://x",
+            // non-ASCII hosts could hide look-alike characters
+            "https://cläude.ai/cb", "https://сlaude.ai/cb" })
+    public void unusableExternalRedirectIsRejected(String redirectUri) {
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> AuthorizePageServlet.validateRedirectUriOrigin(req, redirectUri));
+                () -> servlet(true).externalHost(request("http", "openhab.local", 8080), redirectUri));
         assertEquals("unauthorized_client", e.getMessage());
+    }
+
+    @Test
+    public void overlongExternalRedirectIsRejected() {
+        String redirectUri = "https://claude.ai/" + "a".repeat(AuthorizePageServlet.MAX_REDIRECT_URI_LENGTH);
+        assertNull(AuthorizePageServlet.allowedExternalHost(redirectUri));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "http://localhost:33418/callback, localhost", "http://127.0.0.1:6274/oauth/callback, 127.0.0.1",
+            "http://[::1]:8080/cb, [::1]", "https://Claude.AI/api/mcp/auth_callback, claude.ai" })
+    public void externalHostIsLowerCasedAndAllowsPlainHttpOnLoopbackOnly(String redirectUri, String host) {
+        assertEquals(host, AuthorizePageServlet.allowedExternalHost(redirectUri));
+    }
+
+    @Test
+    public void externalSitesCanBeDisabled() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> servlet(false).externalHost(request("https", "myopenhab.org", 443), CLAUDE));
+        assertEquals("unauthorized_client", e.getMessage());
+    }
+
+    @Test
+    public void externalSitesAreAllowedWhenNotConfigured() {
+        AuthorizePageServlet servlet = servlet(true);
+        servlet.modified(null);
+        assertEquals("claude.ai", servlet.externalHost(request("https", "myopenhab.org", 443), CLAUDE));
+    }
+
+    @Test
+    public void externalRedirectPageShowsTheHostAndAnEmptyConfirmationField() throws Exception {
+        HttpServletRequest req = request("https", "myopenhab.org", 443);
+        Map<String, String[]> params = params(CLAUDE, CLAUDE, "code", CHALLENGE, "S256");
+        // a crafted link can't prefill the confirmation
+        params.put(AuthorizePageServlet.CONFIRM_HOST_PARAM, new String[] { "claude.ai" });
+        when(req.getParameterMap()).thenReturn(params);
+        StringWriter body = new StringWriter();
+        HttpServletResponse resp = response(body);
+
+        servlet(true).doGet(req, resp);
+
+        String page = body.toString();
+        assertTrue(page.contains("<div class=\"site\">claude.ai</div>"));
+        assertTrue(page.contains(CLAUDE));
+        assertTrue(page.contains("name=\"confirm_host\""));
+        assertFalse(page.contains("value=\"claude.ai\""));
+        verify(resp).setHeader("X-Frame-Options", "DENY");
+        verify(resp).setHeader("Content-Security-Policy", "frame-ancestors 'none'");
+    }
+
+    @Test
+    public void sameOriginPageHasNoConfirmationFieldEvenIfRequested() throws Exception {
+        HttpServletRequest req = request("http", "openhab.local", 8080);
+        Map<String, String[]> params = params("http://openhab.local:8080", "http://openhab.local:8080", "code",
+                CHALLENGE, "S256");
+        params.put("external_host", new String[] { "evil" });
+        when(req.getParameterMap()).thenReturn(params);
+        StringWriter body = new StringWriter();
+
+        servlet(true).doGet(req, response(body));
+
+        assertFalse(body.toString().contains("confirm_host"));
+        assertFalse(body.toString().contains("evil"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "claude.ai", " Claude.AI " })
+    public void typingTheHostIssuesACode(String typedHost) throws Exception {
+        givenUser("bob", Role.USER);
+        HttpServletRequest req = loginRequest("bob", typedHost);
+        req.getParameterMap().put("state", new String[] { "xyz" });
+        StringWriter body = new StringWriter();
+        HttpServletResponse resp = response(body);
+
+        AuthorizePageServlet servlet = servlet(true);
+        servlet.pageTemplate = "<head></head>{message}|{form_fields}";
+
+        servlet.doPost(req, resp);
+
+        // sent on from a page: a redirect after the form post would be blocked by the page's form-action
+        verify(resp, never()).addHeader(eq("Location"), any());
+        verify(resp).setHeader("Cache-Control", "no-store");
+        String page = body.toString();
+        assertTrue(page.contains("<meta http-equiv=\"refresh\" content=\"0;url=" + CLAUDE + "?code="));
+        assertTrue(page.contains("<a href=\"" + CLAUDE + "?code="));
+        assertTrue(page.contains("&amp;state=xyz"));
+    }
+
+    @Test
+    public void wrongHostUsesUpTheCsrfToken() throws Exception {
+        AuthorizePageServlet servlet = servlet(true);
+
+        servlet.doPost(loginRequest("bob", "claude-ai.com"), response(new StringWriter()));
+
+        assertFalse(servlet.csrfTokens.containsKey("csrf"));
+    }
+
+    @Test
+    public void missingCsrfTokenIsAFailedLoginThatStillAsksForTheSite() throws Exception {
+        AuthorizePageServlet servlet = servlet(true);
+        servlet.csrfTokens.clear();
+        StringWriter body = new StringWriter();
+
+        servlet.doPost(loginRequest("bob", "claude-ai.com"), response(body));
+
+        assertTrue(body.toString().contains("Please try again."));
+        assertFalse(body.toString().contains("doesn't match"));
+        assertTrue(body.toString().contains("<div class=\"site\">claude.ai</div>"));
+        assertTrue(body.toString().contains("name=\"confirm_host\""));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = { "", "claude", "claude-ai.com", "claude.ai.example.com", "api.claude.ai" })
+    public void wrongOrMissingHostIssuesNoCodeAndSkipsTheLogin(@Nullable String typedHost) throws Exception {
+        givenUser("bob", Role.USER);
+        StringWriter body = new StringWriter();
+        HttpServletResponse resp = response(body);
+
+        servlet(true).doPost(loginRequest("bob", typedHost), resp);
+
+        verify(authProvider, never()).authenticate(any());
+        verify(resp, never()).addHeader(eq("Location"), any());
+        assertTrue(body.toString().contains("doesn't match"));
+        assertTrue(body.toString().contains("name=\"confirm_host\""));
+    }
+
+    @Test
+    public void injectedExternalHostDoesNotReplaceTheRealOne() throws Exception {
+        givenUser("bob", Role.USER);
+        HttpServletRequest req = loginRequest("bob", "evil.com");
+        req.getParameterMap().put("external_host", new String[] { "evil.com" });
+        HttpServletResponse resp = response(new StringWriter());
+
+        servlet(true).doPost(req, resp);
+
+        verify(resp, never()).addHeader(eq("Location"), any());
+    }
+
+    @Test
+    public void disabledExternalSitesIssueNoCode() throws Exception {
+        givenUser("bob", Role.USER);
+        StringWriter body = new StringWriter();
+        HttpServletResponse resp = response(body);
+
+        servlet(false).doPost(loginRequest("bob", "claude.ai"), resp);
+
+        verify(authProvider, never()).authenticate(any());
+        verify(resp, never()).addHeader(eq("Location"), any());
+        assertEquals("unauthorized_client", body.toString());
+    }
+
+    @Test
+    public void externalSiteCannotOfferToCreateTheFirstAccount() throws Exception {
+        AuthorizePageServlet servlet = servlet(true);
+        when(userRegistry.getAll()).thenReturn(List.of());
+        HttpServletRequest req = request("https", "myopenhab.org", 443);
+        when(req.getParameterMap()).thenReturn(params(CLAUDE, CLAUDE, "code", CHALLENGE, "S256"));
+        StringWriter body = new StringWriter();
+
+        servlet.doGet(req, response(body));
+
+        assertTrue(body.toString().contains("no user account yet"));
+        assertFalse(body.toString().contains("confirm_host"));
+    }
+
+    @Test
+    public void externalSiteCannotCreateTheFirstAccount() throws Exception {
+        AuthorizePageServlet servlet = servlet(true);
+        when(userRegistry.getAll()).thenReturn(List.of());
+        HttpServletRequest req = loginRequest("admin", "claude.ai");
+        req.getParameterMap().put("password_repeat", new String[] { "secret" });
+        StringWriter body = new StringWriter();
+        HttpServletResponse resp = response(body);
+
+        servlet.doPost(req, resp);
+
+        verify(userRegistry, never()).register(any(), any(), any());
+        verify(resp, never()).addHeader(eq("Location"), any());
+        assertEquals("access_denied", body.toString());
+    }
+
+    @Test
+    public void failedLoginStillShowsTheExternalSite() throws Exception {
+        when(authProvider.authenticate(any())).thenThrow(new AuthenticationException("wrong password"));
+        StringWriter body = new StringWriter();
+
+        servlet(true).doPost(loginRequest("bob", "claude.ai"), response(body));
+
+        assertTrue(body.toString().contains("Please try again."));
+        assertTrue(body.toString().contains("<div class=\"site\">claude.ai</div>"));
+    }
+
+    @Test
+    public void reflectedValuesCannotInjectPagePlaceholders() throws Exception {
+        HttpServletRequest req = request("https", "myopenhab.org", 443);
+        Map<String, String[]> params = params(CLAUDE, CLAUDE, "code", CHALLENGE, "S256");
+        params.put("state", new String[] { "{message}" });
+        when(req.getParameterMap()).thenReturn(params);
+        StringWriter body = new StringWriter();
+
+        servlet(true).doGet(req, response(body));
+
+        assertTrue(body.toString().contains("name=\"state\" value=\"&#123;message&#125;\""));
+    }
+
+    private static final String CLAUDE = "https://claude.ai/api/mcp/auth_callback";
+
+    private final UserRegistry userRegistry = mock(UserRegistry.class);
+    private final AuthenticationProvider authProvider = mock(AuthenticationProvider.class);
+
+    private AuthorizePageServlet servlet(boolean allowExternalSites) {
+        BundleContext bundleContext = mock(BundleContext.class);
+        when(bundleContext.getBundle()).thenReturn(mock(Bundle.class));
+        LocaleProvider localeProvider = mock(LocaleProvider.class);
+        when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
+        when(userRegistry.getAll()).thenReturn(List.<User> of(new ManagedUser("someone", "salt", "hash")));
+        AuthorizePageServlet servlet = new AuthorizePageServlet(bundleContext, userRegistry, authProvider,
+                localeProvider,
+                Map.<String, Object> of(AuthorizePageServlet.CONFIG_ALLOW_EXTERNAL_SITES, allowExternalSites));
+        servlet.csrfTokens.put("csrf", Instant.now());
+        // the real template isn't loaded in tests, so render just the message and the form fields
+        servlet.pageTemplate = "{message}|{form_fields}";
+        return servlet;
+    }
+
+    private void givenUser(String name, String role) throws Exception {
+        ManagedUser user = new ManagedUser(name, "salt", "hash");
+        user.setRoles(Set.of(role));
+        when(userRegistry.get(name)).thenReturn(user);
+        when(authProvider.authenticate(any())).thenReturn(new Authentication(name, role));
+    }
+
+    private static HttpServletRequest loginRequest(String username, @Nullable String typedHost) {
+        HttpServletRequest req = request("https", "myopenhab.org", 443);
+        Map<String, String[]> params = params(CLAUDE, CLAUDE, "code", CHALLENGE, "S256");
+        params.put("username", new String[] { username });
+        params.put("password", new String[] { "secret" });
+        params.put("csrf_token", new String[] { "csrf" });
+        if (typedHost != null) {
+            params.put(AuthorizePageServlet.CONFIRM_HOST_PARAM, new String[] { typedHost });
+        }
+        when(req.getParameterMap()).thenReturn(params);
+        when(req.getRemoteAddr()).thenReturn("192.0.2.1");
+        return req;
+    }
+
+    private static HttpServletResponse response(StringWriter body) throws Exception {
+        HttpServletResponse resp = mock(HttpServletResponse.class);
+        when(resp.getWriter()).thenReturn(new PrintWriter(body));
+        return resp;
     }
 
     @ParameterizedTest
