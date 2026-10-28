@@ -90,8 +90,8 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def checkSitemapName(ModelSitemap sitemap) {
         val name = sitemap.name
-        if (name.contains("-") || name.substring(0, 1).matches("[0-9]")) {
-            error(buildMsgWithLineNb("Sitemap name must not contain dash and must not start with a number", sitemap, null, null),
+        if (name.contains("-")) {
+            error(buildMsgWithLineNb("Sitemap name must not contain dash", sitemap, null, null),
                 SitemapPackage.Literals.MODEL_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
         }
     }
@@ -159,6 +159,24 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (isInvalidItemName(item)) {
             error(buildMsgWithLineNb("Item name must not contain dash and must not start with a number", c, null, null),
                 SitemapPackage.Literals.MODEL_CONDITION.getEStructuralFeature(SitemapPackage.MODEL_CONDITION__ITEM))
+        }
+    }
+
+    @Check
+    def checkConditionAmbiguousSign(ModelCondition c) {
+        val state = c.state
+        if (c.item !== null || c.condition !== null || c.sign !== null || state === null) {
+            return
+        }
+        // a quoted state is a plain string, not an item followed by a sign
+        val node = NodeModelUtils.findNodesForFeature(c, SitemapPackage.Literals.MODEL_CONDITION__STATE).head
+        if (node !== null && node.text.trim.startsWith("\"") || node !== null && node.text.trim.startsWith("'")) {
+            return
+        }
+        if (state.matches("[A-Za-z_][A-Za-z_0-9]*-[0-9]+(\\.[0-9]+)?")) {
+            error(buildMsgWithLineNb("Ambiguous condition '" + state + "', write '" + state.replaceFirst("-", " -") +
+                "' or use an explicit operator, e.g. '" + state.replaceFirst("-", " == -") + "'", c, null, null),
+                SitemapPackage.Literals.MODEL_CONDITION.getEStructuralFeature(SitemapPackage.MODEL_CONDITION__STATE))
         }
     }
 

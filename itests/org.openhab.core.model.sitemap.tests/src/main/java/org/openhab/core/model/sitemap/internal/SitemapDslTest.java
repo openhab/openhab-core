@@ -27,9 +27,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.sitemap.sitemap.ModelChart;
+import org.openhab.core.model.sitemap.sitemap.ModelCondition;
 import org.openhab.core.model.sitemap.sitemap.ModelMapping;
 import org.openhab.core.model.sitemap.sitemap.ModelSwitch;
 import org.openhab.core.model.sitemap.sitemap.ModelText;
@@ -184,13 +186,13 @@ public class SitemapDslTest extends JavaOSGiTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "test", "my_sitemap", "Sitemap1", "_x" })
+    @ValueSource(strings = { "test", "my_sitemap", "Sitemap1", "_x", "1test" })
     public void validSitemapName(String name) {
         parse("sitemap " + name + " { Text label=\"Test\" }");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "my-sitemap", "1test", "1-2" })
+    @ValueSource(strings = { "my-sitemap", "1-2" })
     public void invalidSitemapName(String name) {
         List<String> errors = assertParseFails("sitemap " + name + " { Text label=\"Test\" }");
         assertTrue(errors.stream().anyMatch(e -> e.contains("Sitemap name")), "Unexpected errors: " + errors);
@@ -223,6 +225,29 @@ public class SitemapDslTest extends JavaOSGiTest {
     public void invalidConditionItemName(String rule) {
         List<String> errors = assertParseFails("sitemap test { Text label=\"Test\" " + rule + " }");
         assertTrue(errors.stream().anyMatch(e -> e.contains("Item name")), "Unexpected errors: " + errors);
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "Temp+1,Temp,+,1", "Temp -1,Temp,-,1", "Temp -1.5,Temp,-,1.5" })
+    public void conditionWithSignAndNoOperator(String rule, String item, String sign, String state) {
+        SitemapModel model = parse("sitemap test { Text label=\"Test\" visibility=[" + rule + "] }");
+        ModelCondition c = firstText(model).getVisibility().getElements().getFirst().getConditions().getFirst();
+        assertEquals(item, c.getItem());
+        assertNull(c.getCondition());
+        assertEquals(sign, c.getSign());
+        assertEquals(state, c.getState());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "Temp-1", "Temp1-2" })
+    public void ambiguousConditionIsRejected(String rule) {
+        List<String> errors = assertParseFails("sitemap test { Text label=\"Test\" visibility=[" + rule + "] }");
+        assertTrue(errors.stream().anyMatch(e -> e.contains("Ambiguous")), "Unexpected errors: " + errors);
+    }
+
+    @Test
+    public void quotedHyphenatedStateIsAccepted() {
+        parse("sitemap test { Text label=\"Test\" visibility=[\"Mode-1\"] }");
     }
 
     private SitemapModel parse(String dsl) {
