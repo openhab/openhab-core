@@ -14,9 +14,9 @@ package org.openhab.core.config.discovery.internal;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,6 +25,8 @@ import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,6 +34,8 @@ import org.openhab.core.thing.ThingUID;
  */
 @NonNullByDefault
 public class DiscoveryResultImpl implements DiscoveryResult {
+
+    private final transient Logger logger = LoggerFactory.getLogger(DiscoveryResultImpl.class);
 
     private @Nullable ThingUID bridgeUID;
     private @NonNullByDefault({}) ThingUID thingUID;
@@ -157,15 +161,22 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         }
     }
 
+    @SuppressWarnings({ "null", "unused" })
     @Override
     public void normalizePropertiesOnConfigDescription(List<String> configurationParameters) {
-        properties = properties.entrySet().stream().map(e -> {
-            if (!configurationParameters.contains(e.getKey())) {
-                return Map.entry(e.getKey(), String.valueOf(e.getValue()));
+        Map<String, Object> normalized = new HashMap<>();
+        properties.forEach((key, value) -> {
+            if (!configurationParameters.contains(key)) {
+                normalized.put(key, String.valueOf(value));
             } else {
-                return e;
+                if (value == null) {
+                    // Bindings may return null values for properties if not properly guarded. Warn about it.
+                    logger.warn("Discovery result '{}' has property '{}' with null value", thingUID, key);
+                }
+                normalized.put(key, value);
             }
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        });
+        properties = normalized;
     }
 
     /**
