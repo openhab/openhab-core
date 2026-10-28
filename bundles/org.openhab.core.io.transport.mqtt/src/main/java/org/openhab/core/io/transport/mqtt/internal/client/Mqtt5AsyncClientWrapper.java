@@ -14,6 +14,7 @@ package org.openhab.core.io.transport.mqtt.internal.client;
 
 import java.util.concurrent.CompletableFuture;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -49,7 +50,8 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
 
     public Mqtt5AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, String webSocketPath,
             String webSocketSubprotocol, boolean secure, boolean hostnameValidated,
-            ConnectionCallback connectionCallback, @Nullable TrustManagerFactory trustManagerFactory) {
+            ConnectionCallback connectionCallback, @Nullable TrustManagerFactory trustManagerFactory,
+            @Nullable KeyManagerFactory keyManagerFactory) {
         Mqtt5ClientBuilder clientBuilder = Mqtt5Client.builder().serverHost(host).serverPort(port).identifier(clientId)
                 .addConnectedListener(connectionCallback).addDisconnectedListener(connectionCallback);
 
@@ -65,10 +67,10 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
         if (secure) {
             if (hostnameValidated) {
                 clientBuilder.sslWithDefaultConfig().sslConfig().trustManagerFactory(trustManagerFactory)
-                        .applySslConfig();
+                        .keyManagerFactory(keyManagerFactory).applySslConfig();
             } else {
                 clientBuilder.sslWithDefaultConfig().sslConfig().trustManagerFactory(trustManagerFactory)
-                        .hostnameVerifier(this).applySslConfig();
+                        .keyManagerFactory(keyManagerFactory).hostnameVerifier(this).applySslConfig();
             }
         }
 

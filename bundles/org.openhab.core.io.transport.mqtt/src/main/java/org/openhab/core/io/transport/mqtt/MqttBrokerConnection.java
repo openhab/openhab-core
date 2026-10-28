@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -98,6 +99,7 @@ public class MqttBrokerConnection {
     private String webSocketSubprotocol = DEFAULT_WEBSOCKET_SUBPROTOCOL;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
+    private @Nullable KeyManagerFactory keyManagerFactory;
     protected final String clientId;
     private @Nullable String user;
     private @Nullable String password;
@@ -323,6 +325,22 @@ public class MqttBrokerConnection {
         } else {
             trustManagerFactory = null;
         }
+    }
+
+    /**
+     * Set the {@link KeyManagerFactory} that provides the client certificate and private key used for
+     * TLS client authentication (mutual TLS). Only applies to secure connections.
+     * Passing <code>null</code> disables client certificate authentication.
+     * <p>
+     * Client authentication only proves the identity of the client. To also be sure to talk to the intended broker,
+     * this should be combined with {@link #setTrustManagers(TrustManager[])} (a trust store containing the broker's
+     * CA) and hostname validation. If hostname validation is disabled and no trust managers are set (or the default
+     * trust-all behavior is used), the broker is not verified, and a warning is logged when the client is created.
+     *
+     * @param keyManagerFactory an initialized {@link KeyManagerFactory} or <code>null</code>
+     */
+    public void setKeyManagerFactory(@Nullable KeyManagerFactory keyManagerFactory) {
+        this.keyManagerFactory = keyManagerFactory;
     }
 
     public TrustManager[] getTrustManagers() {
@@ -783,12 +801,18 @@ public class MqttBrokerConnection {
     }
 
     protected MqttAsyncClientWrapper createClient() {
+        if (secure && keyManagerFactory != null && !hostnameValidated
+                && (trustManagerFactory == null || trustManagerFactory == InsecureTrustManagerFactory.INSTANCE)) {
+            logger.warn(
+                    "MQTT broker connection to '{}' uses a TLS client certificate, but hostname validation is disabled and no trust managers are configured. The broker is not verified; configure trust managers and enable hostname validation.",
+                    host);
+        }
         if (mqttVersion == MqttVersion.V3) {
             return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, webSocketSubprotocol,
-                    secure, hostnameValidated, connectionCallback, trustManagerFactory);
+                    secure, hostnameValidated, connectionCallback, trustManagerFactory, keyManagerFactory);
         } else {
             return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, webSocketSubprotocol,
-                    secure, hostnameValidated, connectionCallback, trustManagerFactory);
+                    secure, hostnameValidated, connectionCallback, trustManagerFactory, keyManagerFactory);
         }
     }
 
