@@ -20,6 +20,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import io.methvin.watcher.visitor.FileTreeVisitor;
 
@@ -45,20 +46,26 @@ public class IgnoreMarkerFileTreeVisitor implements FileTreeVisitor {
     }
 
     @Override
-    public void recursiveVisitFiles(Path file, Callback onDirectory, Callback onFile) throws IOException {
+    public void recursiveVisitFiles(@Nullable Path file, @Nullable Callback onDirectory,
+            @Nullable Callback onFile) throws IOException {
+        if (file == null || onDirectory == null || onFile == null) {
+            return;
+        }
+        Callback directoryCallback = onDirectory;
+        Callback fileCallback = onFile;
         Files.walkFileTree(file, new SimpleFileVisitor<Path>() {
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult preVisitDirectory(Path dir, @Nullable BasicFileAttributes attr) throws IOException {
                 if (!dir.equals(root) && Files.exists(dir.resolve(IGNORE_MARKER_FILE))) {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
-                onDirectory.call(dir);
+                directoryCallback.call(dir);
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-                onFile.call(path);
+            public FileVisitResult visitFile(Path path, @Nullable BasicFileAttributes attr) throws IOException {
+                fileCallback.call(path);
                 return FileVisitResult.CONTINUE;
             }
         });
