@@ -33,6 +33,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolParam;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolParamType;
+import org.openhab.core.voice.text.interpreter.llm.UnrecoverableLLMToolException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -114,7 +115,7 @@ public class ItemCommandLLMTool implements LLMTool {
         }
 
         if (permission == ItemPermission.READ_ONLY) {
-            throw new LLMToolException("Item is read-only: " + item.getName());
+            throw new UnrecoverableLLMToolException("Item is read-only: " + item.getName());
         }
 
         Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);

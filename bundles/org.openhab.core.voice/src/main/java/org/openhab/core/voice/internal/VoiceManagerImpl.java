@@ -83,6 +83,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationManager;
@@ -417,13 +418,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
-        return interpret(text, hliIdList == null ? null : new InterpretationArguments(hliIdList, "", "", "", null));
+        return interpret(text, hliIdList == null ? null : new InterpretationArguments(hliIdList, "", "*", "", null));
     }
 
     @Override
     public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
         if (args == null) {
-            args = new InterpretationArguments("", "", "", "", null);
+            args = new InterpretationArguments("", "", "*", "", null);
         }
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
         if (args.hliIdList().isEmpty()) {
@@ -461,6 +462,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                     String answer = interpreter.interpret(locale, context);
                     logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
                     return answer;
+                } catch (UnrecoverableInterpretationException e) {
+                    logger.debug("Unrecoverable interpretation exception from interpreter '{}': {}",
+                            interpreter.getId(), e.getMessage());
+                    throw e;
                 } catch (InterpretationException e) {
                     logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
                             e.getMessage());
@@ -679,6 +684,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .withVoice(this.getDefaultVoice()) //
                 .withMelody(configuration.getListeningMelody()) //
                 .withListeningItem(configuration.getListeningItem()) //
+                .withLLMTools(llmToolRegistry.getAll()) //
                 .withSystemPrompt(configuration.getSystemPrompt());
     }
 

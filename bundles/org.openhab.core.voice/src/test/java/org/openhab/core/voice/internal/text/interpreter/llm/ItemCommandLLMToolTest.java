@@ -31,6 +31,7 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
+import org.openhab.core.voice.text.interpreter.llm.UnrecoverableLLMToolException;
 
 /**
  * Test class for {@link ItemCommandLLMTool}.
@@ -95,7 +96,7 @@ public class ItemCommandLLMToolTest {
     @Test
     public void callThrowsLTEOnReadOnly() {
         when(itemPermissionResolver.getPermission(item)).thenReturn(ItemPermission.READ_ONLY);
-        LLMToolException exception = assertThrows(LLMToolException.class,
+        UnrecoverableLLMToolException exception = assertThrows(UnrecoverableLLMToolException.class,
                 () -> tool.call(Map.of("itemName", ITEM_NAME, "command", "ON"), Locale.ENGLISH));
         String message = exception.getMessage();
         assertNotNull(message);

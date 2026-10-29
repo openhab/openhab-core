@@ -49,6 +49,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.tts.TTSServiceStub;
 import org.openhab.core.voice.tts.Voice;
@@ -195,14 +196,32 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
     @Test
     public void interpretSomethingWithGivenMultipleHliIdsWhenFirstFails() throws InterpretationException {
-        hliStub = new HumanLanguageInterpreterStub();
+        hliStub = new HumanLanguageInterpreterStub("hli1");
         registerService(hliStub);
         hliStub.setExceptionExpected(true);
-        var anotherHLIStub = new HumanLanguageInterpreterStub();
+        var anotherHLIStub = new HumanLanguageInterpreterStub("hli2");
         registerService(anotherHLIStub);
         String result = voiceManager.interpret("something", new InterpretationArguments(
                 String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())), "", "", "", null));
         assertThat(result, is("Interpreted text"));
+        assertThat(hliStub.getQuestion(), is("something"));
+        assertThat(anotherHLIStub.getQuestion(), is("something"));
+    }
+
+    @Test
+    public void interpretSomethingWithGivenMultipleHliIdsWhenFirstThrowsUnrecoverableInterpretationException() {
+        hliStub = new HumanLanguageInterpreterStub("hli1");
+        registerService(hliStub);
+        hliStub.setUnrecoverableExceptionExpected(true);
+        var anotherHLIStub = new HumanLanguageInterpreterStub("hli2");
+        registerService(anotherHLIStub);
+
+        assertThrows(UnrecoverableInterpretationException.class,
+                () -> voiceManager.interpret("something", new InterpretationArguments(
+                        String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())), "", "", "", null)));
+
+        assertThat(hliStub.getQuestion(), is("something"));
+        assertThat(anotherHLIStub.getQuestion(), is(""));
     }
 
     @Test
@@ -443,6 +462,65 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertThat(hliStub.getQuestion(), is("Recognized text"));
         assertThat(hliStub.getAnswer(), is(""));
         assertThat(ttsService.getSynthesized(), is("interpretation exception"));
+        assertTrue(sink.getIsStreamProcessed());
+
+        voiceManager.stopDialog(source);
+    }
+
+    @Test
+    public void startDialogWithMultipleHLIsWhenFirstFailsWithInterpretationException() {
+        sttService = new STTServiceStub();
+        ksService = new KSServiceStub();
+        hliStub = new HumanLanguageInterpreterStub("hli1");
+        var anotherHLIStub = new HumanLanguageInterpreterStub("hli2");
+
+        registerService(sttService);
+        registerService(ksService);
+        registerService(ttsService);
+        registerService(hliStub);
+        registerService(anotherHLIStub);
+
+        hliStub.setExceptionExpected(true);
+
+        voiceManager.startDialog(voiceManager.getDialogContextBuilder().withSource(source).withSink(sink)
+                .withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLIs(List.of(hliStub, anotherHLIStub))
+                .withLocale(Locale.ENGLISH).withKeyword("word").build());
+
+        assertTrue(ksService.isWordSpotted());
+        assertTrue(sttService.isRecognized());
+        assertThat(hliStub.getQuestion(), is("Recognized text"));
+        assertThat(anotherHLIStub.getQuestion(), is("Recognized text"));
+        assertThat(anotherHLIStub.getAnswer(), is("Interpreted text"));
+        assertThat(ttsService.getSynthesized(), is("Interpreted text"));
+        assertTrue(sink.getIsStreamProcessed());
+
+        voiceManager.stopDialog(source);
+    }
+
+    @Test
+    public void startDialogWithMultipleHLIsAndVerifyThatAnUnrecoverableInterpretationExceptionReturnsFast() {
+        sttService = new STTServiceStub();
+        ksService = new KSServiceStub();
+        hliStub = new HumanLanguageInterpreterStub("hli1");
+        var anotherHLIStub = new HumanLanguageInterpreterStub("hli2");
+
+        registerService(sttService);
+        registerService(ksService);
+        registerService(ttsService);
+        registerService(hliStub);
+        registerService(anotherHLIStub);
+
+        hliStub.setUnrecoverableExceptionExpected(true);
+
+        voiceManager.startDialog(voiceManager.getDialogContextBuilder().withSource(source).withSink(sink)
+                .withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLIs(List.of(hliStub, anotherHLIStub))
+                .withLocale(Locale.ENGLISH).withKeyword("word").build());
+
+        assertTrue(ksService.isWordSpotted());
+        assertTrue(sttService.isRecognized());
+        assertThat(hliStub.getQuestion(), is("Recognized text"));
+        assertThat(anotherHLIStub.getQuestion(), is(""));
+        assertThat(ttsService.getSynthesized(), is("unrecoverable interpretation exception"));
         assertTrue(sink.getIsStreamProcessed());
 
         voiceManager.stopDialog(source);
