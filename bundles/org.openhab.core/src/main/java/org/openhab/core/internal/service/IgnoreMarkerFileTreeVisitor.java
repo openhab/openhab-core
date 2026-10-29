@@ -46,8 +46,8 @@ public class IgnoreMarkerFileTreeVisitor implements FileTreeVisitor {
     }
 
     @Override
-    public void recursiveVisitFiles(@Nullable Path file, @Nullable Callback onDirectory,
-            @Nullable Callback onFile) throws IOException {
+    public void recursiveVisitFiles(@Nullable Path file, @Nullable Callback onDirectory, @Nullable Callback onFile)
+            throws IOException {
         if (file == null || onDirectory == null || onFile == null) {
             return;
         }
