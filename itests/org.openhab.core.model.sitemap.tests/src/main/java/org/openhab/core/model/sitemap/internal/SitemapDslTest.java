@@ -100,10 +100,25 @@ public class SitemapDslTest extends JavaOSGiTest {
         assertEquals(icon, firstText(model).getIcon());
     }
 
-    @Test
-    public void iconWithFileExtensionIsAccepted() {
+    @ParameterizedTest
+    @CsvSource({ "light-bulb.png,light-bulb", "light.svg,light", "123.png,123",
+            "material:lightbulb.png,material:lightbulb", "oh:classic:switch.png,oh:classic:switch",
+            "oh:classic:switch,oh:classic:switch" })
+    public void iconFileExtensionIsNormalized(String icon, String expected) {
         // for backward compatibility
-        parse("sitemap test { Text label=\"Test\" icon=\"light-bulb.png\" }");
+        SitemapModel model = parse("sitemap test { Text label=\"Test\" icon=\"" + icon + "\" }");
+        assertEquals(expected, firstText(model).getIcon());
+
+        // the extension must not come back when serializing, and the result must parse again
+        SitemapModel reparsed = parse(serialize(model));
+        assertEquals(expected, firstText(reparsed).getIcon());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "oh.png:classic:switch", "oh:classic.png:switch", "light.bulb.png", "light.", ".png",
+            "light-bulb.png.", "a.b:c" })
+    public void malformedIconExtensionIsRejected(String icon) {
+        assertParseFails("sitemap test { Text label=\"Test\" icon=\"" + icon + "\" }");
     }
 
     @ParameterizedTest
