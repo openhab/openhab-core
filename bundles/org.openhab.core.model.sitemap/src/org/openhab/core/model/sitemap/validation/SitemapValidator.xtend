@@ -44,6 +44,8 @@ import org.openhab.core.model.sitemap.sitemap.ModelDefault
 import org.openhab.core.model.sitemap.sitemap.ModelColorpicker
 import org.openhab.core.model.sitemap.sitemap.ModelSwitch
 import org.openhab.core.model.sitemap.sitemap.ModelCondition
+import org.openhab.core.model.sitemap.valueconverter.SitemapConverters
+import org.openhab.core.items.ItemUtil
 
 /**
  * Custom validation rules.
@@ -135,7 +137,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     }
 
     private def boolean isInvalidItemName(String name) {
-        return !name.isEmpty && (name.contains("-") || name.substring(0, 1).matches("[0-9]"))
+        return !ItemUtil.isValidItemName(name)
     }
 
     @Check
@@ -170,10 +172,10 @@ class SitemapValidator extends AbstractSitemapValidator {
         }
         // a quoted state is a plain string, not an item followed by a sign
         val node = NodeModelUtils.findNodesForFeature(c, SitemapPackage.Literals.MODEL_CONDITION__STATE).head
-        if (node !== null && node.text.trim.startsWith("\"") || node !== null && node.text.trim.startsWith("'")) {
+        if (node !== null && (node.text.trim.startsWith("\"") || node.text.trim.startsWith("'"))) {
             return
         }
-        if (state.matches("[A-Za-z_][A-Za-z_0-9]*-[0-9]+(\\.[0-9]+)?")) {
+        if (SitemapConverters.AMBIGUOUS_STATE_PATTERN.matcher(state).matches) {
             error(buildMsgWithLineNb("Ambiguous condition '" + state + "', write '" + state.replaceFirst("-", " -") +
                 "' or use an explicit operator, e.g. '" + state.replaceFirst("-", " == -") + "'", c, null, null),
                 SitemapPackage.Literals.MODEL_CONDITION.getEStructuralFeature(SitemapPackage.MODEL_CONDITION__STATE))

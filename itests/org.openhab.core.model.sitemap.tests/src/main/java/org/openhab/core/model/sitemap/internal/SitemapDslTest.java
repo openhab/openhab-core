@@ -246,6 +246,12 @@ public class SitemapDslTest extends JavaOSGiTest {
     }
 
     @Test
+    public void quotedAmbiguousStateRoundTrip() {
+        SitemapModel model = parse("sitemap test { Text label=\"Test\" visibility=[\"Mode-1\"] }");
+        parse(serialize(model)); // must still parse
+    }
+
+    @Test
     public void quotedHyphenatedStateIsAccepted() {
         parse("sitemap test { Text label=\"Test\" visibility=[\"Mode-1\"] }");
     }

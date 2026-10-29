@@ -32,6 +32,8 @@ public class SitemapConverters extends DefaultTerminalConverters {
     private static final Pattern PERIOD_PATTERN = Pattern.compile("(?:" + PERIOD_PART + "?-)?" + PERIOD_PART);
     // Mirrors the Number rule: optional '-', then INT or FLOAT (INT '.' INT)
     private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(?:\\.[0-9]+)?");
+    public static final Pattern AMBIGUOUS_STATE_PATTERN = Pattern
+            .compile("[A-Za-z_][A-Za-z_0-9]*-[0-9]+(?:\\.[0-9]+)?");
 
     @ValueConverter(rule = "Icon")
     public IValueConverter<String> Icon() {
@@ -130,6 +132,9 @@ public class SitemapConverters extends DefaultTerminalConverters {
 
             @Override
             protected String internalToString(String value) throws ValueConverterException {
+                if (AMBIGUOUS_STATE_PATTERN.matcher(value).matches()) {
+                    return STRING().toString(value);
+                }
                 if (ID_PATTERN.matcher(value).matches()) {
                     return ID().toString(value);
                 }
