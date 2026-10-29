@@ -685,12 +685,12 @@ public class StandardInterpreterTest {
         InterpreterContext context = new InterpreterContext(conversation, llmTools, null, null);
 
         String result = standardInterpreter.interpret(Locale.ENGLISH, context);
-        assertEquals("The object is already on.", result);
+        assertEquals(stateAlreadySingleMessage(Locale.ENGLISH, "ON"), result);
         verify(eventPublisherMock, never()).post(any());
         assertEquals(2, conversation.getMessages().size());
         assertEquals(ConversationRole.USER, conversation.getMessages().get(0).role());
         assertEquals(ConversationRole.OPENHAB, conversation.getMessages().get(1).role());
-        assertEquals("The object is already on.", conversation.getMessages().get(1).content());
+        assertEquals(stateAlreadySingleMessage(Locale.ENGLISH, "ON"), conversation.getMessages().get(1).content());
     }
 
     @Test
@@ -720,5 +720,10 @@ public class StandardInterpreterTest {
 
     private String readOnlyMessage(Locale locale) {
         return ResourceBundle.getBundle("LanguageSupport", locale).getString("read_only");
+    }
+
+    private String stateAlreadySingleMessage(Locale locale, String state) {
+        return ResourceBundle.getBundle("LanguageSupport", locale).getString("state_already_singular")
+                .replace("<state>", state.toLowerCase(locale));
     }
 }
