@@ -119,7 +119,8 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                 Files.createDirectories(basePath);
             }
 
-            DirectoryWatcher newDirWatcher = DirectoryWatcher.builder().listener(this).path(basePath).fileTreeVisitor(new IgnoreMarkerFileTreeVisitor(basePath)).build();
+            DirectoryWatcher newDirWatcher = DirectoryWatcher.builder().listener(this).path(basePath)
+                    .fileTreeVisitor(new IgnoreMarkerFileTreeVisitor(basePath)).build();
             CompletableFuture
                     .runAsync(
                             () -> newDirWatcher.watchAsync(executor)
