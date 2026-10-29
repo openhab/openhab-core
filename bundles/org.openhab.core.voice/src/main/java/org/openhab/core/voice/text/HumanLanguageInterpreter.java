@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
@@ -28,7 +29,7 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
  * @author Tilman Kamp - Initial contribution
  */
 @NonNullByDefault
-public interface HumanLanguageInterpreter {
+public interface HumanLanguageInterpreter extends Identifiable<String> {
 
     /**
      * Returns a simple string that uniquely identifies this service
@@ -36,6 +37,11 @@ public interface HumanLanguageInterpreter {
      * @return an id that identifies this service
      */
     String getId();
+
+    @Override
+    default String getUID() {
+        return getId();
+    }
 
     /**
      * Returns a localized human readable label that can be used within UIs.

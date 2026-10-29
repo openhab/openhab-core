@@ -16,6 +16,7 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * This is the interface that a dialog trigger service has to implement.
@@ -23,13 +24,18 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public interface DTService {
+public interface DTService extends Identifiable<String> {
     /**
      * Returns a simple string that uniquely identifies this service.
      *
      * @return an id that identifies this service
      */
     String getId();
+
+    @Override
+    default String getUID() {
+        return getId();
+    }
 
     /**
      * Returns a localized human-readable label that can be used within UIs.
