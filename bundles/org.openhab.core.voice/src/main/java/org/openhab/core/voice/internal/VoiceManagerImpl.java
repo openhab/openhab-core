@@ -16,7 +16,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,6 +69,7 @@ import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.DialogRegistration;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
+import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
 import org.openhab.core.voice.internal.dialog.DialogProcessor;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.stt.RecognitionStartEvent;
@@ -77,9 +77,11 @@ import org.openhab.core.voice.stt.RecognitionStopEvent;
 import org.openhab.core.voice.stt.STTException;
 import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.stt.STTServiceHandle;
+import org.openhab.core.voice.stt.STTServiceRegistry;
 import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
@@ -93,6 +95,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.openhab.core.voice.tts.TTSException;
 import org.openhab.core.voice.tts.TTSService;
+import org.openhab.core.voice.tts.TTSServiceRegistry;
 import org.openhab.core.voice.tts.Voice;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -123,21 +126,105 @@ import org.slf4j.LoggerFactory;
         property = Constants.SERVICE_PID + "=org.openhab.voice")
 @ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfigurationConstants.CONFIG_URI)
 @NonNullByDefault
-public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener,
-        RegistryChangeListener<LLMTool> {
+public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener {
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-    // service maps
-    private final Map<String, KSService> ksServices = new HashMap<>();
-    private final Map<String, STTService> sttServices = new HashMap<>();
-    private final Map<String, TTSService> ttsServices = new HashMap<>();
-    private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
+
+    private final TTSServiceRegistry ttsRegistry;
+    private final STTServiceRegistry sttRegistry;
+    private final KSServiceRegistry ksRegistry;
+    private final HumanLanguageInterpreterRegistry hliRegistry;
     private final LLMToolRegistry llmToolRegistry;
     private final ConversationManager conversationManager;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
     private final ItemPermissionResolver itemPermissionResolver;
+
+    private final RegistryChangeListener<LLMTool> llmToolListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(LLMTool tool) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(LLMTool tool) {
+            stopDialogs(
+                    dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
+        }
+
+        @Override
+        public void updated(LLMTool oldElement, LLMTool element) {
+        }
+    };
+
+    private final RegistryChangeListener<TTSService> ttsListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(TTSService ttsService) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(TTSService ttsService) {
+            stopDialogs(dialog -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
+        }
+
+        @Override
+        public void updated(TTSService oldElement, TTSService element) {
+        }
+    };
+
+    private final RegistryChangeListener<STTService> sttListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(STTService sttService) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(STTService sttService) {
+            stopDialogs(dialog -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
+        }
+
+        @Override
+        public void updated(STTService oldElement, STTService element) {
+        }
+    };
+
+    private final RegistryChangeListener<KSService> ksListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(KSService ksService) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(KSService ksService) {
+            stopDialogs(dialog -> {
+                var dt = dialog.dialogContext.dt();
+                return dt != null && dt.getId().equals(ksService.getId());
+            });
+        }
+
+        @Override
+        public void updated(KSService oldElement, KSService element) {
+        }
+    };
+
+    private final RegistryChangeListener<HumanLanguageInterpreter> hliListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(HumanLanguageInterpreter humanLanguageInterpreter) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(HumanLanguageInterpreter humanLanguageInterpreter) {
+            stopDialogs(dialog -> dialog.dialogContext.hlis().stream()
+                    .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
+        }
+
+        @Override
+        public void updated(HumanLanguageInterpreter oldElement, HumanLanguageInterpreter element) {
+        }
+    };
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
@@ -159,6 +246,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
             final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
+            final @Reference TTSServiceRegistry ttsRegistry, final @Reference STTServiceRegistry sttRegistry,
+            final @Reference KSServiceRegistry ksRegistry,
+            final @Reference HumanLanguageInterpreterRegistry hliRegistry,
             final @Reference ConversationManager conversationManager,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
             final @Reference ItemRegistry itemRegistry, final @Reference MetadataRegistry metadataRegistry,
@@ -171,6 +261,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 this.getClass().getClassLoader());
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
+        this.ttsRegistry = ttsRegistry;
+        this.sttRegistry = sttRegistry;
+        this.ksRegistry = ksRegistry;
+        this.hliRegistry = hliRegistry;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.itemPermissionResolver = itemPermissionResolver;
@@ -180,13 +274,21 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> config) {
         this.bundle = bundleContext.getBundle();
-        llmToolRegistry.addRegistryChangeListener(this);
+        llmToolRegistry.addRegistryChangeListener(llmToolListener);
+        ttsRegistry.addRegistryChangeListener(ttsListener);
+        sttRegistry.addRegistryChangeListener(sttListener);
+        ksRegistry.addRegistryChangeListener(ksListener);
+        hliRegistry.addRegistryChangeListener(hliListener);
         modified(config);
     }
 
     @Deactivate
     protected void deactivate() {
-        llmToolRegistry.removeRegistryChangeListener(this);
+        llmToolRegistry.removeRegistryChangeListener(llmToolListener);
+        ttsRegistry.removeRegistryChangeListener(ttsListener);
+        sttRegistry.removeRegistryChangeListener(sttListener);
+        ksRegistry.removeRegistryChangeListener(ksListener);
+        hliRegistry.removeRegistryChangeListener(hliListener);
         dialogProcessors.values().forEach(DialogProcessor::stop);
         dialogProcessors.clear();
         ScheduledFuture<?> dialogRegistrationFuture = this.dialogRegistrationFuture;
@@ -872,88 +974,27 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         stopDialogs(dialog -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
     }
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addKSService(KSService ksService) {
-        this.ksServices.put(ksService.getId(), ksService);
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeKSService(KSService ksService) {
-        this.ksServices.remove(ksService.getId());
-        stopDialogs(dialog -> {
-            var dt = dialog.dialogContext.dt();
-            return dt != null && dt.getId().equals(ksService.getId());
-        });
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addSTTService(STTService sttService) {
-        this.sttServices.put(sttService.getId(), sttService);
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeSTTService(STTService sttService) {
-        this.sttServices.remove(sttService.getId());
-        stopDialogs(dialog -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addTTSService(TTSService ttsService) {
-        this.ttsServices.put(ttsService.getId(), ttsService);
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeTTSService(TTSService ttsService) {
-        this.ttsServices.remove(ttsService.getId());
-        stopDialogs(dialog -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
-        this.humanLanguageInterpreters.put(humanLanguageInterpreter.getId(), humanLanguageInterpreter);
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
-        this.humanLanguageInterpreters.remove(humanLanguageInterpreter.getId());
-        stopDialogs(dialog -> dialog.dialogContext.hlis().stream()
-                .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
-    }
-
-    @Override
-    public void added(LLMTool tool) {
-        scheduleDialogRegistrations();
-    }
-
-    @Override
-    public void removed(LLMTool tool) {
-        stopDialogs(dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
-    }
-
-    @Override
-    public void updated(LLMTool oldElement, LLMTool element) {
-        // do nothing
-    }
-
     @Override
     public @Nullable TTSService getTTS() {
         TTSService tts = null;
-        if (configuration.getDefaultTTS() != null) {
-            tts = ttsServices.get(configuration.getDefaultTTS());
+        String defaultTTS = configuration.getDefaultTTS();
+        if (defaultTTS != null) {
+            tts = ttsRegistry.get(defaultTTS);
             if (tts == null) {
-                logger.warn("Default TTS service '{}' not available!", configuration.getDefaultTTS());
+                logger.warn("Default TTS service '{}' not available!", defaultTTS);
             }
-        } else if (!ttsServices.isEmpty()) {
-            tts = ttsServices.values().iterator().next();
         } else {
-            logger.debug("No TTS service available!");
+            tts = ttsRegistry.stream().findFirst().orElse(null);
+            if (tts == null) {
+                logger.debug("No TTS service available!");
+            }
         }
         return tts;
     }
 
     @Override
     public @Nullable TTSService getTTS(@Nullable String id) {
-        return id == null ? null : ttsServices.get(id);
+        return id == null ? null : ttsRegistry.get(id);
     }
 
     private @Nullable TTSService getTTS(Voice voice) {
@@ -962,104 +1003,101 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public Collection<TTSService> getTTSs() {
-        return new HashSet<>(ttsServices.values());
+        return new HashSet<>(ttsRegistry.getAll());
     }
 
     @Override
     public @Nullable STTService getSTT() {
         STTService stt = null;
-        if (configuration.getDefaultSTT() != null) {
-            stt = sttServices.get(configuration.getDefaultSTT());
+        String defaultSTT = configuration.getDefaultSTT();
+        if (defaultSTT != null) {
+            stt = sttRegistry.get(defaultSTT);
             if (stt == null) {
-                logger.warn("Default STT service '{}' not available!", configuration.getDefaultSTT());
+                logger.warn("Default STT service '{}' not available!", defaultSTT);
             }
-        } else if (!sttServices.isEmpty()) {
-            stt = sttServices.values().iterator().next();
         } else {
-            logger.debug("No STT service available!");
+            stt = sttRegistry.stream().findFirst().orElse(null);
+            if (stt == null) {
+                logger.debug("No STT service available!");
+            }
         }
         return stt;
     }
 
     @Override
     public @Nullable STTService getSTT(@Nullable String id) {
-        return id == null ? null : sttServices.get(id);
+        return id == null ? null : sttRegistry.get(id);
     }
 
     @Override
     public Collection<STTService> getSTTs() {
-        return new HashSet<>(sttServices.values());
+        return new HashSet<>(sttRegistry.getAll());
     }
 
     @Override
     public @Nullable KSService getKS() {
         KSService ks = null;
-        if (configuration.getDefaultKS() != null) {
-            ks = ksServices.get(configuration.getDefaultKS());
+        String defaultKS = configuration.getDefaultKS();
+        if (defaultKS != null) {
+            ks = ksRegistry.get(defaultKS);
             if (ks == null) {
-                logger.warn("Default KS service '{}' not available!", configuration.getDefaultKS());
+                logger.warn("Default KS service '{}' not available!", defaultKS);
             }
-        } else if (!ksServices.isEmpty()) {
-            ks = ksServices.values().iterator().next();
         } else {
-            logger.debug("No KS service available!");
+            ks = ksRegistry.stream().findFirst().orElse(null);
+            if (ks == null) {
+                logger.debug("No KS service available!");
+            }
         }
         return ks;
     }
 
     @Override
     public @Nullable KSService getKS(@Nullable String id) {
-        return id == null ? null : ksServices.get(id);
+        return id == null ? null : ksRegistry.get(id);
     }
 
     @Override
     public Collection<KSService> getKSs() {
-        return new HashSet<>(ksServices.values());
+        return new HashSet<>(ksRegistry.getAll());
     }
 
     @Override
     public @Nullable HumanLanguageInterpreter getHLI() {
         HumanLanguageInterpreter hli = null;
-        if (configuration.getDefaultHLI() != null) {
-            hli = humanLanguageInterpreters.get(configuration.getDefaultHLI());
+        String defaultHLI = configuration.getDefaultHLI();
+        if (defaultHLI != null) {
+            hli = hliRegistry.get(defaultHLI);
             if (hli == null) {
-                logger.warn("Default HumanLanguageInterpreter '{}' not available!", configuration.getDefaultHLI());
+                logger.warn("Default HumanLanguageInterpreter '{}' not available!", defaultHLI);
             }
-        } else if (!humanLanguageInterpreters.isEmpty()) {
-            hli = humanLanguageInterpreters.values().iterator().next();
         } else {
-            logger.debug("No HumanLanguageInterpreter available!");
+            hli = hliRegistry.stream().findFirst().orElse(null);
+            if (hli == null) {
+                logger.debug("No HumanLanguageInterpreter available!");
+            }
         }
         return hli;
     }
 
     @Override
     public @Nullable HumanLanguageInterpreter getHLI(@Nullable String id) {
-        return id == null ? null : humanLanguageInterpreters.get(id);
+        return id == null ? null : hliRegistry.get(id);
     }
 
     @Override
     public List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids) {
-        return ids == null ? List.of() : getHLIsByIds(Arrays.asList(ids.split(",")));
+        return hliRegistry.getByIds(ids);
     }
 
     @Override
     public List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids) {
-        List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
-        for (String id : ids) {
-            HumanLanguageInterpreter hli = humanLanguageInterpreters.get(id);
-            if (hli == null) {
-                logger.warn("HumanLanguageInterpreter '{}' not available!", id);
-            } else {
-                interpreters.add(hli);
-            }
-        }
-        return interpreters;
+        return hliRegistry.getByIds(ids);
     }
 
     @Override
     public Collection<HumanLanguageInterpreter> getHLIs() {
-        return new HashSet<>(humanLanguageInterpreters.values());
+        return new HashSet<>(hliRegistry.getAll());
     }
 
     @Override
@@ -1068,7 +1106,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     private Set<Voice> getAllVoicesSorted(Locale locale) {
-        return ttsServices.values().stream().map(TTSService::getAvailableVoices).flatMap(Collection::stream)
+        return ttsRegistry.stream().map(TTSService::getAvailableVoices).flatMap(Collection::stream)
                 .sorted(createVoiceComparator(locale)).collect(Collectors
                         .collectingAndThen(Collectors.toCollection(LinkedHashSet::new), Collections::unmodifiableSet));
     }
@@ -1108,19 +1146,19 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         if (VoiceConfigurationConstants.CONFIG_URI.equals(uri.toString())) {
             switch (param) {
                 case VoiceConfigurationConstants.CONFIG_DEFAULT_HLI:
-                    return humanLanguageInterpreters.values().stream()
+                    return hliRegistry.stream()
                             .sorted((hli1, hli2) -> hli1.getLabel(locale).compareToIgnoreCase(hli2.getLabel(locale)))
                             .map(hli -> new ParameterOption(hli.getId(), hli.getLabel(locale))).toList();
                 case VoiceConfigurationConstants.CONFIG_DEFAULT_KS:
-                    return ksServices.values().stream()
+                    return ksRegistry.stream()
                             .sorted((ks1, ks2) -> ks1.getLabel(locale).compareToIgnoreCase(ks2.getLabel(locale)))
                             .map(ks -> new ParameterOption(ks.getId(), ks.getLabel(locale))).toList();
                 case VoiceConfigurationConstants.CONFIG_DEFAULT_STT:
-                    return sttServices.values().stream()
+                    return sttRegistry.stream()
                             .sorted((stt1, stt2) -> stt1.getLabel(locale).compareToIgnoreCase(stt2.getLabel(locale)))
                             .map(stt -> new ParameterOption(stt.getId(), stt.getLabel(locale))).toList();
                 case VoiceConfigurationConstants.CONFIG_DEFAULT_TTS:
-                    return ttsServices.values().stream()
+                    return ttsRegistry.stream()
                             .sorted((tts1, tts2) -> tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale)))
                             .map(tts -> new ParameterOption(tts.getId(), tts.getLabel(locale))).toList();
                 case VoiceConfigurationConstants.CONFIG_DEFAULT_VOICE:
