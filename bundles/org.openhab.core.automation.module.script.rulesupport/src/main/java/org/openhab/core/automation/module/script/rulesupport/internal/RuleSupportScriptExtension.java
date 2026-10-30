@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
@@ -67,6 +68,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
     private static final String RULE_SUPPORT = "RuleSupport";
     private static final String RULE_REGISTRY = "ruleRegistry";
     private static final String AUTOMATION_MANAGER = "automationManager";
+    private static final String RULE_MANAGER = "ruleManager";
 
     private static final Map<String, Collection<String>> PRESETS = new HashMap<>();
     private static final Map<String, Object> STATIC_TYPES = new HashMap<>();
@@ -75,6 +77,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
     private final Map<String, Map<String, Object>> objectCache = new ConcurrentHashMap<>();
 
     private final RuleRegistry ruleRegistry;
+    private final RuleManager ruleManager;
     private final ScriptedRuleProvider ruleProvider;
     private final ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory;
     private final ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider;
@@ -110,6 +113,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
         TYPES.add(AUTOMATION_MANAGER);
         TYPES.add(RULE_REGISTRY);
+        TYPES.add(RULE_MANAGER);
 
         PRESETS.put(RULE_SUPPORT, Arrays.asList("Configuration", "Action", "Condition", "Trigger", "Rule",
                 "ModuleBuilder", "ActionBuilder", "ConditionBuilder", "TriggerBuilder"));
@@ -122,11 +126,13 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
     @Activate
     public RuleSupportScriptExtension(final @Reference RuleRegistry ruleRegistry,
+            final @Reference RuleManager ruleManager,
             final @Reference ScriptedRuleProvider ruleProvider,
             final @Reference ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory,
             final @Reference ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider,
             final @Reference ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory) {
         this.ruleRegistry = ruleRegistry;
+        this.ruleManager = ruleManager;
         this.ruleProvider = ruleProvider;
         this.scriptedCustomModuleHandlerFactory = scriptedCustomModuleHandlerFactory;
         this.scriptedCustomModuleTypeProvider = scriptedCustomModuleTypeProvider;
@@ -172,6 +178,10 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
             objects.put(AUTOMATION_MANAGER, automationManager);
             objects.put(RULE_REGISTRY, ruleRegistryDelegate);
+
+            obj = objects.get(type);
+        } else if (RULE_MANAGER.equals(type)) {
+            objects.put(RULE_MANAGER, ruleManager);
 
             obj = objects.get(type);
         }
