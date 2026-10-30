@@ -13,6 +13,7 @@ Export-Package: org.openhab.core.model.sitemap,\
 Import-Package: org.apache.log4j,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.openhab.core.common.registry, \
+ org.openhab.core.items,\
  org.openhab.core.items.dto,\
  org.openhab.core.model.core,\
  org.openhab.core.sitemap, \

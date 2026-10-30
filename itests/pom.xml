@@ -36,6 +36,7 @@
     <module>org.openhab.core.model.item.tests</module>
     <module>org.openhab.core.model.rule.tests</module>
     <module>org.openhab.core.model.script.tests</module>
+    <module>org.openhab.core.model.sitemap.tests</module>
     <module>org.openhab.core.model.thing.testsupport</module>
     <module>org.openhab.core.model.thing.tests</module>
     <module>org.openhab.core.storage.json.tests</module>

@@ -43,6 +43,9 @@ import org.openhab.core.model.sitemap.sitemap.ModelSelection
 import org.openhab.core.model.sitemap.sitemap.ModelDefault
 import org.openhab.core.model.sitemap.sitemap.ModelColorpicker
 import org.openhab.core.model.sitemap.sitemap.ModelSwitch
+import org.openhab.core.model.sitemap.sitemap.ModelCondition
+import org.openhab.core.model.sitemap.valueconverter.SitemapConverters
+import org.openhab.core.items.ItemUtil
 
 /**
  * Custom validation rules.
@@ -87,6 +90,15 @@ class SitemapValidator extends AbstractSitemapValidator {
     }
 
     @Check
+    def checkSitemapName(ModelSitemap sitemap) {
+        val name = sitemap.name
+        if (name.contains("-")) {
+            error(buildMsgWithLineNb("Sitemap name must not contain dash", sitemap, null, null),
+                SitemapPackage.Literals.MODEL_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
+        }
+    }
+    
+    @Check
     def void checkAtLeastOneWidget(ModelSitemap sitemap) {
         if (sitemap.children === null || sitemap.children.size === 0) {
             warning(buildMsgWithLineNb("Sitemap should have at least one widget", sitemap, null, null),
@@ -121,6 +133,52 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (w.item === null) {
             error(buildMsgWithLineNb(getWidgetType(w) + " widget doesn't have item defined", w, null, null),
                 SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
+        }
+    }
+
+    private def boolean isInvalidItemName(String name) {
+        return !ItemUtil.isValidItemName(name)
+    }
+
+    @Check
+    def checkWidgetItemName(ModelWidget w) {
+        val item = w.item
+        if (item === null) {
+            return
+        }
+        if (isInvalidItemName(item)) {
+            error(buildMsgWithLineNb(getWidgetType(w) + " widget item name must not contain dash and must not start with a number", w, null, null),
+                SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
+        }
+    }
+    
+    @Check
+    def checkConditionItemName(ModelCondition c) {
+        val item = c.item
+        if (item === null || item.isEmpty) {
+            return
+        }
+        if (isInvalidItemName(item)) {
+            error(buildMsgWithLineNb("Item name must not contain dash and must not start with a number", c, null, null),
+                SitemapPackage.Literals.MODEL_CONDITION.getEStructuralFeature(SitemapPackage.MODEL_CONDITION__ITEM))
+        }
+    }
+
+    @Check
+    def checkConditionAmbiguousSign(ModelCondition c) {
+        val state = c.state
+        if (c.item !== null || c.condition !== null || c.sign !== null || state === null) {
+            return
+        }
+        // a quoted state is a plain string, not an item followed by a sign
+        val node = NodeModelUtils.findNodesForFeature(c, SitemapPackage.Literals.MODEL_CONDITION__STATE).head
+        if (node !== null && (node.text.trim.startsWith("\"") || node.text.trim.startsWith("'"))) {
+            return
+        }
+        if (SitemapConverters.AMBIGUOUS_STATE_PATTERN.matcher(state).matches) {
+            error(buildMsgWithLineNb("Ambiguous condition '" + state + "', write '" + state.replaceFirst("-", " -") +
+                "' or use an explicit operator, e.g. '" + state.replaceFirst("-", " == -") + "'", c, null, null),
+                SitemapPackage.Literals.MODEL_CONDITION.getEStructuralFeature(SitemapPackage.MODEL_CONDITION__STATE))
         }
     }
 
