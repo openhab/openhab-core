@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = KSServiceRegistry.class, immediate = true)
+@Component(immediate = true)
 @NonNullByDefault
 public class KSServiceRegistryImpl extends AbstractVoiceServiceRegistry<KSService> implements KSServiceRegistry {
 

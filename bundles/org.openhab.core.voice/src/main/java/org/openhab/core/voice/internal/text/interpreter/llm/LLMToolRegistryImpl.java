@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = LLMToolRegistry.class, immediate = true)
+@Component(immediate = true)
 @NonNullByDefault
 public class LLMToolRegistryImpl extends AbstractVoiceServiceRegistry<LLMTool> implements LLMToolRegistry {
     private final Logger logger = LoggerFactory.getLogger(LLMToolRegistryImpl.class);

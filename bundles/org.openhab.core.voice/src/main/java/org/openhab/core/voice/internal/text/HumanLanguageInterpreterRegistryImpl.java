@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = HumanLanguageInterpreterRegistry.class, immediate = true)
+@Component(immediate = true)
 @NonNullByDefault
 public class HumanLanguageInterpreterRegistryImpl extends AbstractVoiceServiceRegistry<HumanLanguageInterpreter>
         implements HumanLanguageInterpreterRegistry {
