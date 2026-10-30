@@ -207,6 +207,7 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.isListed = thingType.isListed();
         entity.extensibleChannelTypeIds = thingType.getExtensibleChannelTypeIds();
         entity.isBridge = thingType instanceof BridgeType;
+        entity.bundleSymbolicName = thingType.getBundleSymbolicName();
 
         return entity;
     }
@@ -298,6 +299,7 @@ public abstract class AbstractStorageBasedTypeProvider
         if (entity.representationProperty != null) {
             builder.withRepresentationProperty(Objects.requireNonNull(entity.representationProperty));
         }
+        builder.withBundleSymbolicName(entity.bundleSymbolicName);
         return entity.isBridge ? builder.buildBridge() : builder.build();
     }
 
@@ -397,6 +399,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public boolean isListed = false;
         public boolean isBridge = false;
         public @Nullable String semanticEquipmentTag;
+        public @Nullable String bundleSymbolicName;
     }
 
     static class ChannelDefinitionEntity {

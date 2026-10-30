@@ -64,6 +64,7 @@ public class ThingTypeXmlResult {
     protected URI configDescriptionURI;
     protected ConfigDescription configDescription;
     protected @Nullable String semanticEquipmentTag;
+    private @Nullable String bundleSymbolicName;
 
     public ThingTypeXmlResult(ThingTypeUID thingTypeUID, @Nullable List<String> supportedBridgeTypeUIDs, String label,
             @Nullable String description, @Nullable String category, boolean listed,
@@ -205,7 +206,16 @@ public class ThingTypeXmlResult {
             builder.withSemanticEquipmentTag(semanticEquipmentTag);
         }
 
+        builder.withBundleSymbolicName(bundleSymbolicName);
+
         return builder;
+    }
+
+    /**
+     * Sets the symbolic name of the bundle that provides the described thing type.
+     */
+    public void setBundleSymbolicName(@Nullable String bundleSymbolicName) {
+        this.bundleSymbolicName = bundleSymbolicName;
     }
 
     public ThingType toThingType() throws ConversionException {

@@ -60,6 +60,7 @@ public class BridgeType extends ThingType {
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param extensibleChannelTypeIds the channel-type ids this thing-type is extensible with (could be null or empty).
      * @param semanticEquipmentTag the semantic (equipment) tag of the bridge (could be null)
+     * @param bundleSymbolicName the symbolic name of the bundle that provides this bridge type (could be null)
      * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     BridgeType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
@@ -67,9 +68,10 @@ public class BridgeType extends ThingType {
             @Nullable String representationProperty, @Nullable List<ChannelDefinition> channelDefinitions,
             @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
             @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds,
-            @Nullable String semanticEquipmentTag) throws IllegalArgumentException {
+            @Nullable String semanticEquipmentTag, @Nullable String bundleSymbolicName)
+            throws IllegalArgumentException {
         super(uid, supportedBridgeTypeUIDs, label, description, category, listed, representationProperty,
                 channelDefinitions, channelGroupDefinitions, properties, configDescriptionURI, extensibleChannelTypeIds,
-                semanticEquipmentTag);
+                semanticEquipmentTag, bundleSymbolicName);
     }
 }
