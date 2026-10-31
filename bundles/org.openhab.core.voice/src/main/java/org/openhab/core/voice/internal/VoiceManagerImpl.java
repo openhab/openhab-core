@@ -280,6 +280,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         ksRegistry.addRegistryChangeListener(ksListener);
         hliRegistry.addRegistryChangeListener(hliListener);
         modified(config);
+        scheduleDialogRegistrations();
     }
 
     @Deactivate
