@@ -83,6 +83,7 @@
     <jackson.annotations.version>2.22</jackson.annotations.version>
     <jackson.version>2.22.4</jackson.version>
     <jbbp.version>3.0.3</jbbp.version>
+    <jupnp.version>4.0.0-SNAPSHOT</jupnp.version>
     <karaf.compile.version>4.4.12</karaf.compile.version>
     <karaf.tooling.version>4.4.12</karaf.tooling.version>
     <maven.plugin.tools.version>3.16.0</maven.plugin.tools.version>
@@ -134,6 +135,21 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <repositories>
+    <!-- jupnp 4.0.0-SNAPSHOT is only published to Maven Central snapshots, remove once jupnp 4.0.0 is released -->
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>central-snapshots</id>
+      <name>Maven Central Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
+  </repositories>
 
   <build>
     <pluginManagement>
