@@ -15,6 +15,10 @@ package org.openhab.core.io.net.http;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,12 +26,20 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.client.HttpAuthenticationStore;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -38,6 +50,26 @@ import org.junit.jupiter.api.Test;
  */
 @NonNullByDefault
 public class HttpUtilTest extends BaseHttpUtilTest {
+
+    private static final int MAX_PROXY_CLIENTS = 8;
+
+    @AfterEach
+    public void releaseProxyClients() {
+        // proxy clients are cached in a static map, do not leak them into other tests
+        new HttpUtil().unsetHttpClientFactory(clientFactoryMock);
+    }
+
+    private HttpClient mockProxyClient() throws Exception {
+        HttpClient proxyClientMock = mock(HttpClient.class);
+        when(proxyClientMock.getProxyConfiguration()).thenReturn(new ProxyConfiguration());
+        when(proxyClientMock.getAuthenticationStore()).thenReturn(new HttpAuthenticationStore());
+        when(proxyClientMock.newRequest(URI.create(URL))).thenReturn(requestMock);
+        return proxyClientMock;
+    }
+
+    private void executeViaProxy(int proxyPort) throws Exception {
+        HttpUtil.executeUrl("GET", URL, null, null, null, 500, "proxy.example.org", proxyPort, null, null, null);
+    }
 
     @Test
     public void baseTest() throws Exception {
@@ -103,5 +135,162 @@ public class HttpUtilTest extends BaseHttpUtilTest {
         verify(requestMock).timeout(500, TimeUnit.MILLISECONDS);
         verify(requestMock).content(any(), eq("text/plain"));
         verify(requestMock).send();
+    }
+
+    @Test
+    public void proxyRequestsDoNotTouchTheCommonHttpClient() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient proxyClientMock = mock(HttpClient.class);
+        ProxyConfiguration proxyConfigMock = new ProxyConfiguration();
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(proxyClientMock);
+        when(proxyClientMock.getProxyConfiguration()).thenReturn(proxyConfigMock);
+        when(proxyClientMock.getAuthenticationStore()).thenReturn(new HttpAuthenticationStore());
+        when(proxyClientMock.newRequest(URI.create(URL))).thenReturn(requestMock);
+
+        HttpUtil.executeUrl("GET", URL, null, null, null, 500, "proxy.example.org", 8080, "user", "secret", null);
+
+        // the shared client must neither be used nor modified
+        verify(clientFactoryMock, never()).getCommonHttpClient();
+        verify(httpClientMock, never()).getProxyConfiguration();
+        verify(httpClientMock, never()).getAuthenticationStore();
+        assertEquals(1, proxyConfigMock.getProxies().size());
+    }
+
+    @Test
+    public void requestsWithoutProxyUseTheCommonHttpClient() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+
+        HttpUtil.executeUrl("GET", URL, 500);
+
+        verify(clientFactoryMock).getCommonHttpClient();
+        verify(clientFactoryMock, never()).createHttpClient(any());
+    }
+
+    @Test
+    public void proxyClientIsReusedForTheSameProxyConfiguration() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient proxyClientMock = mockProxyClient();
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(proxyClientMock);
+
+        executeViaProxy(8080);
+        executeViaProxy(8080);
+
+        verify(clientFactoryMock, times(1)).createHttpClient(any());
+    }
+
+    @Test
+    public void unbindingTheFactoryStopsProxyClientsAndDropsTheCache() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient first = mockProxyClient();
+        HttpClient second = mockProxyClient();
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(first, second);
+
+        executeViaProxy(8080);
+        new HttpUtil().unsetHttpClientFactory(clientFactoryMock);
+
+        verify(first).stop();
+        // no factory, no client
+        assertThrows(IllegalStateException.class, () -> executeViaProxy(8080));
+
+        // after binding again a new client is created, the stopped one is never handed out again
+        new HttpUtil().setHttpClientFactory(clientFactoryMock);
+        executeViaProxy(8080);
+        verify(clientFactoryMock, times(2)).createHttpClient(any());
+        verify(second, never()).stop();
+    }
+
+    @Test
+    public void leastRecentlyUsedProxyClientIsRetiredWhenThereAreTooMany() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient[] clients = new HttpClient[MAX_PROXY_CLIENTS + 1];
+        for (int i = 0; i < clients.length; i++) {
+            clients[i] = mockProxyClient();
+        }
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(clients[0],
+                java.util.Arrays.copyOfRange(clients, 1, clients.length));
+
+        for (int i = 0; i < clients.length; i++) {
+            executeViaProxy(8000 + i);
+        }
+
+        verify(clients[0]).stop();
+        for (int i = 1; i < clients.length; i++) {
+            verify(clients[i], never()).stop();
+        }
+    }
+
+    @Test
+    public void retiredProxyClientIsStoppedOnlyAfterItsRequestHasFinished() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient proxyClientMock = mockProxyClient();
+        when(clientFactoryMock.createHttpClient(any())).thenReturn(proxyClientMock);
+
+        CountDownLatch requestStarted = new CountDownLatch(1);
+        CountDownLatch finishRequest = new CountDownLatch(1);
+        when(requestMock.send()).thenAnswer(invocation -> {
+            requestStarted.countDown();
+            assertTrue(finishRequest.await(5, TimeUnit.SECONDS));
+            return contentResponseMock;
+        });
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> request = executor.submit(() -> {
+                executeViaProxy(8080);
+                return null;
+            });
+            assertTrue(requestStarted.await(5, TimeUnit.SECONDS));
+
+            // unbinding while the request is in flight must not pull the client away from it
+            new HttpUtil().unsetHttpClientFactory(clientFactoryMock);
+            verify(proxyClientMock, never()).stop();
+
+            finishRequest.countDown();
+            request.get(5, TimeUnit.SECONDS);
+            verify(proxyClientMock, timeout(5000)).stop();
+        } finally {
+            finishRequest.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void proxyClientCreatedWhileUnbindingIsNotLeftBehind() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        HttpClient proxyClientMock = mockProxyClient();
+        CountDownLatch creating = new CountDownLatch(1);
+        CountDownLatch continueCreating = new CountDownLatch(1);
+        when(clientFactoryMock.createHttpClient(any())).thenAnswer(invocation -> {
+            creating.countDown();
+            assertTrue(continueCreating.await(5, TimeUnit.SECONDS));
+            return proxyClientMock;
+        });
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> request = executor.submit(() -> {
+                executeViaProxy(8080);
+                return null;
+            });
+            assertTrue(creating.await(5, TimeUnit.SECONDS));
+
+            // the factory goes away while a client is being created for it
+            Future<?> unbind = executor.submit(() -> new HttpUtil().unsetHttpClientFactory(clientFactoryMock));
+            continueCreating.countDown();
+            request.get(5, TimeUnit.SECONDS);
+            unbind.get(5, TimeUnit.SECONDS);
+
+            // whichever side won, the client must not stay cached for a later factory
+            verify(proxyClientMock, timeout(5000)).stop();
+            new HttpUtil().setHttpClientFactory(clientFactoryMock);
+            HttpClient other = mockProxyClient();
+            when(clientFactoryMock.createHttpClient(any())).thenReturn(other);
+            executeViaProxy(8080);
+            verify(other, never()).stop();
+            verify(clientFactoryMock, times(2)).createHttpClient(any());
+        } finally {
+            continueCreating.countDown();
+            executor.shutdownNow();
+        }
     }
 }
