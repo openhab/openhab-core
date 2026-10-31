@@ -107,11 +107,6 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
         List<ChannelXmlResult> channelGroupTypeReferences = (List<ChannelXmlResult>) nodeIterator
                 .nextList("channel-groups", false);
 
-        if ((channelTypeReferences == null || channelTypeReferences.isEmpty())
-                && (channelGroupTypeReferences == null || channelGroupTypeReferences.isEmpty())) {
-            throw new ConversionException("Thing type must define channels or channel-groups");
-        }
-
         return new List[] { channelTypeReferences, channelGroupTypeReferences };
     }
 
