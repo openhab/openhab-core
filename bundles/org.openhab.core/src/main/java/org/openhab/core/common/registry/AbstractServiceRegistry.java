@@ -26,11 +26,18 @@ import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link AbstractServiceRegistry} is an abstract implementation of the {@link Registry} interface, that can be used
- * as sbase class for {@link Registry} implementations that track registered OSGi services and provide access to them.
+ * as a base class for {@link Registry} implementations that track registered OSGi services and provide access to them.
  *
  * <p>
  * This {@link Registry} implementation provides access to registered OSGi services by their
  * {@link Identifiable#getUID}. It does NOT support adding, updating, or removing elements manually.
+ * <p>
+ * In comparison to {@link AbstractRegistry}, this implementation does not track {@link Provider}s and query them for
+ * elements. Instead, elements are registered directly as OSGi services. Also, there is no {@link ManagedProvider} for
+ * this {@link Registry} implementation to write to, so adding, updating, or removing elements through the
+ * {@link Registry} methods is not possible. Use this class to implement {@link Registry}-like access to OSGi services
+ * of a specific service type. Use {@link AbstractRegistry} when elements are to be provided by {@link Provider}s and
+ * the {@link Registry} methods to add, update, and remove elements are required to work.
  *
  * @implNote Implementations must define OSGi bind and unbind methods for the services they track, and call
  *           {@link #addService(Identifiable)} and {@link #removeService(Identifiable)} when the service is bound or
