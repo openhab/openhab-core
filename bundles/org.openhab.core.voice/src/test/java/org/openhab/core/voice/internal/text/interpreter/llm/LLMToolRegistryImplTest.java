@@ -32,8 +32,8 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 @NonNullByDefault
 public class LLMToolRegistryImplTest {
 
-    private LLMTool tool1 = mock(LLMTool.class);
-    private LLMTool tool2 = mock(LLMTool.class);
+    private final LLMTool tool1 = mock(LLMTool.class);
+    private final LLMTool tool2 = mock(LLMTool.class);
 
     private @NonNullByDefault({}) LLMToolRegistryImpl registry;
 
@@ -115,5 +115,12 @@ public class LLMToolRegistryImplTest {
 
         assertTrue(registry.getByIds("").isEmpty());
         assertTrue(registry.getByIds((String) null).isEmpty());
+    }
+
+    @Test
+    public void testUnsupportedOperations() {
+        assertThrows(UnsupportedOperationException.class, () -> registry.add(tool1));
+        assertThrows(UnsupportedOperationException.class, () -> registry.update(tool1));
+        assertThrows(UnsupportedOperationException.class, () -> registry.remove("tool1"));
     }
 }
