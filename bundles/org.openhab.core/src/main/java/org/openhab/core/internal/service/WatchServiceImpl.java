@@ -50,6 +50,7 @@ import io.methvin.watcher.DirectoryChangeEvent;
 import io.methvin.watcher.DirectoryChangeListener;
 import io.methvin.watcher.DirectoryWatcher;
 import io.methvin.watcher.hashing.FileHash;
+import io.methvin.watcher.hashing.FileHasher;
 
 /**
  * The {@link WatchServiceImpl} is the implementation of the {@link WatchService}
@@ -119,7 +120,8 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                 Files.createDirectories(basePath);
             }
 
-            DirectoryWatcher newDirWatcher = DirectoryWatcher.builder().listener(this).path(basePath).build();
+            DirectoryWatcher newDirWatcher = DirectoryWatcher.builder().listener(this).path(basePath)
+                    .fileHasher(FileHasher.LAST_MODIFIED_TIME).build();
             CompletableFuture
                     .runAsync(
                             () -> newDirWatcher.watchAsync(executor)
@@ -258,19 +260,45 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                 logger.warn("Detected invalid event (hash must not be null for CREATE/MODIFY): {}", lastElement);
                 return;
             }
-            hashCache.put(lastElement.path(), lastElement.hash());
+            hashCache.put(lastElement.path(), contentHash(lastElement.path(), lastElement.hash()));
             doNotify(path, Kind.CREATE);
         } else {
             if (lastElement.hash() == null) {
                 logger.warn("Detected invalid event (hash must not be null for CREATE/MODIFY): {}", lastElement);
                 return;
             }
-            FileHash oldHash = hashCache.put(lastElement.path(), lastElement.hash());
-            if (!Objects.equals(oldHash, lastElement.hash())) {
+            FileHash newHash = contentHash(lastElement.path(), lastElement.hash());
+            FileHash oldHash = hashCache.put(lastElement.path(), newHash);
+            if (!Objects.equals(oldHash, newHash)) {
                 // only notify if hashes are different, otherwise the file content did not chnge
                 doNotify(path, Kind.MODIFY);
             }
         }
+    }
+
+    /**
+     * Files bigger than this are not read to calculate a content hash for duplicate detection.
+     */
+    static final long MAX_CONTENT_HASH_SIZE = 8L * 1024 * 1024;
+
+    /**
+     * The directory watcher uses a cheap hasher (last modified time), so registering a large directory tree does not
+     * need to read every file. To still detect duplicate events (same content saved again), the content hash is
+     * calculated here, only for the files that actually triggered an event.
+     *
+     * @param path the changed file
+     * @param eventHash the (cheap) hash of the event, used for files that are too big or can not be read
+     * @return the content hash or the hash of the event
+     */
+    static FileHash contentHash(Path path, FileHash eventHash) {
+        try {
+            if (Files.size(path) <= MAX_CONTENT_HASH_SIZE) {
+                return FileHasher.DEFAULT_FILE_HASHER.hash(path);
+            }
+        } catch (IOException e) {
+            // fall back to the hash of the event
+        }
+        return eventHash;
     }
 
     private void doNotify(Path path, Kind kind) {
