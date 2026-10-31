@@ -50,7 +50,12 @@ public class HttpServiceUtil {
         // Try to find the port by using the service property (respect service ranking).
         final ServiceReference<?>[] refs;
         try {
-            refs = bc.getAllServiceReferences("org.osgi.service.http.HttpService", null);
+            // Pax Web 11 registers the Http Service under its own interface name, as the OSGi
+            // org.osgi.service.http package is javax based and gone with Jakarta EE 10. The service
+            // properties holding the ports kept their original names. Referenced by name so that this
+            // bundle does not need to import the Pax Web API package; getAllServiceReferences does not
+            // require the caller to be wired to the service interface.
+            refs = bc.getAllServiceReferences("org.ops4j.pax.web.service.http.HttpService", null);
         } catch (final InvalidSyntaxException ex) {
             // This point of code should never be reached.
             final Logger logger = LoggerFactory.getLogger(HttpServiceUtil.class);
