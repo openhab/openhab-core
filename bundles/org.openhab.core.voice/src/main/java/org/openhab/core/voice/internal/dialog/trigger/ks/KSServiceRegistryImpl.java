@@ -13,9 +13,9 @@
 package org.openhab.core.voice.internal.dialog.trigger.ks;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.common.registry.AbstractServiceRegistry;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
-import org.openhab.core.voice.internal.AbstractVoiceServiceRegistry;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class KSServiceRegistryImpl extends AbstractVoiceServiceRegistry<KSService> implements KSServiceRegistry {
+public class KSServiceRegistryImpl extends AbstractServiceRegistry<KSService, String> implements KSServiceRegistry {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addKSService(KSService ksService) {

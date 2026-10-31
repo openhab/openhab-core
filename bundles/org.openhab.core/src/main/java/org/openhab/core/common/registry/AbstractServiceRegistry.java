@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.internal;
+package org.openhab.core.common.registry;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,75 +20,83 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.Identifiable;
-import org.openhab.core.common.registry.Registry;
-import org.openhab.core.common.registry.RegistryChangeListener;
 
 /**
- * Abstract base class for voice service registries. Provides {@link Registry}-like access to dynamically registered
- * services.
+ * The {@link AbstractServiceRegistry} is an abstract implementation of the {@link Registry} interface, that can be used
+ * as sbase class for {@link Registry} implementations that track registered OSGi services and provide access to them.
+ *
+ * <p>
+ * This {@link Registry} implementation provides access to registered OSGi services by their
+ * {@link Identifiable#getUID}. It does NOT support adding, updating, or removing elements manually.
+ *
+ * @implNote Implementations must define OSGi bind and unbind methods for the services they track, and call
+ *           {@link #addService(Identifiable)} and {@link #removeService(Identifiable)} when the service is bound or
+ *           unbound.
  *
  * @author Florian Hotze - Initial contribution
  *
- * @param <E> the identifiable service type
+ * @param <S> type of the identifiable service
+ * @param <K> type of the key
  */
 @NonNullByDefault
-public abstract class AbstractVoiceServiceRegistry<E extends Identifiable<String>> implements Registry<E, String> {
+public abstract class AbstractServiceRegistry<@NonNull S extends Identifiable<K>, @NonNull K>
+        implements Registry<S, K> {
 
-    protected final Map<String, E> services = new ConcurrentHashMap<>();
-    protected final Set<RegistryChangeListener<E>> listeners = new CopyOnWriteArraySet<>();
+    protected final Map<K, S> services = new ConcurrentHashMap<>();
+    protected final Set<RegistryChangeListener<S>> listeners = new CopyOnWriteArraySet<>();
 
-    protected void addService(E service) {
+    protected void addService(S service) {
         services.put(service.getUID(), service);
         listeners.forEach(l -> l.added(service));
     }
 
-    protected void removeService(E service) {
+    protected void removeService(S service) {
         services.remove(service.getUID());
         listeners.forEach(l -> l.removed(service));
     }
 
     @Override
-    public @Nullable E get(String key) {
+    public @Nullable S get(K key) {
         return services.get(key);
     }
 
     @Override
-    public Collection<E> getAll() {
+    public Collection<S> getAll() {
         return List.copyOf(services.values());
     }
 
     @Override
-    public Stream<E> stream() {
+    public Stream<S> stream() {
         return services.values().stream();
     }
 
     @Override
-    public void addRegistryChangeListener(RegistryChangeListener<E> listener) {
+    public void addRegistryChangeListener(RegistryChangeListener<S> listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeRegistryChangeListener(RegistryChangeListener<E> listener) {
+    public void removeRegistryChangeListener(RegistryChangeListener<S> listener) {
         listeners.remove(listener);
     }
 
     @Override
-    public E add(E element) {
+    public S add(S element) {
         throw new UnsupportedOperationException(
                 getClass().getSimpleName() + " does not support adding elements manually.");
     }
 
     @Override
-    public @Nullable E update(E element) {
+    public @Nullable S update(S element) {
         throw new UnsupportedOperationException(
                 getClass().getSimpleName() + " does not support updating elements manually.");
     }
 
     @Override
-    public @Nullable E remove(String key) {
+    public @Nullable S remove(K key) {
         throw new UnsupportedOperationException(
                 getClass().getSimpleName() + " does not support removing elements manually.");
     }

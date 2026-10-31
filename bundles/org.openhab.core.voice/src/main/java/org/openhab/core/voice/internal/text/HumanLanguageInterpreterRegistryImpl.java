@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.internal.AbstractVoiceServiceRegistry;
+import org.openhab.core.common.registry.AbstractServiceRegistry;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
 import org.osgi.service.component.annotations.Component;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class HumanLanguageInterpreterRegistryImpl extends AbstractVoiceServiceRegistry<HumanLanguageInterpreter>
+public class HumanLanguageInterpreterRegistryImpl extends AbstractServiceRegistry<HumanLanguageInterpreter, String>
         implements HumanLanguageInterpreterRegistry {
     private final Logger logger = LoggerFactory.getLogger(HumanLanguageInterpreterRegistryImpl.class);
 

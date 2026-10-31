@@ -13,7 +13,7 @@
 package org.openhab.core.voice.internal.stt;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.internal.AbstractVoiceServiceRegistry;
+import org.openhab.core.common.registry.AbstractServiceRegistry;
 import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.stt.STTServiceRegistry;
 import org.osgi.service.component.annotations.Component;
@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class STTServiceRegistryImpl extends AbstractVoiceServiceRegistry<STTService> implements STTServiceRegistry {
+public class STTServiceRegistryImpl extends AbstractServiceRegistry<STTService, String> implements STTServiceRegistry {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSTTService(STTService sttService) {

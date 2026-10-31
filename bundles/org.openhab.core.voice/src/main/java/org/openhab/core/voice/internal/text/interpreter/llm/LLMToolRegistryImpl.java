@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.internal.AbstractVoiceServiceRegistry;
+import org.openhab.core.common.registry.AbstractServiceRegistry;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Component;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class LLMToolRegistryImpl extends AbstractVoiceServiceRegistry<LLMTool> implements LLMToolRegistry {
+public class LLMToolRegistryImpl extends AbstractServiceRegistry<LLMTool, String> implements LLMToolRegistry {
     private final Logger logger = LoggerFactory.getLogger(LLMToolRegistryImpl.class);
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

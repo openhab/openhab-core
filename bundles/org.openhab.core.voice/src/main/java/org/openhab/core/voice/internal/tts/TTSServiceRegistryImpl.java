@@ -13,7 +13,7 @@
 package org.openhab.core.voice.internal.tts;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.internal.AbstractVoiceServiceRegistry;
+import org.openhab.core.common.registry.AbstractServiceRegistry;
 import org.openhab.core.voice.tts.TTSService;
 import org.openhab.core.voice.tts.TTSServiceRegistry;
 import org.osgi.service.component.annotations.Component;
@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @Component(immediate = true)
 @NonNullByDefault
-public class TTSServiceRegistryImpl extends AbstractVoiceServiceRegistry<TTSService> implements TTSServiceRegistry {
+public class TTSServiceRegistryImpl extends AbstractServiceRegistry<TTSService, String> implements TTSServiceRegistry {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addTTSService(TTSService ttsService) {
