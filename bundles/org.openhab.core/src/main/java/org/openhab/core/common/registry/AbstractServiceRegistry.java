@@ -39,7 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * of a specific service type. Use {@link AbstractRegistry} when elements are to be provided by {@link Provider}s and
  * the {@link Registry} methods to add, update, and remove elements are required to work.
  *
- * @implNote Implementations must define OSGi bind and unbind methods for the services they track, and call
+ * @implNote Implementations must define OSGi bind and unbind methods for the service type they track, and call
  *           {@link #addService(Identifiable)} and {@link #removeService(Identifiable)} when the service is bound or
  *           unbound.
  *
