@@ -28,7 +28,10 @@
 			<xs:element name="category" type="xs:string" minOccurs="0"/>
 			<xs:element name="semantic-equipment-tag" type="thing-description:semanticEquipmentTag" minOccurs="0"/>
 			<xs:choice minOccurs="0">
-				<xs:element name="channels" type="thing-description:channels"/>
+				<xs:sequence>
+					<xs:element name="channels" type="thing-description:channels"/>
+					<xs:element name="channel-groups" type="thing-description:channelGroups" minOccurs="0"/>
+				</xs:sequence>
 				<xs:element name="channel-groups" type="thing-description:channelGroups"/>
 			</xs:choice>
 			<xs:element name="properties" type="thing-description:properties" minOccurs="0"/>

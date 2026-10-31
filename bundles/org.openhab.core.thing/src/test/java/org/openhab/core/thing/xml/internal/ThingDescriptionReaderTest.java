@@ -13,8 +13,8 @@
 package org.openhab.core.thing.xml.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -56,7 +56,7 @@ public class ThingDescriptionReaderTest {
             }
         }
 
-        assertThat(thingTypeXmlResults.size(), is(1));
+        assertThat(thingTypeXmlResults.size(), is(2));
 
         ThingTypeXmlResult thingTypeXmlResult = thingTypeXmlResults.getFirst();
         assertThat(thingTypeXmlResult.getUID().toString(), is("hue:lamp"));
@@ -139,5 +139,14 @@ public class ThingDescriptionReaderTest {
         assertThat(channelType.getTags().size(), is(2));
         assertTrue(channelType.getTags().contains("Status"));
         assertTrue(channelType.getTags().contains("Presence"));
+
+        thingTypeXmlResult = thingTypeXmlResults.get(1);
+        assertThat(thingTypeXmlResult.getUID().toString(), is("hue:mixed"));
+        assertThat(thingTypeXmlResult.label, is("HUE Mixed Channels"));
+        assertThat(thingTypeXmlResult.description, is("Thing exposing both ungrouped channels and channel groups."));
+        assertThat(thingTypeXmlResult.channelGroupTypeReferences, is(not(nullValue())));
+        assertThat(thingTypeXmlResult.channelGroupTypeReferences.size(), is(1));
+        assertThat(thingTypeXmlResult.channelTypeReferences, is(not(nullValue())));
+        assertThat(thingTypeXmlResult.channelTypeReferences.size(), is(1));
     }
 }
