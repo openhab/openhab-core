@@ -102,11 +102,14 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     @SuppressWarnings("unchecked")
     protected List<ChannelXmlResult>[] getChannelTypeReferenceObjects(NodeIterator nodeIterator)
             throws ConversionException {
-        List<ChannelXmlResult> channelGroupTypeReferences = null;
         List<ChannelXmlResult> channelTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channels",
                 false);
-        if (channelTypeReferences == null) {
-            channelGroupTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channel-groups", false);
+        List<ChannelXmlResult> channelGroupTypeReferences = (List<ChannelXmlResult>) nodeIterator
+                .nextList("channel-groups", false);
+
+        if ((channelTypeReferences == null || channelTypeReferences.isEmpty())
+                && (channelGroupTypeReferences == null || channelGroupTypeReferences.isEmpty())) {
+            throw new ConversionException("Thing type must define channels or channel-groups");
         }
 
         return new List[] { channelTypeReferences, channelGroupTypeReferences };
