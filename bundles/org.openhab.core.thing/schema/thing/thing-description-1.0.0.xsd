@@ -227,7 +227,7 @@
 			</xs:sequence>
 			<!-- Deprecated format -->
 			<xs:sequence>
-				<xs:element name="tag" type="thing-description:semanticPointOrPropertyTag" minOccurs="1" maxOccurs="2"/>
+				<xs:element name="tag" type="thing-description:semanticPropertyOrPointTag" minOccurs="1" maxOccurs="2"/>
 			</xs:sequence>
 		</xs:choice>
 	</xs:complexType>
@@ -283,7 +283,7 @@
 		</xs:simpleContent>
 	</xs:complexType>
 
-	<xs:simpleType name="semanticPointOrPropertyTag">
+	<xs:simpleType name="semanticPropertyOrPointTag">
 		<xs:annotation>
 			<xs:documentation>DEPRECATED 'tag' use 'point' or 'property' instead.</xs:documentation>
 		</xs:annotation>
