@@ -222,12 +222,8 @@
 		<xs:choice>
 			<!-- New format -->
 			<xs:sequence>
-				<xs:element name="point-tag" type="thing-description:semanticPointTag"/>
-				<xs:element name="property-tag" type="thing-description:semanticPropertyTag" minOccurs="0"/>
-			</xs:sequence>
-			<xs:sequence>
-				<xs:element name="property-tag" type="thing-description:semanticPropertyTag"/>
-				<xs:element name="point-tag" type="thing-description:semanticPointTag"/>
+				<xs:element name="point" type="thing-description:semanticPointTag"/>
+				<xs:element name="property" type="thing-description:semanticPropertyTag" minOccurs="0"/>
 			</xs:sequence>
 			<!-- Deprecated format -->
 			<xs:sequence>
@@ -289,7 +285,7 @@
 
 	<xs:simpleType name="semanticPointOrPropertyTag">
 		<xs:annotation>
-			<xs:documentation>DEPRECATED 'tag' use 'point-tag' and 'property-tag' instead</xs:documentation>
+			<xs:documentation>DEPRECATED 'tag' use 'point' or 'property' instead.</xs:documentation>
 		</xs:annotation>
 		<xs:union memberTypes="thing-description:semanticPointTag thing-description:semanticPropertyTag"/>
 	</xs:simpleType>

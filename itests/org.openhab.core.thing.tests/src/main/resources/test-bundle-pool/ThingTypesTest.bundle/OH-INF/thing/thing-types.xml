@@ -100,8 +100,8 @@
 			switch the lamp on and off.
 		</description>
 		<tags>
-			<tag>Hue</tag>
-			<tag>ColorLamp</tag>
+			<point>Control</point>
+			<property>Light</property>
 		</tags>
 
 		<config-description>
@@ -117,8 +117,8 @@
 			temperature from 0 (cold) to 100 (warm).
 		</description>
 		<tags>
-			<tag>Hue</tag>
-			<tag>AmbientLamp</tag>
+			<point>Control</point>
+			<property>Light</property>
 		</tags>
 	</channel-type>
 

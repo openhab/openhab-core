@@ -121,19 +121,17 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
 
                 String name = tagNode.getNodeName();
                 switch (name) {
-                    case "point-tag", "property-tag", "tag" -> {
+                    case "point", "property", "tag" -> {
                         Object value = tagNode.getValue();
                         if ("tag".equals(name)) {
-                            logger.warn(
-                                    "The 'tag' element is deprecated and will be removed in a future release; use 'point-tag' or 'property-tag' instead (tag value: '{}').",
-                                    value);
+                            logger.warn("DEPRECATED 'tag' use 'point' or 'property' instead (tag value: '{}').", value);
                         }
                         if (value instanceof String tag) {
                             tags.add(tag);
                         }
                     }
                     default -> throw new ConversionException(
-                            "The 'tags' node must only contain 'point-tag', 'property-tag', or (DEPRECATED) 'tag' nodes!");
+                            "The 'tags' node must only contain 'point', 'property', or DEPRECATED 'tag' nodes!");
                 }
             }
         }

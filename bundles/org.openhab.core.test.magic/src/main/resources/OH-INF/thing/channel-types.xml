@@ -33,7 +33,8 @@
 		</description>
 		<category>ColorLight</category>
 		<tags>
-			<tag>Light</tag>
+			<point>Control</point>
+			<property>Light</property>
 		</tags>
 		<autoUpdatePolicy>recommend</autoUpdatePolicy>
 		<config-description>
