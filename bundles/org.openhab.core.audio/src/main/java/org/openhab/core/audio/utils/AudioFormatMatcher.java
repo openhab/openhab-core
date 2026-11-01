@@ -82,7 +82,8 @@ public final class AudioFormatMatcher {
 
     private static boolean isConcrete(AudioFormat format) {
         return format.getCodec() != null && format.getContainer() != null && format.isBigEndian() != null
-                && format.getBitDepth() != null && format.getBitRate() != null && format.getFrequency() != null && format.getChannels() != null;
+                && format.getBitDepth() != null && format.getBitRate() != null && format.getFrequency() != null
+                && format.getChannels() != null;
     }
 
     public static boolean isPcmFormat(AudioFormat format) {
