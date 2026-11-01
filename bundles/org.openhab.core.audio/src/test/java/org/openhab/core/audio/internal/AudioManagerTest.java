@@ -80,12 +80,24 @@ public class AudioManagerTest {
     }
 
     @Test
-    public void audioManagerPlaysByteArrayAudioStream() throws AudioException {
+    public void audioManagerPlaysByteArrayAudioStream() {
         audioManager.addAudioSink(audioSink);
         ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
                 AudioFormat.CODEC_PCM_SIGNED);
 
         audioManager.play(audioStream, audioSink.getId());
+
+        AudioFormat expectedAudioFormat = audioStream.getFormat();
+
+        assertThat(audioSink.audioFormat.isCompatible(expectedAudioFormat), is(true));
+    }
+
+    @Test
+    public void audioManagerPlaysByteArrayAudioStreamDirectlyToAudioSink() {
+        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
+
+        audioManager.play(audioStream, audioSink);
 
         AudioFormat expectedAudioFormat = audioStream.getFormat();
 

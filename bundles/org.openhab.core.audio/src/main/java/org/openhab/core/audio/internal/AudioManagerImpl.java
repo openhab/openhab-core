@@ -119,7 +119,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Override
     public void play(@Nullable AudioStream audioStream) {
-        play(audioStream, null);
+        play(audioStream, (String) null);
     }
 
     @Override
@@ -131,49 +131,54 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
-            AudioStream streamCandidate = audioStream;
-            if (audioStream != null) {
-                boolean isFormatSupported = sink.getSupportedFormats().stream()
-                        .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
-                boolean isStreamSupported = sink.getSupportedStreams().stream()
-                        .anyMatch(clazz -> clazz.isInstance(audioStream));
-                if (!isFormatSupported || !isStreamSupported) {
-                    try {
-                        logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
-                        streamCandidate = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
-                                sink.getSupportedStreams());
-                    } catch (AudioTranscodingException e) {
-                        closeQuietly(audioStream);
-                        logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
-                                e.getMessage());
-                        return;
-                    }
-                }
-            }
-            final AudioStream streamToPlay = streamCandidate;
-            Runnable restoreVolume = handleVolumeCommand(volume, sink);
-            sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
-                if (streamToPlay instanceof Disposable disposable) {
-                    try {
-                        disposable.dispose();
-                    } catch (IOException | RuntimeException ignored) {
-                    }
-                }
-
-                if (throwable != null) {
-                    logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
-                }
-
-                try {
-                    restoreVolume.run();
-                } catch (RuntimeException e) {
-                    logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
-                }
-            });
+            play(audioStream, sink, volume);
         } else {
             closeQuietly(audioStream);
             logger.warn("Failed playing audio stream '{}' as no audio sink was found.", audioStream);
         }
+    }
+
+    @Override
+    public void play(@Nullable AudioStream audioStream, AudioSink sink, @Nullable PercentType volume) {
+        AudioStream streamCandidate = audioStream;
+        if (audioStream != null) {
+            boolean isFormatSupported = sink.getSupportedFormats().stream()
+                    .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
+            boolean isStreamSupported = sink.getSupportedStreams().stream()
+                    .anyMatch(clazz -> clazz.isInstance(audioStream));
+            if (!isFormatSupported || !isStreamSupported) {
+                try {
+                    logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
+                    streamCandidate = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
+                            sink.getSupportedStreams());
+                } catch (AudioTranscodingException e) {
+                    closeQuietly(audioStream);
+                    logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
+                            e.getMessage());
+                    return;
+                }
+            }
+        }
+        final AudioStream streamToPlay = streamCandidate;
+        Runnable restoreVolume = handleVolumeCommand(volume, sink);
+        sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
+            if (streamToPlay instanceof Disposable disposable) {
+                try {
+                    disposable.dispose();
+                } catch (IOException | RuntimeException ignored) {
+                }
+            }
+
+            if (throwable != null) {
+                logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
+            }
+
+            try {
+                restoreVolume.run();
+            } catch (RuntimeException e) {
+                logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
+            }
+        });
     }
 
     @Override
