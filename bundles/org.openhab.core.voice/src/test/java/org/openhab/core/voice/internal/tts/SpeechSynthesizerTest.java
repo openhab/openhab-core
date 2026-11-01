@@ -77,11 +77,12 @@ public class SpeechSynthesizerTest {
     }
 
     @Test
-    public void sayThrowsWhenNoCompatibleFormat() {
+    public void synthesizeAndPlayThrowsWhenNoCompatibleFormat() {
         when(ttsService.getSupportedFormats()).thenReturn(Set.of(WAV_FORMAT));
         when(sink.getSupportedFormats()).thenReturn(Set.of());
 
-        assertThrows(TTSException.class, () -> speechSynthesizer.say("hello", ttsService, voice, sink, null));
+        assertThrows(TTSException.class,
+                () -> speechSynthesizer.synthesizeAndPlay("hello", ttsService, voice, sink, null));
         verifyNoInteractions(audioManager);
     }
 

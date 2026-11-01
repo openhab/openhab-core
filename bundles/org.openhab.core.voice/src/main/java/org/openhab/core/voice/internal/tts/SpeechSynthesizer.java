@@ -81,8 +81,8 @@ public class SpeechSynthesizer {
      * @param volume volume to set during playback, or null to keep the current volume
      * @throws TTSException if synthesis or playback fails
      */
-    private void synthesizeAndPlay(String text, TTSService tts, Voice voice, AudioSink sink,
-            @Nullable PercentType volume) throws TTSException {
+    void synthesizeAndPlay(String text, TTSService tts, Voice voice, AudioSink sink, @Nullable PercentType volume)
+            throws TTSException {
         Set<AudioFormat> ttsSupportedFormats = tts.getSupportedFormats();
         AudioFormat ttsAudioFormat = AudioFormatMatcher.getBestMatchWithTranscoding(ttsSupportedFormats,
                 sink.getSupportedFormats());
