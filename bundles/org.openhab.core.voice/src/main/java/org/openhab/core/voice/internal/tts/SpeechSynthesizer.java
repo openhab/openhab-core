@@ -51,30 +51,6 @@ public class SpeechSynthesizer {
     }
 
     /**
-     * Synthesizes the given text using the provided TTS service and voice, and plays it on the audio sink.
-     *
-     * @param text text to synthesize
-     * @param tts TTS service to use
-     * @param voice voice to use
-     * @param sink audio sink to play audio on
-     * @param volume volume to set during playback, or null to keep the current volume
-     * @throws TTSException if synthesis or playback fails
-     */
-    void synthesizeAndPlay(String text, TTSService tts, Voice voice, AudioSink sink,
-            @Nullable PercentType volume) throws TTSException {
-        Set<AudioFormat> ttsSupportedFormats = tts.getSupportedFormats();
-        AudioFormat ttsAudioFormat = AudioFormatMatcher.getBestMatchWithTranscoding(ttsSupportedFormats,
-                sink.getSupportedFormats());
-        if (ttsAudioFormat == null) {
-            throw new TTSException(
-                    "No compatible audio format found for TTS '" + tts.getId() + "' and sink '" + sink.getId() + "'");
-        }
-
-        AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
-        audioManager.play(audioStream, sink, volume);
-    }
-
-    /**
      * Synthesizes and plays the text, catching and logging any {@link TTSException}.
      *
      * @param text text to synthesize
@@ -93,5 +69,29 @@ public class SpeechSynthesizer {
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
             }
         }
+    }
+
+    /**
+     * Synthesizes the given text using the provided TTS service and voice, and plays it on the audio sink.
+     *
+     * @param text text to synthesize
+     * @param tts TTS service to use
+     * @param voice voice to use
+     * @param sink audio sink to play audio on
+     * @param volume volume to set during playback, or null to keep the current volume
+     * @throws TTSException if synthesis or playback fails
+     */
+    private void synthesizeAndPlay(String text, TTSService tts, Voice voice, AudioSink sink,
+            @Nullable PercentType volume) throws TTSException {
+        Set<AudioFormat> ttsSupportedFormats = tts.getSupportedFormats();
+        AudioFormat ttsAudioFormat = AudioFormatMatcher.getBestMatchWithTranscoding(ttsSupportedFormats,
+                sink.getSupportedFormats());
+        if (ttsAudioFormat == null) {
+            throw new TTSException(
+                    "No compatible audio format found for TTS '" + tts.getId() + "' and sink '" + sink.getId() + "'");
+        }
+
+        AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
+        audioManager.play(audioStream, sink, volume);
     }
 }

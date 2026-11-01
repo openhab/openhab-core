@@ -63,7 +63,7 @@ public class SpeechSynthesizerTest {
     }
 
     @Test
-    public void synthesizeAndPlayDelegatesPlaybackToAudioManager() throws Exception {
+    public void sayDelegatesPlaybackToAudioManager() throws Exception {
         when(ttsService.getSupportedFormats()).thenReturn(Set.of(WAV_FORMAT));
         when(sink.getSupportedFormats()).thenReturn(Set.of(WAV_FORMAT));
 
@@ -71,18 +71,17 @@ public class SpeechSynthesizerTest {
         when(ttsService.synthesize("hello", voice, WAV_FORMAT)).thenReturn(audioStream);
 
         PercentType volume = new PercentType(80);
-        speechSynthesizer.synthesizeAndPlay("hello", ttsService, voice, sink, volume);
+        speechSynthesizer.say("hello", ttsService, voice, sink, volume);
 
         verify(audioManager).play(audioStream, sink, volume);
     }
 
     @Test
-    public void synthesizeAndPlayThrowsWhenNoCompatibleFormat() {
+    public void sayThrowsWhenNoCompatibleFormat() {
         when(ttsService.getSupportedFormats()).thenReturn(Set.of(WAV_FORMAT));
         when(sink.getSupportedFormats()).thenReturn(Set.of());
 
-        assertThrows(TTSException.class,
-                () -> speechSynthesizer.synthesizeAndPlay("hello", ttsService, voice, sink, null));
+        assertThrows(TTSException.class, () -> speechSynthesizer.say("hello", ttsService, voice, sink, null));
         verifyNoInteractions(audioManager);
     }
 
