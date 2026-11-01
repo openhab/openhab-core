@@ -562,7 +562,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                 // States which do not provide a Number will be converted to DecimalType.
                 // e.g.: GroupItem can provide a count of items matching the active state
                 // for some group functions.
-                state = item.getStateAs(DecimalType.class);
+                State state2 = item.getStateAs(DecimalType.class);
+                if (state2 != null) {
+                    state = state2;
+                }
             }
 
             // for fraction digits in state we don't want to risk format exceptions,

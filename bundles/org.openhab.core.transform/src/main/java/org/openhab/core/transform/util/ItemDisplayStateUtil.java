@@ -211,7 +211,7 @@ public class ItemDisplayStateUtil {
                         displayState = state.format(pattern);
                     }
                 } catch (IllegalArgumentException e) {
-                    LOGGER.debug(
+                    LOGGER.warn(
                             "Unable to format value '{}' of item {} using format pattern '{}': {}, displaying raw state",
                             state, itemName, pattern, e.getMessage());
                     displayState = state.toString();
