@@ -13,7 +13,6 @@
 package org.openhab.core.voice.internal.dialog;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -23,21 +22,24 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.voice.dialog.DialogContext;
+import org.openhab.core.voice.internal.text.InterpretationService;
+import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.UnrecoverableInterpretationException;
-import org.openhab.core.voice.tts.TTSException;
 import org.openhab.core.voice.tts.TTSService;
 import org.openhab.core.voice.tts.Voice;
 import org.osgi.framework.Bundle;
@@ -50,9 +52,19 @@ import org.osgi.framework.Bundle;
 @NonNullByDefault
 public class DialogProcessorTest {
 
+    private @NonNullByDefault({}) InterpretationService interpretationService;
+    private final SpeechSynthesizer speechSynthesizer = mock(SpeechSynthesizer.class);
+
+    @BeforeEach
+    public void setUp() {
+        LocaleProvider localeProvider = mock(LocaleProvider.class);
+        when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
+
+        interpretationService = new InterpretationService(localeProvider);
+    }
+
     @Test
-    public void interpreterLoopReturnsFastAfterUnrecoverableInterpretationException()
-            throws InterpretationException, TTSException {
+    public void interpreterLoopReturnsFastAfterUnrecoverableInterpretationException() throws InterpretationException {
         HumanLanguageInterpreter hli1 = mock(HumanLanguageInterpreter.class);
         HumanLanguageInterpreter hli2 = mock(HumanLanguageInterpreter.class);
         when(hli1.getId()).thenReturn("hli1");
@@ -76,8 +88,6 @@ public class DialogProcessorTest {
         Voice voice = mock(Voice.class);
         when(voice.getLocale()).thenReturn(Locale.ENGLISH);
         when(tts.getAvailableVoices()).thenReturn(Set.of(voice));
-        AudioStream audioStream = mock(AudioStream.class);
-        when(tts.synthesize(anyString(), any(Voice.class), any(AudioFormat.class))).thenReturn(audioStream);
 
         DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source).withSink(sink)
                 .withSTT(stt).withTTS(tts).withVoice(voice).withHLIs(List.of(hli1, hli2)).build();
@@ -87,19 +97,18 @@ public class DialogProcessorTest {
         TranslationProvider i18n = mock(TranslationProvider.class);
         Bundle bundle = mock(Bundle.class);
 
-        DialogProcessor processor = new DialogProcessor(context, listener, publisher, new WeakHashMap<>(), i18n,
-                bundle);
+        DialogProcessor processor = new DialogProcessor(context, listener, publisher, new WeakHashMap<>(), i18n, bundle,
+                interpretationService, speechSynthesizer);
 
         processor.sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
 
         verify(hli1, times(1)).interpret(any(Locale.class), any(InterpreterContext.class));
         verify(hli2, never()).interpret(any(Locale.class), any(InterpreterContext.class));
-        verify(tts, times(1)).synthesize(eq("unrecoverable error"), any(Voice.class), any(AudioFormat.class));
+        verify(speechSynthesizer, times(1)).say(eq("unrecoverable error"), eq(tts), eq(voice), eq(sink), eq(null));
     }
 
     @Test
-    public void interpreterLoopContinuesAfterRecoverableInterpretationException()
-            throws InterpretationException, TTSException {
+    public void interpreterLoopContinuesAfterRecoverableInterpretationException() throws InterpretationException {
         HumanLanguageInterpreter hli1 = mock(HumanLanguageInterpreter.class);
         HumanLanguageInterpreter hli2 = mock(HumanLanguageInterpreter.class);
         when(hli1.getId()).thenReturn("hli1");
@@ -124,8 +133,6 @@ public class DialogProcessorTest {
         Voice voice = mock(Voice.class);
         when(voice.getLocale()).thenReturn(Locale.ENGLISH);
         when(tts.getAvailableVoices()).thenReturn(Set.of(voice));
-        AudioStream audioStream = mock(AudioStream.class);
-        when(tts.synthesize(anyString(), any(Voice.class), any(AudioFormat.class))).thenReturn(audioStream);
 
         DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source).withSink(sink)
                 .withSTT(stt).withTTS(tts).withVoice(voice).withHLIs(List.of(hli1, hli2)).build();
@@ -135,13 +142,13 @@ public class DialogProcessorTest {
         TranslationProvider i18n = mock(TranslationProvider.class);
         Bundle bundle = mock(Bundle.class);
 
-        DialogProcessor processor = new DialogProcessor(context, listener, publisher, new WeakHashMap<>(), i18n,
-                bundle);
+        DialogProcessor processor = new DialogProcessor(context, listener, publisher, new WeakHashMap<>(), i18n, bundle,
+                interpretationService, speechSynthesizer);
 
         processor.sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
 
         verify(hli1, times(1)).interpret(any(Locale.class), any(InterpreterContext.class));
         verify(hli2, times(1)).interpret(any(Locale.class), any(InterpreterContext.class));
-        verify(tts, times(1)).synthesize(eq("success answer"), any(Voice.class), any(AudioFormat.class));
+        verify(speechSynthesizer, times(1)).say(eq("success answer"), eq(tts), eq(voice), eq(sink), eq(null));
     }
 }

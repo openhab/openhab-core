@@ -12,8 +12,6 @@
  */
 package org.openhab.core.voice.internal;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,27 +26,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioException;
-import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.transcode.AudioTranscoder;
-import org.openhab.core.audio.transcode.AudioTranscodingException;
-import org.openhab.core.common.Disposable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -71,25 +61,18 @@ import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
 import org.openhab.core.voice.internal.dialog.DialogProcessor;
+import org.openhab.core.voice.internal.stt.AudioTranscriber;
+import org.openhab.core.voice.internal.text.InterpretationService;
+import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.security.ItemPermissionResolver;
-import org.openhab.core.voice.stt.RecognitionStartEvent;
-import org.openhab.core.voice.stt.RecognitionStopEvent;
-import org.openhab.core.voice.stt.STTException;
 import org.openhab.core.voice.stt.STTService;
-import org.openhab.core.voice.stt.STTServiceHandle;
 import org.openhab.core.voice.stt.STTServiceRegistry;
-import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
-import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.voice.text.InterpreterContext;
-import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
-import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationManager;
-import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.interpreter.llm.LLMItemSerializer;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
@@ -140,6 +123,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
     private final ItemPermissionResolver itemPermissionResolver;
+    private final AudioTranscriber audioTranscriber;
+    private final InterpretationService interpretationService;
+    private final SpeechSynthesizer speechSynthesizer;
 
     private final RegistryChangeListener<LLMTool> llmToolListener = new RegistryChangeListener<>() {
         @Override
@@ -252,7 +238,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             final @Reference ConversationManager conversationManager,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
             final @Reference ItemRegistry itemRegistry, final @Reference MetadataRegistry metadataRegistry,
-            final @Reference ItemPermissionResolver itemPermissionResolver) {
+            final @Reference ItemPermissionResolver itemPermissionResolver,
+            final @Reference AudioTranscriber audioTranscriber,
+            final @Reference InterpretationService interpretationService,
+            final @Reference SpeechSynthesizer speechSynthesizer) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
@@ -268,6 +257,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.itemPermissionResolver = itemPermissionResolver;
+        this.audioTranscriber = audioTranscriber;
+        this.interpretationService = interpretationService;
+        this.speechSynthesizer = speechSynthesizer;
         this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
     }
 
@@ -362,62 +354,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 throw new TTSException(
                         "Unable to find a voice for language " + localeProvider.getLocale().getLanguage());
             }
-            Set<AudioFormat> ttsSupportedFormats = tts.getSupportedFormats();
             AudioSink sink = audioManager.getSink(sinkId);
             if (sink == null) {
                 throw new TTSException("Unable to find the audio sink " + sinkId);
             }
 
-            AudioFormat ttsAudioFormat = getBestMatchWithTranscoding(ttsSupportedFormats, sink.getSupportedFormats());
-            if (ttsAudioFormat == null) {
-                throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
-                        + sink.getId() + "'");
-            }
-
-            AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
-            boolean isFormatSupported = sink.getSupportedFormats().stream()
-                    .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
-            boolean isStreamSupported = sink.getSupportedStreams().stream()
-                    .anyMatch(clazz -> clazz.isInstance(audioStream));
-            AudioStream streamCandidate = audioStream;
-            // if format or stream implementation isn't supported by AudioSink, attempt to transcode it
-            if (!isFormatSupported || !isStreamSupported) {
-                try {
-                    logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
-                    streamCandidate = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
-                            sink.getSupportedStreams());
-                } catch (AudioTranscodingException e) {
-                    closeQuietly(audioStream);
-                    logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
-                            e.getMessage());
-                    return;
-                }
-            }
-            final AudioStream streamToPlay = streamCandidate;
-            if (sink.getSupportedStreams().stream().noneMatch(clazz -> clazz.isInstance(streamToPlay))) {
-                closeQuietly(streamToPlay);
-                throw new TTSException(
-                        "Failed playing audio stream '" + streamToPlay + "' as audio sink doesn't support it");
-            }
-            Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
-            sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
-                if (streamToPlay instanceof Disposable disposable) {
-                    try {
-                        disposable.dispose();
-                    } catch (IOException | RuntimeException ignored) {
-                    }
-                }
-
-                if (throwable != null) {
-                    logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
-                }
-
-                try {
-                    restoreVolume.run();
-                } catch (RuntimeException e) {
-                    logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
-                }
-            });
+            speechSynthesizer.say(text, tts, voice, sink, volume);
         } catch (TTSException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
@@ -439,21 +381,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             logger.warn("Speech-to-text service '{}' not available", sttId != null ? sttId : "default");
             return "";
         }
-        var sttFormat = VoiceManagerImpl.getBestMatch(audioSource.getSupportedFormats(),
-                sttService.getSupportedFormats());
-        if (sttFormat == null) {
-            logger.warn("No compatible audio format found for stt '{}' and the provided audio stream",
-                    sttService.getId());
-            return "";
-        }
-        AudioStream audioStream;
-        try {
-            audioStream = audioSource.getInputStream(sttFormat);
-        } catch (AudioException e) {
-            logger.warn("AudioException creating source audio stream: {}", e.getMessage());
-            return "";
-        }
-        return transcribe(audioStream, sttService, locale);
+        return audioTranscriber.transcribe(audioSource, sttService, locale);
     }
 
     @Override
@@ -463,55 +391,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             logger.warn("Speech-to-text service '{}' not available", sttId != null ? sttId : "default");
             return "";
         }
-        var sttFormat = VoiceManagerImpl.getBestMatch(Set.of(audioStream.getFormat()),
-                sttService.getSupportedFormats());
-        if (sttFormat == null) {
-            logger.warn("No compatible audio format found for stt '{}' and the provided audio stream",
-                    sttService.getId());
-            return "";
-        }
-        return transcribe(audioStream, sttService, locale);
-    }
-
-    private String transcribe(AudioStream audioStream, STTService sttService, @Nullable Locale locale) {
-        Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
-        CompletableFuture<String> transcriptionResult = new CompletableFuture<>();
-        STTServiceHandle sttServiceHandle;
-        try {
-            sttServiceHandle = sttService.recognize(sttEvent -> {
-                if (sttEvent instanceof SpeechRecognitionEvent sre) {
-                    logger.debug("SpeechRecognitionEvent event received");
-                    String transcript = sre.getTranscript();
-                    logger.debug("Text recognized: {}", transcript);
-                    transcriptionResult.complete(transcript);
-                } else if (sttEvent instanceof RecognitionStartEvent) {
-                    logger.debug("RecognitionStartEvent event received");
-                } else if (sttEvent instanceof RecognitionStopEvent) {
-                    logger.debug("RecognitionStopEvent event received");
-                } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
-                    logger.debug("SpeechRecognitionErrorEvent event received");
-                    transcriptionResult.completeExceptionally(
-                            new IOException("SpeechRecognitionErrorEvent emitted: " + sre.getMessage()));
-                }
-            }, audioStream, nullSafeLocale);
-        } catch (STTException e) {
-            logger.warn("STTException while running transcription");
-            return "";
-        }
-        try {
-            return transcriptionResult.get(60, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            logger.warn("InterruptedException waiting for transcription: {}", e.getMessage());
-            sttServiceHandle.abort();
-        } catch (ExecutionException e) {
-            var cause = e.getCause();
-            logger.warn("ExecutionException running transcription: {}",
-                    cause != null ? cause.getMessage() : e.getMessage());
-        } catch (TimeoutException e) {
-            logger.warn("TimeoutException waiting for transcription");
-            sttServiceHandle.abort();
-        }
-        return "";
+        return audioTranscriber.transcribe(audioStream, sttService, locale);
     }
 
     @Override
@@ -526,71 +406,37 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
-        if (args == null) {
-            args = new InterpretationArguments("", "", "*", "", null);
-        }
+        InterpretationArguments nullSafeArgs = args != null ? args : new InterpretationArguments("", "", "*", "", null);
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
-        if (args.hliIdList().isEmpty()) {
+        if (nullSafeArgs.hliIdList().isEmpty()) {
             HumanLanguageInterpreter interpreter = getHLI();
             if (interpreter != null) {
                 interpreters.add(interpreter);
             }
         } else {
-            interpreters = getHLIsByIds(args.hliIdList());
+            interpreters = getHLIsByIds(nullSafeArgs.hliIdList());
         }
 
         if (!interpreters.isEmpty()) {
-            Locale locale = args.locale();
+            Locale locale = nullSafeArgs.locale();
             if (locale == null) {
                 locale = localeProvider.getLocale();
             }
-            Conversation conversation = conversationManager.getConversation(args.conversationId());
-            try {
-                conversation.addMessage(ConversationRole.USER, text);
-            } catch (ConversationException e) {
-                String errMsg = e.getMessage();
-                throw new InterpretationException(
-                        errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
+            String locationItem = null;
+            if (nullSafeArgs.locationItem() != null && !nullSafeArgs.locationItem().isBlank()) {
+                locationItem = nullSafeArgs.locationItem();
             }
-            List<LLMTool> tools = llmToolRegistry.getByIds(args.toolIdList());
-            String locationItem = args.locationItem();
-            if (locationItem != null && locationItem.isBlank()) {
-                locationItem = null;
-            }
-            InterpreterContext context = new InterpreterContext(conversation, tools, locationItem,
-                    enrichSystemPrompt(configuration.getSystemPrompt(), locale));
-            InterpretationException exception = null;
-            for (var interpreter : interpreters) {
-                try {
-                    String answer = interpreter.interpret(locale, context);
-                    logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                    return answer;
-                } catch (UnrecoverableInterpretationException e) {
-                    logger.debug("Unrecoverable interpretation exception from interpreter '{}': {}",
-                            interpreter.getId(), e.getMessage());
-                    throw e;
-                } catch (InterpretationException e) {
-                    logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
-                            e.getMessage());
-                    exception = e;
-                }
-            }
-            if (exception != null) {
-                try {
-                    String errMsg = exception.getMessage();
-                    context.conversation().addMessage(ConversationRole.OPENHAB,
-                            errMsg != null ? errMsg : "Unknown interpreter error");
-                } catch (ConversationException e) {
-                    logger.error("Error adding error message to conversation: {}", e.getMessage());
-                }
-                throw exception;
-            }
+            String enrichedPrompt = enrichSystemPrompt(configuration.getSystemPrompt(), locale);
+            return interpretationService.interpret(text, interpreters,
+                    conversationManager.getConversation(nullSafeArgs.conversationId()),
+                    llmToolRegistry.getByIds(nullSafeArgs.toolIdList()), locale, locationItem, enrichedPrompt);
         }
 
-        if (args.hliIdList().isEmpty()) {
+        if (nullSafeArgs.hliIdList().isEmpty()) {
             throw new InterpretationException("No human language interpreter available!");
         } else {
-            throw new InterpretationException("No human language interpreter can be found for " + args.hliIdList());
+            throw new InterpretationException(
+                    "No human language interpreter can be found for " + nullSafeArgs.hliIdList());
         }
     }
 
@@ -620,121 +466,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 return voice;
             }
         }
-        return null;
-    }
-
-    public static @Nullable AudioFormat getPreferredFormat(Set<AudioFormat> audioFormats) {
-        // Return the first concrete AudioFormat found
-        for (AudioFormat currentAudioFormat : audioFormats) {
-            // Check if currentAudioFormat is abstract
-            if ((null == currentAudioFormat.getCodec()) || (null == currentAudioFormat.getContainer())
-                    || (null == currentAudioFormat.isBigEndian()) || (null == currentAudioFormat.getBitDepth())) {
-                continue;
-            }
-            // Prefer WAVE container
-            if ((null == currentAudioFormat.getBitRate()) || (null == currentAudioFormat.getFrequency())
-                    || !AudioFormat.CONTAINER_WAVE.equals(currentAudioFormat.getContainer())) {
-                continue;
-            }
-
-            // As currentAudioFormat is concrete, use it
-            return currentAudioFormat;
-        }
-
-        // There's no concrete AudioFormat so we must create one
-        for (AudioFormat currentAudioFormat : audioFormats) {
-            // Define AudioFormat to return
-            AudioFormat format = currentAudioFormat;
-
-            // Not all Codecs and containers can be supported
-            // Prefer WAVE container
-            if ((null == format.getCodec()) || (null == format.getContainer())
-                    || !AudioFormat.CONTAINER_WAVE.equals(format.getContainer())) {
-                continue;
-            }
-
-            // If required, set bigEndian, bit-depth, bit-rate, and frequency to default values
-            if (null == format.isBigEndian()) {
-                format = new AudioFormat(format.getContainer(), format.getCodec(), Boolean.TRUE, format.getBitDepth(),
-                        format.getBitRate(), format.getFrequency(), format.getChannels());
-            }
-            if (null == format.getBitDepth() || null == format.getBitRate() || null == format.getFrequency()) {
-                // Define default values
-                int defaultBitDepth = 16;
-                long defaultFrequency = 44100;
-
-                // Obtain current values
-                Integer bitRate = format.getBitRate();
-                Long frequency = format.getFrequency();
-                Integer bitDepth = format.getBitDepth();
-
-                // These values must be interdependent (bitRate = bitDepth * frequency)
-                if (null == bitRate) {
-                    if (null == bitDepth) {
-                        bitDepth = defaultBitDepth;
-                    }
-                    if (null == frequency) {
-                        frequency = defaultFrequency;
-                    }
-                    bitRate = bitDepth * frequency.intValue();
-                } else if (null == bitDepth) {
-                    if (null == frequency) {
-                        frequency = defaultFrequency;
-                    }
-                    bitDepth = bitRate / frequency.intValue();
-                } else if (null == frequency) {
-                    frequency = bitRate.longValue() / bitDepth.longValue();
-                }
-
-                format = new AudioFormat(format.getContainer(), format.getCodec(), format.isBigEndian(), bitDepth,
-                        bitRate, frequency, format.getChannels());
-            }
-
-            // Return preferred AudioFormat
-            return format;
-        }
-
-        // Return null indicating failure
-        return null;
-    }
-
-    public static @Nullable AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
-        AudioFormat preferredFormat = getPreferredFormat(inputs);
-        for (AudioFormat output : outputs) {
-            if (output.isCompatible(preferredFormat)) {
-                return preferredFormat;
-            } else {
-                for (AudioFormat input : inputs) {
-                    if (output.isCompatible(input)) {
-                        return input;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    AudioFormat getBestMatchWithTranscoding(Set<AudioFormat> ttsSupportedFormats,
-            Set<AudioFormat> sinkSupportedFormats) {
-        AudioFormat bestMatch = getBestMatch(ttsSupportedFormats, sinkSupportedFormats);
-        if (bestMatch != null) {
-            return bestMatch;
-        }
-
-        AudioFormat preferredFormat = getPreferredFormat(ttsSupportedFormats);
-        if (preferredFormat != null && sinkSupportedFormats.stream()
-                .anyMatch(sinkFormat -> AudioTranscoder.canTranscode(preferredFormat, sinkFormat))) {
-            return preferredFormat;
-        }
-
-        for (AudioFormat ttsFormat : ttsSupportedFormats) {
-            if (sinkSupportedFormats.stream()
-                    .anyMatch(sinkFormat -> AudioTranscoder.canTranscode(ttsFormat, sinkFormat))) {
-                return ttsFormat;
-            }
-        }
-
         return null;
     }
 
@@ -828,7 +559,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
                 processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                        this.i18nProvider, b);
+                        this.i18nProvider, b, this.interpretationService, this.speechSynthesizer);
                 dialogProcessors.put(context.source().getId(), processor);
                 return processor.start();
             } else {
@@ -885,7 +616,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvider, b);
+                    this.i18nProvider, b, this.interpretationService, this.speechSynthesizer);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -1263,20 +994,5 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
         String itemsSection = "Available items:\n" + serializedItems;
         return base.isEmpty() ? itemsSection : base + "\n\n" + itemsSection;
-    }
-
-    private void closeQuietly(@Nullable Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException ignored) {
-            }
-            if (closeable instanceof Disposable disposable) {
-                try {
-                    disposable.dispose();
-                } catch (IOException ignored) {
-                }
-            }
-        }
     }
 }
