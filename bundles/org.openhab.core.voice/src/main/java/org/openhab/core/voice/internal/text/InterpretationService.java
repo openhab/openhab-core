@@ -18,6 +18,7 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
@@ -26,7 +27,9 @@ import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +45,13 @@ public class InterpretationService {
 
     private final Logger logger = LoggerFactory.getLogger(InterpretationService.class);
 
+    private final LocaleProvider localeProvider;
+
+    @Activate
+    public InterpretationService(final @Reference LocaleProvider localeProvider) {
+        this.localeProvider = localeProvider;
+    }
+
     /**
      * Interprets user text using the given interpreters and context.
      *
@@ -56,7 +66,7 @@ public class InterpretationService {
      * @throws InterpretationException if interpretation fails
      */
     public String interpret(String text, List<HumanLanguageInterpreter> interpreters, Conversation conversation,
-            Collection<LLMTool> tools, Locale locale, @Nullable String locationItem,
+            Collection<LLMTool> tools, @Nullable Locale locale, @Nullable String locationItem,
             @Nullable String enrichedSystemPrompt) throws InterpretationException {
         try {
             conversation.addMessage(ConversationRole.USER, text);
@@ -69,9 +79,11 @@ public class InterpretationService {
         InterpreterContext context = new InterpreterContext(conversation, tools, locationItem, enrichedSystemPrompt);
         InterpretationException exception = null;
 
+        Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
+
         for (var interpreter : interpreters) {
             try {
-                String answer = interpreter.interpret(locale, context);
+                String answer = interpreter.interpret(nullSafeLocale, context);
                 logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
                 return answer;
             } catch (UnrecoverableInterpretationException e) {

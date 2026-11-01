@@ -24,16 +24,13 @@ import java.util.Locale;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
-import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
-import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.conversation.ConversationRole;
-import org.openhab.core.voice.text.interpreter.llm.LLMTool;
-import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 
 /**
  * Unit tests for {@link InterpretationService}.
@@ -51,7 +48,10 @@ public class InterpretationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new InterpretationService();
+        LocaleProvider localeProvider = mock(LocaleProvider.class);
+        when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
+
+        service = new InterpretationService(localeProvider);
 
         conversation = mock(Conversation.class);
         hli1 = mock(HumanLanguageInterpreter.class);
