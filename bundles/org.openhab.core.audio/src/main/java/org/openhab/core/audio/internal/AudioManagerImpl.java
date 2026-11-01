@@ -227,7 +227,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
             logger.warn("Failed playing melody as no audio sink {} was found.", sinkId);
             return;
         }
-        var synthesizerFormat = AudioFormatMatcher.getBestMatch(ToneSynthesizer.getSupportedFormats(),
+        var synthesizerFormat = AudioFormatMatcher.getBestMatchWithTranscoding(ToneSynthesizer.getSupportedFormats(),
                 sink.getSupportedFormats());
         if (synthesizerFormat == null) {
             logger.warn("Failed playing melody as sink {} does not support wav.", sinkId);
