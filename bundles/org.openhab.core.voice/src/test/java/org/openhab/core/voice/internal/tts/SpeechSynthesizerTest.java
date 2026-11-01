@@ -42,12 +42,12 @@ public class SpeechSynthesizerTest {
     private static final AudioFormat WAV_FORMAT = new AudioFormat(AudioFormat.CONTAINER_WAVE,
             AudioFormat.CODEC_PCM_SIGNED, true, 16, 705600, 44100L, 1);
 
-    private AudioManager audioManager = mock(AudioManager.class);
-    private TTSService ttsService = mock(TTSService.class);
-    private Voice voice = mock(Voice.class);
-    private AudioSink sink = mock(AudioSink.class);
+    private @NonNullByDefault({}) AudioManager audioManager;
+    private @NonNullByDefault({}) TTSService ttsService;
+    private @NonNullByDefault({}) Voice voice;
+    private @NonNullByDefault({}) AudioSink sink;
 
-    private SpeechSynthesizer speechSynthesizer = new SpeechSynthesizer(audioManager);
+    private @NonNullByDefault({}) SpeechSynthesizer speechSynthesizer;
 
     @BeforeEach
     public void setUp() {
