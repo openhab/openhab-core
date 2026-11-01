@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.utils.AudioFormatMatcher;
 
 /**
  * An audio format definition
@@ -370,7 +369,7 @@ public class AudioFormat {
      * @param inputs the supported audio formats of an audio source
      * @param outputs the supported audio formats of an audio sink
      * @return the best matching format or null, if source and sink are incompatible
-     * @deprecated Use {@link AudioFormatMatcher#getBestMatch(Set, Set)} instead.
+     * @deprecated Use {@link org.openhab.core.audio.utils.AudioFormatMatcher#getBestMatch(Set, Set)} instead.
      */
     @Deprecated
     public static @Nullable AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
@@ -398,7 +397,7 @@ public class AudioFormat {
      * @param audioFormats The AudioFormats from which to choose
      * @return The preferred AudioFormat or null if none could be determined. A passed concrete format is preferred
      *         adding default values to an abstract AudioFormat from the passed set.
-     * @deprecated Use {@link AudioFormatMatcher#getPreferredFormat(Set)} instead.
+     * @deprecated Use {@link org.openhab.core.audio.utils.AudioFormatMatcher#getPreferredFormat(Set)} instead.
      */
     @Deprecated
     public static @Nullable AudioFormat getPreferredFormat(Set<AudioFormat> audioFormats) {
