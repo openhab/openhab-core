@@ -91,7 +91,7 @@ public final class AudioFormatMatcher {
         return AudioFormat.CONTAINER_NONE.equals(container) && (codec == null || AudioFormat.isPcmCodec(codec));
     }
 
-    private static boolean isWaveFormat(AudioFormat format) {
+    public static boolean isWaveFormat(AudioFormat format) {
         String container = format.getContainer();
         String codec = format.getCodec();
         return AudioFormat.CONTAINER_WAVE.equals(container) && (codec == null || AudioFormat.isPcmCodec(codec));

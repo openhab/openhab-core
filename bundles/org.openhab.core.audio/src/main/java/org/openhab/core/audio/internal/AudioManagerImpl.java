@@ -48,6 +48,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.transcode.AudioTranscoder;
 import org.openhab.core.audio.transcode.AudioTranscodingException;
+import org.openhab.core.audio.utils.AudioFormatMatcher;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.common.Disposable;
@@ -226,7 +227,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
             logger.warn("Failed playing melody as no audio sink {} was found.", sinkId);
             return;
         }
-        var synthesizerFormat = AudioFormat.getBestMatch(ToneSynthesizer.getSupportedFormats(),
+        var synthesizerFormat = AudioFormatMatcher.getBestMatch(ToneSynthesizer.getSupportedFormats(),
                 sink.getSupportedFormats());
         if (synthesizerFormat == null) {
             logger.warn("Failed playing melody as sink {} does not support wav.", sinkId);
@@ -246,7 +247,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         if (audioSource == null) {
             throw new AudioException("Audio source '" + (sourceId != null ? sourceId : "default") + "' not available");
         }
-        var audioFormat = AudioFormat.getBestMatch(audioSource.getSupportedFormats(),
+        var audioFormat = AudioFormatMatcher.getBestMatch(audioSource.getSupportedFormats(),
                 Set.of(AudioFormat.PCM_SIGNED, AudioFormat.WAV));
         if (audioFormat == null) {
             throw new AudioException("Unable to find valid audio format");
@@ -258,7 +259,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         int targetByteLength = secondByteLength * seconds;
         ByteBuffer recordBuffer = ByteBuffer.allocate(targetByteLength);
         try (var audioStream = audioSource.getInputStream(audioFormat)) {
-            if (audioFormat.isCompatible(AudioFormat.WAV)) {
+            if (AudioFormatMatcher.isWaveFormat(audioFormat)) {
                 AudioWaveUtils.removeFMT(audioStream);
             }
             while (true) {
