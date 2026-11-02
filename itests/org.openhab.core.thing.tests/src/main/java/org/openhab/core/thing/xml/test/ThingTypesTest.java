@@ -112,7 +112,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             ChannelType colorChannelType = channelTypeRegistry.getChannelType(colorChannel.getChannelTypeUID());
             assertThat(colorChannelType, is(notNullValue()));
             assertThat(colorChannelType.toString(), is("hue:color"));
-            assertThat(colorChannelType.getItemType(), is("ColorItem"));
+            assertThat(colorChannelType.getItemType(), is(CoreItemFactory.COLOR));
             assertThat(colorChannelType.getLabel(), is("HUE Lamp Color"));
             assertThat(colorChannelType.getDescription(), is(
                     "The color channel allows to control the color of the hue lamp. It is also possible to dim values and switch the lamp on and off."));
@@ -134,7 +134,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(colorTemperatureChannelType, is(notNullValue()));
 
             assertThat(colorTemperatureChannelType.toString(), is("hue:color_temperature"));
-            assertThat(colorTemperatureChannelType.getItemType(), is("DimmerItem"));
+            assertThat(colorTemperatureChannelType.getItemType(), is(CoreItemFactory.DIMMER));
             assertThat(colorTemperatureChannelType.getLabel(), is("HUE Lamp Color Temperature"));
             assertThat(colorTemperatureChannelType.getDescription(), is(
                     "The color temperature channel allows to set the color temperature from 0 (cold) to 100 (warm)."));
