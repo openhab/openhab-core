@@ -32,10 +32,6 @@
 			light on and off.
 		</description>
 		<category>ColorLight</category>
-		<tags>
-			<point>Control</point>
-			<property>Light</property>
-		</tags>
 		<autoUpdatePolicy>recommend</autoUpdatePolicy>
 		<config-description>
 			<parameter name="boostRed" type="decimal" min="0" max="100">
