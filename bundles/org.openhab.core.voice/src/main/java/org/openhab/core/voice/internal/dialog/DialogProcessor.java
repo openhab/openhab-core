@@ -14,7 +14,6 @@ package org.openhab.core.voice.internal.dialog;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -28,6 +27,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.utils.AudioFormatMatcher;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
@@ -48,7 +48,8 @@ import org.openhab.core.voice.dialog.trigger.ks.KSException;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSpottedEvent;
-import org.openhab.core.voice.internal.VoiceManagerImpl;
+import org.openhab.core.voice.internal.text.InterpretationService;
+import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.RecognitionStartEvent;
 import org.openhab.core.voice.stt.RecognitionStopEvent;
 import org.openhab.core.voice.stt.STTEvent;
@@ -57,15 +58,7 @@ import org.openhab.core.voice.stt.STTListener;
 import org.openhab.core.voice.stt.STTServiceHandle;
 import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
-import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.voice.text.InterpreterContext;
-import org.openhab.core.voice.text.UnrecoverableInterpretationException;
-import org.openhab.core.voice.text.conversation.Conversation;
-import org.openhab.core.voice.text.conversation.ConversationException;
-import org.openhab.core.voice.text.conversation.ConversationRole;
-import org.openhab.core.voice.text.interpreter.llm.LLMTool;
-import org.openhab.core.voice.tts.TTSException;
 import org.openhab.core.voice.tts.Voice;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -98,8 +91,9 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private final @Nullable AudioFormat ksFormat;
     private final @Nullable AudioFormat sttFormat;
-    private final @Nullable AudioFormat ttsFormat;
     private final DialogEventListener eventListener;
+    private final InterpretationService interpretationService;
+    private final SpeechSynthesizer speechSynthesizer;
 
     /**
      * If the processor is currently processing a keyword event and thus should not spot further ones.
@@ -119,21 +113,22 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle) {
+            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle,
+            InterpretationService interpretationService, SpeechSynthesizer speechSynthesizer) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
         this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
+        this.interpretationService = interpretationService;
+        this.speechSynthesizer = speechSynthesizer;
         var dt = context.dt();
         this.ksFormat = dt instanceof KSService ks
-                ? VoiceManagerImpl.getBestMatch(context.source().getSupportedFormats(), ks.getSupportedFormats())
+                ? AudioFormatMatcher.getBestMatch(context.source().getSupportedFormats(), ks.getSupportedFormats())
                 : null;
-        this.sttFormat = VoiceManagerImpl.getBestMatch(context.source().getSupportedFormats(),
+        this.sttFormat = AudioFormatMatcher.getBestMatch(context.source().getSupportedFormats(),
                 context.stt().getSupportedFormats());
-        this.ttsFormat = VoiceManagerImpl.getBestMatch(context.tts().getSupportedFormats(),
-                context.sink().getSupportedFormats());
         initToneSynthesizer(context.listeningMelody());
     }
 
@@ -144,7 +139,7 @@ public class DialogProcessor implements KSListener, STTListener {
         if (listeningMelodyText != null && !listeningMelodyText.isBlank()) {
             try {
                 listeningMelody = ToneSynthesizer.parseMelody(listeningMelodyText);
-                var synthesizerFormat = VoiceManagerImpl.getBestMatch(ToneSynthesizer.getSupportedFormats(),
+                var synthesizerFormat = AudioFormatMatcher.getBestMatch(ToneSynthesizer.getSupportedFormats(),
                         dialogContext.sink().getSupportedFormats());
                 if (synthesizerFormat != null) {
                     toneSynthesizer = new ToneSynthesizer(synthesizerFormat);
@@ -366,38 +361,16 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
                 eventListener.onBeforeDialogInterpretation(dialogContext);
-                Conversation conversation = dialogContext.conversation();
-                String error = null;
-                String answer = "";
                 try {
-                    conversation.addMessage(ConversationRole.USER, question);
-                } catch (ConversationException e) {
-                    logger.debug("Unable to add message to conversation: {}", e.getMessage(), e);
-                    error = "Unable to add message to conversation: " + e.getMessage();
-                }
-                if (error == null) {
-                    Collection<LLMTool> tools = dialogContext.llmTools();
-                    InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
+                    String answer = interpretationService.interpret(question, dialogContext.hlis(),
+                            dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
                             dialogContext.locationItem(),
                             eventListener.enrichSystemPrompt(dialogContext.systemPrompt(), dialogContext.locale()));
-                    for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
-                        try {
-                            answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
-                            error = null;
-                            logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(),
-                                    answer);
-                            break;
-                        } catch (UnrecoverableInterpretationException e) {
-                            logger.debug("Unrecoverable interpretation exception: {}", e.getMessage());
-                            error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
-                            break;
-                        } catch (InterpretationException e) {
-                            logger.debug("Interpretation exception: {}", e.getMessage());
-                            error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
-                        }
-                    }
+                    say(answer);
+                } catch (InterpretationException e) {
+                    String error = e.getMessage();
+                    say(error != null ? error : "Unexpected error");
                 }
-                say(error != null ? error : answer);
                 abortSTT();
             }
         } else if (sttEvent instanceof RecognitionStartEvent) {
@@ -429,49 +402,21 @@ public class DialogProcessor implements KSListener, STTListener {
             logger.debug("Empty value, nothing to say");
             return;
         }
-        try {
-            Voice voice = null;
-            for (Voice currentVoice : dialogContext.tts().getAvailableVoices()) {
-                if (!dialogContext.locale().getLanguage().equals(currentVoice.getLocale().getLanguage())) {
-                    continue;
-                }
-                var prefVoice = dialogContext.voice();
-                if (voice == null || (prefVoice != null && prefVoice.getUID().equals(currentVoice.getUID()))) {
-                    voice = currentVoice;
-                }
+        Voice voice = null;
+        for (Voice currentVoice : dialogContext.tts().getAvailableVoices()) {
+            if (!dialogContext.locale().getLanguage().equals(currentVoice.getLocale().getLanguage())) {
+                continue;
             }
-            if (voice == null) {
-                throw new TTSException("Unable to find a suitable voice");
-            }
-
-            AudioFormat audioFormat = ttsFormat;
-            if (audioFormat == null) {
-                throw new TTSException("No compatible audio format found for TTS '" + dialogContext.tts().getId()
-                        + "' and sink '" + dialogContext.sink().getId() + "'");
-            }
-
-            AudioStream audioStream = dialogContext.tts().synthesize(text, voice, audioFormat);
-
-            if (dialogContext.sink().getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
-                try {
-                    dialogContext.sink().process(audioStream);
-                } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
-                    } else {
-                        logger.warn("Error saying '{}': {}", text, e.getMessage());
-                    }
-                }
-            } else {
-                logger.warn("Failed playing audio stream '{}' as audio doesn't support it.", audioStream);
-            }
-        } catch (TTSException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
-            } else {
-                logger.warn("Error saying '{}': {}", text, e.getMessage());
+            var prefVoice = dialogContext.voice();
+            if (voice == null || (prefVoice != null && prefVoice.getUID().equals(currentVoice.getUID()))) {
+                voice = currentVoice;
             }
         }
+        if (voice == null) {
+            logger.warn("Unable to find a suitable voice for language {}", dialogContext.locale().getLanguage());
+            return;
+        }
+        speechSynthesizer.say(text, dialogContext.tts(), voice, dialogContext.sink(), null);
     }
 
     private void playStartSound() {

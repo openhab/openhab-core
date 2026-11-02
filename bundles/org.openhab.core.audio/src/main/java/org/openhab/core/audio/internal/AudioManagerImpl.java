@@ -48,6 +48,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.transcode.AudioTranscoder;
 import org.openhab.core.audio.transcode.AudioTranscodingException;
+import org.openhab.core.audio.utils.AudioFormatMatcher;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.common.Disposable;
@@ -118,7 +119,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Override
     public void play(@Nullable AudioStream audioStream) {
-        play(audioStream, null);
+        play(audioStream, (String) null);
     }
 
     @Override
@@ -130,49 +131,54 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
-            AudioStream streamCandidate = audioStream;
-            if (audioStream != null) {
-                boolean isFormatSupported = sink.getSupportedFormats().stream()
-                        .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
-                boolean isStreamSupported = sink.getSupportedStreams().stream()
-                        .anyMatch(clazz -> clazz.isInstance(audioStream));
-                if (!isFormatSupported || !isStreamSupported) {
-                    try {
-                        logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
-                        streamCandidate = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
-                                sink.getSupportedStreams());
-                    } catch (AudioTranscodingException e) {
-                        closeQuietly(audioStream);
-                        logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
-                                e.getMessage());
-                        return;
-                    }
-                }
-            }
-            final AudioStream streamToPlay = streamCandidate;
-            Runnable restoreVolume = handleVolumeCommand(volume, sink);
-            sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
-                if (streamToPlay instanceof Disposable disposable) {
-                    try {
-                        disposable.dispose();
-                    } catch (IOException | RuntimeException ignored) {
-                    }
-                }
-
-                if (throwable != null) {
-                    logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
-                }
-
-                try {
-                    restoreVolume.run();
-                } catch (RuntimeException e) {
-                    logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
-                }
-            });
+            play(audioStream, sink, volume);
         } else {
             closeQuietly(audioStream);
             logger.warn("Failed playing audio stream '{}' as no audio sink was found.", audioStream);
         }
+    }
+
+    @Override
+    public void play(@Nullable AudioStream audioStream, AudioSink sink, @Nullable PercentType volume) {
+        AudioStream streamCandidate = audioStream;
+        if (audioStream != null) {
+            boolean isFormatSupported = sink.getSupportedFormats().stream()
+                    .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
+            boolean isStreamSupported = sink.getSupportedStreams().stream()
+                    .anyMatch(clazz -> clazz.isInstance(audioStream));
+            if (!isFormatSupported || !isStreamSupported) {
+                try {
+                    logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
+                    streamCandidate = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
+                            sink.getSupportedStreams());
+                } catch (AudioTranscodingException e) {
+                    closeQuietly(audioStream);
+                    logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
+                            e.getMessage());
+                    return;
+                }
+            }
+        }
+        final AudioStream streamToPlay = streamCandidate;
+        Runnable restoreVolume = handleVolumeCommand(volume, sink);
+        sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
+            if (streamToPlay instanceof Disposable disposable) {
+                try {
+                    disposable.dispose();
+                } catch (IOException | RuntimeException ignored) {
+                }
+            }
+
+            if (throwable != null) {
+                logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
+            }
+
+            try {
+                restoreVolume.run();
+            } catch (RuntimeException e) {
+                logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
+            }
+        });
     }
 
     @Override
@@ -226,7 +232,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
             logger.warn("Failed playing melody as no audio sink {} was found.", sinkId);
             return;
         }
-        var synthesizerFormat = AudioFormat.getBestMatch(ToneSynthesizer.getSupportedFormats(),
+        var synthesizerFormat = AudioFormatMatcher.getBestMatchWithTranscoding(ToneSynthesizer.getSupportedFormats(),
                 sink.getSupportedFormats());
         if (synthesizerFormat == null) {
             logger.warn("Failed playing melody as sink {} does not support wav.", sinkId);
@@ -246,7 +252,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         if (audioSource == null) {
             throw new AudioException("Audio source '" + (sourceId != null ? sourceId : "default") + "' not available");
         }
-        var audioFormat = AudioFormat.getBestMatch(audioSource.getSupportedFormats(),
+        var audioFormat = AudioFormatMatcher.getBestMatch(audioSource.getSupportedFormats(),
                 Set.of(AudioFormat.PCM_SIGNED, AudioFormat.WAV));
         if (audioFormat == null) {
             throw new AudioException("Unable to find valid audio format");
@@ -258,7 +264,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         int targetByteLength = secondByteLength * seconds;
         ByteBuffer recordBuffer = ByteBuffer.allocate(targetByteLength);
         try (var audioStream = audioSource.getInputStream(audioFormat)) {
-            if (audioFormat.isCompatible(AudioFormat.WAV)) {
+            if (AudioFormatMatcher.isWaveFormat(audioFormat)) {
                 AudioWaveUtils.removeFMT(audioStream);
             }
             while (true) {
