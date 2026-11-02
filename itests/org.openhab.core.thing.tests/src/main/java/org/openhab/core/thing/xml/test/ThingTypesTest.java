@@ -13,8 +13,8 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.*;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -119,10 +119,10 @@ public class ThingTypesTest extends JavaOSGiTest {
 
             Set<String> tags = colorChannelType.getTags();
             assertThat(tags, is(notNullValue()));
-            assertThat(tags.contains("Hue"), is(true));
-            assertThat(tags.contains("ColorLamp"), is(true));
-            assertThat(tags.contains("AmbientLamp"), is(false));
-            assertThat(tags.contains("AlarmSystem"), is(false));
+            assertThat(tags.contains("Control"), is(true));
+            assertThat(tags.contains("Light"), is(true));
+            assertThat(tags.contains("Alarm"), is(false));
+            assertThat(tags.contains("Info"), is(false));
 
             ChannelDefinition colorTemperatureChannel = channelDefinitions.stream()
                     .filter(it -> "color_temperature".equals(it.getId())).findFirst().get();
@@ -141,10 +141,10 @@ public class ThingTypesTest extends JavaOSGiTest {
 
             tags = colorTemperatureChannelType.getTags();
             assertThat(tags, is(notNullValue()));
-            assertThat(tags.contains("Hue"), is(true));
-            assertThat(tags.contains("AmbientLamp"), is(true));
-            assertThat(tags.contains("ColorLamp"), is(false));
-            assertThat(tags.contains("AlarmSystem"), is(false));
+            assertThat(tags.contains("Control"), is(true));
+            assertThat(tags.contains("Light"), is(true));
+            assertThat(tags.contains("Alarm"), is(false));
+            assertThat(tags.contains("Info"), is(false));
 
             ChannelDefinition alarmChannel = channelDefinitions.stream().filter(it -> "alarm".equals(it.getId()))
                     .findFirst().get();
@@ -159,10 +159,10 @@ public class ThingTypesTest extends JavaOSGiTest {
 
             tags = alarmChannelType.getTags();
             assertThat(tags, is(notNullValue()));
-            assertThat(tags.contains("Hue"), is(true));
-            assertThat(tags.contains("AlarmSystem"), is(true));
-            assertThat(tags.contains("AmbientLamp"), is(false));
-            assertThat(tags.contains("ColorLamp"), is(false));
+            assertThat(tags.contains("Control"), is(false));
+            assertThat(tags.contains("Light"), is(false));
+            assertThat(tags.contains("Alarm"), is(true));
+            assertThat(tags.contains("Info"), is(true));
             assertThat(alarmChannelType.getCategory(), is(equalTo("ALARM")));
 
             StateDescription state = alarmChannelType.getState();

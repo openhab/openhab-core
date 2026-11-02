@@ -94,7 +94,7 @@
 
 	<!-- HUE Lamp Color Channel -->
 	<channel-type id="color">
-		<item-type>ColorItem</item-type>
+		<item-type>Color</item-type>
 		<label>HUE Lamp Color</label>
 		<description>The color channel allows to control the color of the hue lamp. It is also possible to dim values and
 			switch the lamp on and off.
@@ -111,7 +111,7 @@
 
 	<!-- HUE Lamp Color Temperature Channel -->
 	<channel-type id="color_temperature">
-		<item-type>DimmerItem</item-type>
+		<item-type>Dimmer</item-type>
 		<label>HUE Lamp Color Temperature</label>
 		<description>The color temperature channel allows to set the color
 			temperature from 0 (cold) to 100 (warm).
@@ -129,8 +129,8 @@
 		<description>The light blinks if alarm is set.</description>
 		<category>ALARM</category>
 		<tags>
-			<tag>Hue</tag>
-			<tag>AlarmSystem</tag>
+			<point>Alarm</point>
+			<property>Info</property>
 		</tags>
 		<state min="0" max="100.0" step="10.0" pattern="%d Peek" readOnly="true">
 			<options>
