@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal.update;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +27,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.internal.ThingFactoryHelper;
+import org.openhab.core.thing.internal.dto.XmlTags;
 import org.openhab.core.thing.internal.update.dto.XmlAddChannel;
 import org.openhab.core.thing.internal.update.dto.XmlUpdateChannel;
 import org.openhab.core.thing.type.ChannelType;
@@ -65,7 +67,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         this.groupIds = rawGroupIds != null ? Arrays.asList(rawGroupIds.split(",")) : List.of();
         this.label = updateChannel.getLabel();
         this.description = updateChannel.getDescription();
-        this.tags = updateChannel.getTags();
+        this.tags = toStrings(updateChannel.getTags());
         this.preserveConfig = updateChannel.isPreserveConfiguration();
         this.channelTypeRegistry = channelTypeRegistry;
         this.configDescriptionRegistry = configDescriptionRegistry;
@@ -81,7 +83,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         this.groupIds = rawGroupIds != null ? Arrays.asList(rawGroupIds.split(",")) : List.of();
         this.label = addChannel.getLabel();
         this.description = addChannel.getDescription();
-        this.tags = addChannel.getTags();
+        this.tags = toStrings(addChannel.getTags());
         this.preserveConfig = false;
         this.channelTypeRegistry = channelTypeRegistry;
         this.configDescriptionRegistry = configDescriptionRegistry;
@@ -138,6 +140,26 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         }
 
         thingBuilder.withChannel(channelBuilder.build());
+    }
+
+    /**
+     * Converts a {@link XmlTags} list into a list of Strings containing the respective tag values
+     */
+    private static @Nullable List<String> toStrings(@Nullable XmlTags xmlTags) {
+        if (xmlTags == null) {
+            return null;
+        }
+        List<String> tags = new ArrayList<>();
+        String point = xmlTags.getPoint();
+        if (point != null) {
+            tags.add(point);
+        }
+        String property = xmlTags.getProperty();
+        if (property != null) {
+            tags.add(property);
+        }
+        tags.addAll(xmlTags.getTag());
+        return tags;
     }
 
     @Override
