@@ -214,7 +214,25 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>3.0.5</version>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.jetty9</artifactId>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.javax.servlet</artifactId>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.javax.httpservice</artifactId>
+      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -250,7 +268,7 @@
     <dependency>
       <groupId>com.hivemq</groupId>
       <artifactId>hivemq-mqtt-client</artifactId>
-      <version>1.4.0</version>
+      <version>1.4.1</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
