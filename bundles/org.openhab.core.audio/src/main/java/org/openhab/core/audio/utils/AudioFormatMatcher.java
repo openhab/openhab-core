@@ -48,7 +48,7 @@ public final class AudioFormatMatcher {
             }
         }
 
-        // Fall bac to concrete WAVE container format
+        // Fall back to concrete WAVE container format
         for (AudioFormat currentAudioFormat : audioFormats) {
             if (isConcrete(currentAudioFormat) && isWaveFormat(currentAudioFormat)) {
                 return currentAudioFormat;
@@ -125,7 +125,9 @@ public final class AudioFormatMatcher {
             frequency = bitRate.longValue() / bitDepth.longValue();
         }
 
-        return new AudioFormat(container, codec, bigEndian, bitDepth, bitRate, frequency, format.getChannels());
+        Integer channels = format.getChannels() != null ? format.getChannels() : 1;
+
+        return new AudioFormat(container, codec, bigEndian, bitDepth, bitRate, frequency, channels);
     }
 
     /**
@@ -137,17 +139,22 @@ public final class AudioFormatMatcher {
      */
     public static @Nullable AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
         AudioFormat preferredFormat = getPreferredFormat(inputs);
-        for (AudioFormat output : outputs) {
-            if (output.isCompatible(preferredFormat)) {
-                return preferredFormat;
-            } else {
-                for (AudioFormat input : inputs) {
-                    if (output.isCompatible(input)) {
-                        return input;
-                    }
+        if (preferredFormat != null) {
+            for (AudioFormat output : outputs) {
+                if (output.isCompatible(preferredFormat)) {
+                    return preferredFormat;
                 }
             }
         }
+
+        for (AudioFormat output : outputs) {
+            for (AudioFormat input : inputs) {
+                if (output.isCompatible(input)) {
+                    return input;
+                }
+            }
+        }
+
         return null;
     }
 
