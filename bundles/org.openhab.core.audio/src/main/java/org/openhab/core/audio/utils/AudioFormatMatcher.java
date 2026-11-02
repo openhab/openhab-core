@@ -34,6 +34,17 @@ public final class AudioFormatMatcher {
     }
 
     /**
+     * Returns whether the given codec is a PCM codec.
+     *
+     * @param codec a codec
+     * @return true if the codec is a PCM codec, false otherwise
+     */
+    public static boolean isPcmCodec(@Nullable String codec) {
+        return AudioFormat.CODEC_PCM_SIGNED.equals(codec) || AudioFormat.CODEC_PCM_UNSIGNED.equals(codec)
+                || AudioFormat.CODEC_PCM_ALAW.equals(codec) || AudioFormat.CODEC_PCM_ULAW.equals(codec);
+    }
+
+    /**
      * Determines a preferred concrete audio format from a set of supported formats.
      * Prefers PCM (uncontainerized signed PCM) over WAVE container formats and fills default attributes if abstract.
      *
@@ -89,13 +100,13 @@ public final class AudioFormatMatcher {
     public static boolean isPcmFormat(AudioFormat format) {
         String container = format.getContainer();
         String codec = format.getCodec();
-        return AudioFormat.CONTAINER_NONE.equals(container) && (codec == null || AudioFormat.isPcmCodec(codec));
+        return AudioFormat.CONTAINER_NONE.equals(container) && (codec == null || isPcmCodec(codec));
     }
 
     public static boolean isWaveFormat(AudioFormat format) {
         String container = format.getContainer();
         String codec = format.getCodec();
-        return AudioFormat.CONTAINER_WAVE.equals(container) && (codec == null || AudioFormat.isPcmCodec(codec));
+        return AudioFormat.CONTAINER_WAVE.equals(container) && (codec == null || isPcmCodec(codec));
     }
 
     private static AudioFormat completeFormat(AudioFormat format, String defaultContainer, String defaultCodec) {

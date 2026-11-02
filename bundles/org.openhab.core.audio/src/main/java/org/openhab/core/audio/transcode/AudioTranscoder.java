@@ -38,6 +38,7 @@ import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.internal.transcode.SizeableTranscodedAudioStream;
 import org.openhab.core.audio.internal.transcode.TranscodedAudioStream;
+import org.openhab.core.audio.utils.AudioFormatMatcher;
 import org.openhab.core.common.Disposable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
@@ -111,13 +112,13 @@ public final class AudioTranscoder {
         String codec = format.getCodec();
 
         if (AudioFormat.CONTAINER_WAVE.equals(container)) {
-            return codec == null || AudioFormat.isPcmCodec(codec);
+            return codec == null || AudioFormatMatcher.isPcmCodec(codec);
         }
         if (AudioFormat.CONTAINER_FLAC.equals(container)) {
             return codec == null || AudioFormat.CODEC_FLAC.equals(codec);
         }
         if (AudioFormat.CONTAINER_NONE.equals(container) || container == null) {
-            return codec == null || AudioFormat.isPcmCodec(codec) || AudioFormat.CODEC_FLAC.equals(codec);
+            return codec == null || AudioFormatMatcher.isPcmCodec(codec) || AudioFormat.CODEC_FLAC.equals(codec);
         }
         return false;
     }
@@ -136,13 +137,13 @@ public final class AudioTranscoder {
         String codec = format.getCodec();
 
         if (AudioFormat.CONTAINER_WAVE.equals(container)) {
-            return codec == null || AudioFormat.isPcmCodec(codec);
+            return codec == null || AudioFormatMatcher.isPcmCodec(codec);
         }
         if (AudioFormat.CONTAINER_FLAC.equals(container)) {
             return codec == null || AudioFormat.CODEC_FLAC.equals(codec);
         }
         if (AudioFormat.CONTAINER_NONE.equals(container) || container == null) {
-            return codec == null || AudioFormat.isPcmCodec(codec);
+            return codec == null || AudioFormatMatcher.isPcmCodec(codec);
         }
         return false;
     }

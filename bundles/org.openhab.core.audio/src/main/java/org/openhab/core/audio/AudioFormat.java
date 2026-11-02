@@ -353,17 +353,6 @@ public class AudioFormat {
     }
 
     /**
-     * Returns whether the given codec is a PCM codec.
-     *
-     * @param codec a codec
-     * @return true if the codec is a PCM codec, false otherwise
-     */
-    public static boolean isPcmCodec(@Nullable String codec) {
-        return CODEC_PCM_SIGNED.equals(codec) || CODEC_PCM_UNSIGNED.equals(codec) || CODEC_PCM_ALAW.equals(codec)
-                || CODEC_PCM_ULAW.equals(codec);
-    }
-
-    /**
      * Determines the best match between a list of audio formats supported by a source and a sink.
      *
      * @param inputs the supported audio formats of an audio source
