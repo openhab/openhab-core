@@ -30,6 +30,12 @@
         <artifactId>gson</artifactId>
         <version>${gson.version}</version>
       </dependency>
+      <!-- xtext-dev-bom manages guava, make sure it gets the version from the runtime BOM -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>33.8.0-jre</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
