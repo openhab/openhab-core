@@ -309,7 +309,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
     @Override
     public @Nullable DTServiceHandle startDialog(DialogContext context) throws IllegalStateException {
-        validateLocaleCompatibility(context);
+        validatePersistentDialogContext(context);
 
         synchronized (dialogProcessors) {
             if (dialogProcessors.containsKey(context.source().getId())) {
@@ -528,7 +528,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         });
     }
 
-    private static void validateLocaleCompatibility(DialogContext context) throws IllegalStateException {
+    private static void validatePersistentDialogContext(DialogContext context) throws IllegalStateException {
         final var dtService = getDtService(context);
 
         if ((dtService instanceof KSService ksService)
@@ -536,6 +536,10 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             throw new IllegalStateException(
                     "Cannot start dialog as provided locale is not supported by KS service " + ksService.getUID());
         }
+        validateLocaleCompatibility(context);
+    }
+
+    private static void validateLocaleCompatibility(DialogContext context) throws IllegalStateException {
         if (!checkLocales(context.stt().getSupportedLocales(), context.locale())) {
             throw new IllegalStateException(
                     "Cannot start dialog as provided locale is not supported by STT service " + context.stt().getUID());
