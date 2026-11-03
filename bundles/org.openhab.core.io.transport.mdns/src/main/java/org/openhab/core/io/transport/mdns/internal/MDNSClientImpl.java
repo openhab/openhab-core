@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, service = MDNSClient.class)
 public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener {
+    private static final int MAX_LABEL_LENGTH = 63;
     private static final Pattern IP_LITERAL = Pattern.compile("^[0-9.]+$|.*:.*");
 
     private final Logger logger = LoggerFactory.getLogger(MDNSClientImpl.class);
@@ -108,7 +109,11 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
             return false;
         }
         String lower = name.trim().toLowerCase(Locale.ROOT);
-        return !lower.startsWith("localhost") && !IP_LITERAL.matcher(lower).matches();
+        int dot = lower.indexOf('.');
+        if ((dot > 0 ? dot : lower.length()) > MAX_LABEL_LENGTH) {
+            return false;
+        }
+        return !lower.equals("localhost") && !lower.startsWith("localhost.") && !IP_LITERAL.matcher(lower).matches();
     }
 
     private Set<InetAddress> getAllInetAddresses() {
