@@ -12,41 +12,20 @@
  */
 package org.openhab.core.voice.internal.dialog;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.List;
 import java.util.Objects;
-import java.util.WeakHashMap;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioException;
-import org.openhab.core.audio.AudioFormat;
-import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.UnsupportedAudioFormatException;
-import org.openhab.core.audio.UnsupportedAudioStreamException;
-import org.openhab.core.audio.utils.AudioFormatMatcher;
-import org.openhab.core.audio.utils.ToneSynthesizer;
-import org.openhab.core.events.EventPublisher;
-import org.openhab.core.i18n.TranslationProvider;
-import org.openhab.core.items.ItemUtil;
-import org.openhab.core.items.events.ItemEventFactory;
-import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.voice.dialog.DialogContext;
-import org.openhab.core.voice.dialog.trigger.BasicDTService;
 import org.openhab.core.voice.dialog.trigger.DTErrorEvent;
 import org.openhab.core.voice.dialog.trigger.DTEvent;
-import org.openhab.core.voice.dialog.trigger.DTException;
-import org.openhab.core.voice.dialog.trigger.DTService;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSErrorEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSEvent;
-import org.openhab.core.voice.dialog.trigger.ks.KSException;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
-import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSpottedEvent;
+import org.openhab.core.voice.internal.VoiceI18nProvider;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.RecognitionStartEvent;
@@ -54,18 +33,16 @@ import org.openhab.core.voice.stt.RecognitionStopEvent;
 import org.openhab.core.voice.stt.STTEvent;
 import org.openhab.core.voice.stt.STTException;
 import org.openhab.core.voice.stt.STTListener;
-import org.openhab.core.voice.stt.STTServiceHandle;
 import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.tts.Voice;
-import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An instance of this class can handle a complete dialog with the user. It orchestrates the keyword spotting, the stt
- * and tts services together with the human language interpreter.
+ * Handles a dialog with the user as a pure state machine orchestrating trigger listening, speech recognition,
+ * human language interpretation, and speech synthesis.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Send commands to an item to indicate the keyword has been spotted
@@ -76,261 +53,108 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Use dialog context
  * @author Miguel Álvarez - Add sounds
  * @author Miguel Álvarez - Add dialog groups
- *
+ * @author Florian Hotze - Refactor into pure state machine
  */
 @NonNullByDefault
 public class DialogProcessor implements KSListener, STTListener {
-    private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
-    private final WeakHashMap<String, DialogContext> activeDialogGroups;
-    public final DialogContext dialogContext;
-    private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
-    private final EventPublisher eventPublisher;
-    private final TranslationProvider i18nProvider;
-    private final Bundle bundle;
 
-    private final @Nullable AudioFormat ksFormat;
-    private final @Nullable AudioFormat sttFormat;
-    private final DialogEventListener eventListener;
+    /**
+     * States of the dialog state machine.
+     */
+    public enum DialogState {
+        IDLE,
+        WAITING_FOR_TRIGGER,
+        LISTENING,
+        INTERPRETING,
+        SPEAKING
+    }
+
+    private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
+
+    public final DialogContext dialogContext;
+    private final DialogAudioDriver audioDriver;
+    private final DialogFeedbackService feedbackService;
     private final InterpretationService interpretationService;
     private final SpeechSynthesizer speechSynthesizer;
+    private final VoiceI18nProvider i18nProvider;
+    private final DialogEventListener eventListener;
 
-    /**
-     * If the processor is currently processing a keyword event and thus should not spot further ones.
-     */
-    private boolean processing = false;
+    private DialogState state = DialogState.IDLE;
 
-    /**
-     * If the STT server is in the process of aborting
-     */
-    private boolean isSTTServerAborting = false;
-
-    private @Nullable DTServiceHandle dtServiceHandle;
-    private @Nullable STTServiceHandle sttServiceHandle;
-
-    private @Nullable AudioStream streamKS;
-    private @Nullable AudioStream streamSTT;
-    private @Nullable ToneSynthesizer toneSynthesizer;
-
-    public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle,
-            InterpretationService interpretationService, SpeechSynthesizer speechSynthesizer) {
+    public DialogProcessor(DialogContext context, DialogAudioDriver audioDriver, DialogFeedbackService feedbackService,
+            InterpretationService interpretationService, SpeechSynthesizer speechSynthesizer,
+            VoiceI18nProvider i18nProvider, DialogEventListener eventListener) {
         this.dialogContext = context;
-        this.eventListener = eventListener;
-        this.eventPublisher = eventPublisher;
-        this.i18nProvider = i18nProvider;
-        this.activeDialogGroups = activeDialogGroups;
-        this.bundle = bundle;
+        this.audioDriver = audioDriver;
+        this.feedbackService = feedbackService;
         this.interpretationService = interpretationService;
         this.speechSynthesizer = speechSynthesizer;
-        var dt = context.dt();
-        this.ksFormat = dt instanceof KSService ks
-                ? AudioFormatMatcher.getBestMatch(context.source().getSupportedFormats(), ks.getSupportedFormats())
-                : null;
-        this.sttFormat = AudioFormatMatcher.getBestMatch(context.source().getSupportedFormats(),
-                context.stt().getSupportedFormats());
-        initToneSynthesizer(context.listeningMelody());
-    }
-
-    private void initToneSynthesizer(@Nullable String listeningMelodyText) {
-        @Nullable
-        List<ToneSynthesizer.Tone> listeningMelody = null;
-        ToneSynthesizer toneSynthesizer = null;
-        if (listeningMelodyText != null && !listeningMelodyText.isBlank()) {
-            try {
-                listeningMelody = ToneSynthesizer.parseMelody(listeningMelodyText);
-                var synthesizerFormat = AudioFormatMatcher.getBestMatch(ToneSynthesizer.getSupportedFormats(),
-                        dialogContext.sink().getSupportedFormats());
-                if (synthesizerFormat != null) {
-                    toneSynthesizer = new ToneSynthesizer(synthesizerFormat);
-                    logger.debug("Sounds enabled");
-                } else {
-                    logger.warn("Sounds disabled, synthesizer is not compatible with this sink");
-                }
-            } catch (ParseException e) {
-                logger.warn("Sounds disabled, unable to parse 'listening' melody: {}", e.getMessage());
-            }
-        }
-        this.toneSynthesizer = toneSynthesizer;
-        this.listeningMelody = listeningMelody;
+        this.i18nProvider = i18nProvider;
+        this.eventListener = eventListener;
     }
 
     /**
-     * Starts a persistent dialog
-     * 
-     * @throws IllegalStateException if keyword spot service is misconfigured
+     * Returns the current state of the dialog state machine.
+     */
+    public DialogState getState() {
+        return state;
+    }
+
+    /**
+     * Starts a persistent dialog.
+     *
      * @return {@link DTServiceHandle} or null if dialog fails to start
+     * @throws IllegalStateException if keyword spot service is misconfigured
      */
     public @Nullable DTServiceHandle start() throws IllegalStateException {
-        DTService dtService = dialogContext.dt();
-        String keyword = dialogContext.keyword();
-        if (dtService != null && keyword != null) {
-            abortKS();
-            closeStreamKS();
-            try {
-                if (dtService instanceof KSService ksService) {
-                    AudioFormat fmt = ksFormat;
-                    if (fmt == null) {
-                        logger.warn("No compatible audio format found for ks '{}' and source '{}'", ksService.getId(),
-                                dialogContext.source().getId());
-                        return null;
-                    }
-                    AudioStream stream = dialogContext.source().getInputStream(fmt);
-                    streamKS = stream;
-                    dtServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
-                } else if (dtService instanceof BasicDTService basicDTService) {
-                    dtServiceHandle = basicDTService.registerListener(this);
-                } else {
-                    logger.warn("Voice manager is not able to handle this DTService implementation '{}'",
-                            dtService.getClass().getName());
-                }
-                playStartSound();
-                return dtServiceHandle;
-            } catch (AudioException e) {
-                logger.warn("Encountered audio error: {}", e.getMessage());
-            } catch (KSException e) {
-                logger.warn("Encountered error calling spot: {}", e.getMessage());
-                closeStreamKS();
-            } catch (DTException e) {
-                logger.warn("Encountered error starting the dialog trigger: {}", e.getMessage());
-            }
-            return null;
-        } else {
-            throw new IllegalStateException("Unable to run persistent dialog ks service is not configured");
-        }
+        state = DialogState.WAITING_FOR_TRIGGER;
+        DTServiceHandle handle = audioDriver.startTrigger(this);
+        feedbackService.playStartSound();
+        return handle;
     }
 
     /**
-     * Starts a single dialog
+     * Starts a single dialog sequence (trigger spotted or direct listening).
      */
     public void startSimpleDialog() {
-        synchronized (activeDialogGroups) {
-            if (!activeDialogGroups.containsKey(dialogContext.dialogGroup())) {
-                logger.debug("Acquiring dialog group '{}'", dialogContext.dialogGroup());
-                activeDialogGroups.put(dialogContext.dialogGroup(), dialogContext);
-            } else {
-                logger.warn("Ignoring keyword spotting event, dialog group '{}' running", dialogContext.dialogGroup());
-                return;
-            }
-        }
-        closeStreamSTT();
-        isSTTServerAborting = false;
-        AudioFormat fmt = sttFormat;
-        if (fmt == null) {
-            logger.warn("No compatible audio format found for stt '{}' and source '{}'", dialogContext.stt().getId(),
-                    dialogContext.source().getId());
-            return;
-        }
-        playOnListeningSound();
+        state = DialogState.LISTENING;
+        feedbackService.playListeningSound();
         try {
-            AudioStream stream = dialogContext.source().getInputStream(fmt);
-            streamSTT = stream;
-            sttServiceHandle = dialogContext.stt().recognize(this, stream, dialogContext.locale());
-            return;
-        } catch (AudioException e) {
-            logger.warn("Error creating the audio stream: {}", e.getMessage());
+            audioDriver.startRecognition(this);
         } catch (STTException e) {
-            closeStreamSTT();
-            String msg = e.getMessage();
-            String text = i18nProvider.getText(bundle, "error.stt-exception", null, dialogContext.locale());
-            if (msg != null) {
-                say(text == null ? msg : text.replace("{0}", msg));
-            } else if (text != null) {
-                say(text.replace("{0}", ""));
-            }
-        }
-        // In case of error release dialog group
-        synchronized (activeDialogGroups) {
-            logger.debug("Releasing dialog group '{}' due to errors", dialogContext.dialogGroup());
-            activeDialogGroups.remove(dialogContext.dialogGroup());
+            String text = i18nProvider.getFormattedText("error.stt-exception", dialogContext.locale(), e.getMessage());
+            say(text);
+            finishDialog();
         }
     }
 
     /**
-     * Stops any dialog execution
+     * Stops any dialog execution.
      */
     public void stop() {
-        abortSTT();
-        closeStreamSTT();
-        abortKS();
-        closeStreamKS();
-        toggleProcessing(false);
-        playStopSound();
+        audioDriver.stopAll();
+        feedbackService.setListening(false);
+        feedbackService.playStopSound();
+        state = DialogState.IDLE;
         eventListener.onDialogStopped(dialogContext);
     }
 
     /**
-     * Returns the dialog context used to start this processor.
+     * Returns the dialog context used by this processor.
      */
     public DialogContext getContext() {
         return dialogContext;
     }
 
     /**
-     * Indicates if voice recognition is running.
+     * Indicates if speech recognition is currently listening.
      */
     public boolean isProcessing() {
-        return processing;
-    }
-
-    private void abortKS() {
-        DTServiceHandle handle = dtServiceHandle;
-        if (handle != null) {
-            handle.abort();
-            dtServiceHandle = null;
-        }
-    }
-
-    private void closeStreamKS() {
-        AudioStream stream = streamKS;
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                logger.debug("IOException closing ks audio stream: {}", e.getMessage(), e);
-            }
-            streamKS = null;
-        }
-    }
-
-    private void abortSTT() {
-        STTServiceHandle handle = sttServiceHandle;
-        if (handle != null) {
-            handle.abort();
-            sttServiceHandle = null;
-        }
-        isSTTServerAborting = true;
-        synchronized (activeDialogGroups) {
-            logger.debug("Releasing dialog group '{}'", dialogContext.dialogGroup());
-            activeDialogGroups.remove(dialogContext.dialogGroup());
-        }
-    }
-
-    private void closeStreamSTT() {
-        AudioStream stream = streamSTT;
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                logger.debug("IOException closing stt audio stream: {}", e.getMessage(), e);
-            }
-            streamSTT = null;
-        }
-    }
-
-    private void toggleProcessing(boolean value) {
-        if (processing == value) {
-            return;
-        }
-        processing = value;
-        String item = dialogContext.listeningItem();
-        if (item != null && ItemUtil.isValidItemName(item)) {
-            eventPublisher.post(ItemEventFactory.createCommandEvent(item, OnOffType.from(value)));
-        }
+        return state == DialogState.LISTENING;
     }
 
     @Override
     public void dtEventReceived(DTEvent dtEvent) {
-        isSTTServerAborting = false;
         if (dtEvent instanceof DTTriggeredEvent) {
             logger.debug("{} event received",
                     (dtEvent instanceof KSpottedEvent) ? "KSpottedEvent" : "DTTriggeredEvent");
@@ -341,8 +165,8 @@ public class DialogProcessor implements KSListener, STTListener {
             }
         } else if (dtEvent instanceof DTErrorEvent dte) {
             logger.debug("{} event received", dte instanceof KSErrorEvent ? "KSErrorEvent" : "DTErrorEvent");
-            String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
-            say(text == null ? dte.getMessage() : text.replace("{0}", dte.getMessage()));
+            String text = i18nProvider.getFormattedText("error.ks-error", dialogContext.locale(), dte.getMessage());
+            say(text);
         }
     }
 
@@ -355,43 +179,53 @@ public class DialogProcessor implements KSListener, STTListener {
     public synchronized void sttEventReceived(STTEvent sttEvent) {
         if (sttEvent instanceof SpeechRecognitionEvent sre) {
             logger.debug("SpeechRecognitionEvent event received");
-            if (!isSTTServerAborting) {
-                String question = sre.getTranscript();
-                logger.debug("Text recognized: {}", question);
-                toggleProcessing(false);
-                eventListener.onBeforeDialogInterpretation(dialogContext);
-                try {
-                    String answer = interpretationService.interpret(question, dialogContext.hlis(),
-                            dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
-                            dialogContext.locationItem(), dialogContext.systemPrompt());
-                    say(answer);
-                } catch (InterpretationException e) {
-                    String error = e.getMessage();
-                    say(error != null ? error : "Unexpected error");
-                }
-                abortSTT();
+            String question = sre.getTranscript();
+            logger.debug("Text recognized: {}", question);
+            feedbackService.setListening(false);
+            audioDriver.stopRecognition();
+            state = DialogState.INTERPRETING;
+            eventListener.onBeforeDialogInterpretation(dialogContext);
+            try {
+                String answer = interpretationService.interpret(question, dialogContext.hlis(),
+                        dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
+                        dialogContext.locationItem(), dialogContext.systemPrompt());
+                state = DialogState.SPEAKING;
+                say(answer);
+            } catch (InterpretationException e) {
+                String error = e.getMessage();
+                state = DialogState.SPEAKING;
+                say(error != null ? error : "Unexpected error");
             }
+            finishDialog();
         } else if (sttEvent instanceof RecognitionStartEvent) {
             logger.debug("RecognitionStartEvent event received");
-            toggleProcessing(true);
+            feedbackService.setListening(true);
         } else if (sttEvent instanceof RecognitionStopEvent) {
             logger.debug("RecognitionStopEvent event received");
-            toggleProcessing(false);
+            feedbackService.setListening(false);
         } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
             String message = sre.getMessage();
             logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
-            if (!isSTTServerAborting) {
-                abortSTT();
-                toggleProcessing(false);
-                if (!message.isEmpty()) {
-                    say(message);
-                }
+            audioDriver.stopRecognition();
+            feedbackService.setListening(false);
+            if (!message.isEmpty()) {
+                say(message);
             }
+            finishDialog();
+        }
+    }
+
+    private void finishDialog() {
+        if (dialogContext.dt() != null && dialogContext.keyword() != null) {
+            state = DialogState.WAITING_FOR_TRIGGER;
+        } else {
+            state = DialogState.IDLE;
+            eventListener.onDialogStopped(dialogContext);
         }
     }
 
     /**
-     * Says the passed command
+     * Speaks the passed text via {@link SpeechSynthesizer}.
      *
      * @param text The text to say
      */
@@ -417,41 +251,8 @@ public class DialogProcessor implements KSListener, STTListener {
         speechSynthesizer.say(text, dialogContext.tts(), voice, dialogContext.sink(), null);
     }
 
-    private void playStartSound() {
-        playNotes(Stream.of(ToneSynthesizer.Note.G, ToneSynthesizer.Note.A, ToneSynthesizer.Note.B)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
-    }
-
-    private void playStopSound() {
-        playNotes(Stream.of(ToneSynthesizer.Note.B, ToneSynthesizer.Note.A, ToneSynthesizer.Note.G)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
-    }
-
-    private void playOnListeningSound() {
-        var listeningMelody = this.listeningMelody;
-        if (listeningMelody != null) {
-            playNotes(listeningMelody);
-        }
-    }
-
-    private void playNotes(List<ToneSynthesizer.Tone> notes) {
-        var toneSynthesizer = this.toneSynthesizer;
-        if (toneSynthesizer != null) {
-            try (AudioStream stream = toneSynthesizer.getStream(notes)) {
-                var sink = dialogContext.sink();
-                if (sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(stream))) {
-                    sink.process(stream);
-                } else {
-                    logger.warn("Failed playing synthesizer sound as audio sink doesn't support it.");
-                }
-            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException | IOException e) {
-                logger.warn("{} playing synthesizer sound: {}", e.getClass().getName(), e.getMessage());
-            }
-        }
-    }
-
     /**
-     * Check if other DialogProcessor instance have same configuration ignoring the keyword spotting configuration
+     * Check if other DialogProcessor instance has the same configuration ignoring keyword spotting configuration.
      *
      * @param dialogProcessor Other DialogProcessor instance
      */
@@ -469,14 +270,14 @@ public class DialogProcessor implements KSListener, STTListener {
 
     public interface DialogEventListener {
         /**
-         * Runs before starting to interpret the transcription result
+         * Runs before starting to interpret the transcription result.
          *
          * @param context used by the dialog processor
          */
         void onBeforeDialogInterpretation(DialogContext context);
 
         /**
-         * Runs whenever the dialog it stopped
+         * Runs whenever the dialog is stopped.
          *
          * @param context used by the dialog processor
          */

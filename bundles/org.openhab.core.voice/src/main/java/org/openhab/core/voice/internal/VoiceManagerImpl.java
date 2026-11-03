@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,12 +24,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -39,25 +32,19 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.common.ThreadPoolManager;
-import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
-import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.library.types.PercentType;
-import org.openhab.core.storage.Storage;
-import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.DialogRegistration;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
-import org.openhab.core.voice.internal.dialog.DialogProcessor;
+import org.openhab.core.voice.internal.dialog.DialogManager;
 import org.openhab.core.voice.internal.stt.AudioTranscriber;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
@@ -67,24 +54,17 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
-import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.openhab.core.voice.tts.TTSException;
 import org.openhab.core.voice.tts.TTSService;
 import org.openhab.core.voice.tts.TTSServiceRegistry;
 import org.openhab.core.voice.tts.Voice;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,17 +81,17 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Add transcribe method
  * @author Florian Hotze - Extract OSGi service tracking into
  *         {@link org.openhab.core.common.registry.AbstractServiceRegistry}s; Extract shared functionality into
- *         dedicated services
+ *         dedicated services; Extract dialog lifecycle and persistence into {@link DialogManager}
  */
 @Component(immediate = true, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
 @ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfigurationConstants.CONFIG_URI)
 @NonNullByDefault
-public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener {
+public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
-    private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
-            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
+    private final LocaleProvider localeProvider;
+    private final AudioManager audioManager;
     private final TTSServiceRegistry ttsRegistry;
     private final STTServiceRegistry sttRegistry;
     private final KSServiceRegistry ksRegistry;
@@ -121,126 +101,21 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final AudioTranscriber audioTranscriber;
     private final InterpretationService interpretationService;
     private final SpeechSynthesizer speechSynthesizer;
-
-    private final RegistryChangeListener<LLMTool> llmToolListener = new RegistryChangeListener<>() {
-        @Override
-        public void added(LLMTool tool) {
-            scheduleDialogRegistrations();
-        }
-
-        @Override
-        public void removed(LLMTool tool) {
-            stopDialogs(
-                    dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
-        }
-
-        @Override
-        public void updated(LLMTool oldElement, LLMTool element) {
-        }
-    };
-
-    private final RegistryChangeListener<TTSService> ttsListener = new RegistryChangeListener<>() {
-        @Override
-        public void added(TTSService ttsService) {
-            scheduleDialogRegistrations();
-        }
-
-        @Override
-        public void removed(TTSService ttsService) {
-            stopDialogs(dialog -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
-        }
-
-        @Override
-        public void updated(TTSService oldElement, TTSService element) {
-        }
-    };
-
-    private final RegistryChangeListener<STTService> sttListener = new RegistryChangeListener<>() {
-        @Override
-        public void added(STTService sttService) {
-            scheduleDialogRegistrations();
-        }
-
-        @Override
-        public void removed(STTService sttService) {
-            stopDialogs(dialog -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
-        }
-
-        @Override
-        public void updated(STTService oldElement, STTService element) {
-        }
-    };
-
-    private final RegistryChangeListener<KSService> ksListener = new RegistryChangeListener<>() {
-        @Override
-        public void added(KSService ksService) {
-            scheduleDialogRegistrations();
-        }
-
-        @Override
-        public void removed(KSService ksService) {
-            stopDialogs(dialog -> {
-                var dt = dialog.dialogContext.dt();
-                return dt != null && dt.getId().equals(ksService.getId());
-            });
-        }
-
-        @Override
-        public void updated(KSService oldElement, KSService element) {
-        }
-    };
-
-    private final RegistryChangeListener<HumanLanguageInterpreter> hliListener = new RegistryChangeListener<>() {
-        @Override
-        public void added(HumanLanguageInterpreter humanLanguageInterpreter) {
-            scheduleDialogRegistrations();
-        }
-
-        @Override
-        public void removed(HumanLanguageInterpreter humanLanguageInterpreter) {
-            stopDialogs(dialog -> dialog.dialogContext.hlis().stream()
-                    .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
-        }
-
-        @Override
-        public void updated(HumanLanguageInterpreter oldElement, HumanLanguageInterpreter element) {
-        }
-    };
-
-    private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
-
-    private final LocaleProvider localeProvider;
-    private final AudioManager audioManager;
-    private final EventPublisher eventPublisher;
-    private final TranslationProvider i18nProvider;
-    private final Storage<DialogRegistration> dialogRegistrationStorage;
+    private final DialogManager dialogManager;
     private final VoiceManagerConfiguration configuration;
-
-    private @Nullable Bundle bundle;
-
-    private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
-    private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
-    private @Nullable DialogContext lastDialogContext;
-    private @Nullable ScheduledFuture<?> dialogRegistrationFuture;
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
-            final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
-            final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
-            final @Reference TTSServiceRegistry ttsRegistry, final @Reference STTServiceRegistry sttRegistry,
-            final @Reference KSServiceRegistry ksRegistry,
+            final @Reference LLMToolRegistry llmToolRegistry, final @Reference TTSServiceRegistry ttsRegistry,
+            final @Reference STTServiceRegistry sttRegistry, final @Reference KSServiceRegistry ksRegistry,
             final @Reference HumanLanguageInterpreterRegistry hliRegistry,
             final @Reference ConversationManager conversationManager,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
             final @Reference AudioTranscriber audioTranscriber,
             final @Reference InterpretationService interpretationService,
-            final @Reference SpeechSynthesizer speechSynthesizer) {
+            final @Reference SpeechSynthesizer speechSynthesizer, final @Reference DialogManager dialogManager) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
-        this.eventPublisher = eventPublisher;
-        this.i18nProvider = i18nProvider;
-        this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
-                this.getClass().getClassLoader());
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
         this.ttsRegistry = ttsRegistry;
@@ -250,35 +125,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.audioTranscriber = audioTranscriber;
         this.interpretationService = interpretationService;
         this.speechSynthesizer = speechSynthesizer;
+        this.dialogManager = dialogManager;
         this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
     }
 
     @Activate
-    protected void activate(BundleContext bundleContext, Map<String, Object> config) {
-        this.bundle = bundleContext.getBundle();
-        llmToolRegistry.addRegistryChangeListener(llmToolListener);
-        ttsRegistry.addRegistryChangeListener(ttsListener);
-        sttRegistry.addRegistryChangeListener(sttListener);
-        ksRegistry.addRegistryChangeListener(ksListener);
-        hliRegistry.addRegistryChangeListener(hliListener);
+    protected void activate(Map<String, Object> config) {
         modified(config);
-        scheduleDialogRegistrations();
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        llmToolRegistry.removeRegistryChangeListener(llmToolListener);
-        ttsRegistry.removeRegistryChangeListener(ttsListener);
-        sttRegistry.removeRegistryChangeListener(sttListener);
-        ksRegistry.removeRegistryChangeListener(ksListener);
-        hliRegistry.removeRegistryChangeListener(hliListener);
-        dialogProcessors.values().forEach(DialogProcessor::stop);
-        dialogProcessors.clear();
-        ScheduledFuture<?> dialogRegistrationFuture = this.dialogRegistrationFuture;
-        if (dialogRegistrationFuture != null) {
-            dialogRegistrationFuture.cancel(true);
-            this.dialogRegistrationFuture = null;
-        }
     }
 
     @SuppressWarnings("null")
@@ -497,203 +350,58 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public DialogContext.Builder getDialogContextBuilder() {
-        return new DialogContext.Builder(configuration.getKeyword(), localeProvider.getLocale()) //
-                .withSink(audioManager.getSink()) //
-                .withSource(audioManager.getSource()) //
-                .withConversation(conversationManager.getConversation("")) //
-                .withKS(this.getKS()) //
-                .withSTT(this.getSTT()) //
-                .withTTS(this.getTTS()) //
-                .withHLI(this.getHLI()) //
-                .withVoice(this.getDefaultVoice()) //
-                .withMelody(configuration.getListeningMelody()) //
-                .withListeningItem(configuration.getListeningItem()) //
-                .withLLMTools(llmToolRegistry.getAll()) //
-                .withSystemPrompt(configuration.getSystemPrompt());
+        return dialogManager.getDialogContextBuilder();
     }
 
     @Override
     public List<DialogContext> getDialogsContexts() {
-        return dialogProcessors.values().stream().map(DialogProcessor::getContext).toList();
+        return dialogManager.getDialogsContexts();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public @Nullable DialogContext getLastDialogContext() {
-        return lastDialogContext;
+        return dialogManager.getLastDialogContext();
     }
 
     @Override
     public @Nullable DTServiceHandle startDialog(DialogContext context) throws IllegalStateException {
-        var dtService = context.dt();
-        var ksKeyword = context.keyword();
-        if (dtService == null) {
-            throw new IllegalStateException(
-                    "Invalid dialog context for persistent dialog: missing dialog trigger implementation");
-        }
-        if (dtService instanceof KSService && (ksKeyword == null || ksKeyword.isEmpty())) {
-            throw new IllegalStateException(
-                    "Invalid dialog context for persistent dialog: missing keyword spot configuration");
-        }
-        Bundle b = bundle;
-        if (b == null) {
-            throw new IllegalStateException("Bundle is not (yet?) set.");
-        }
-        if ((dtService instanceof KSService ksService
-                && !checkLocales(ksService.getSupportedLocales(), context.locale()))
-                || !checkLocales(context.stt().getSupportedLocales(), context.locale()) || !context.hlis().stream()
-                        .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), context.locale()))) {
-            throw new IllegalStateException("Cannot start dialog as provided locale is not supported by all services.");
-        } else {
-            DialogProcessor processor = dialogProcessors.get(context.source().getId());
-            if (processor == null) {
-                logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
-                        context.source().getId());
-                processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                        this.i18nProvider, b, this.interpretationService, this.speechSynthesizer);
-                dialogProcessors.put(context.source().getId(), processor);
-                return processor.start();
-            } else {
-                throw new IllegalStateException(
-                        String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
-                                context.source().getLabel(null)));
-            }
-        }
+        return dialogManager.startDialog(context);
     }
 
     @Override
     public void stopDialog(@Nullable AudioSource source) throws IllegalStateException {
-        AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
-        if (audioSource != null) {
-            DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
-            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
-            if (processor == null) {
-                processor = singleDialogProcessors.get(audioSource.getId());
-            }
-            if (processor != null) {
-                processor.stop();
-                logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
-            } else {
-                throw new IllegalStateException(
-                        String.format("Cannot stop dialog as no dialog is started for audio source '%s'.",
-                                audioSource.getLabel(null)));
-            }
-        } else {
-            throw new IllegalStateException("Cannot stop dialog as audio source is missing.");
-        }
+        dialogManager.stopDialog(source);
     }
 
     @Override
     public void stopDialog(DialogContext context) throws IllegalStateException {
-        stopDialog(context.source());
+        dialogManager.stopDialog(context);
     }
 
     @Override
     public void listenAndAnswer(DialogContext context) throws IllegalStateException {
-        Bundle b = bundle;
-        if (b == null) {
-            throw new IllegalStateException("Cannot execute a simple dialog as services are missing.");
-        } else if (!checkLocales(context.stt().getSupportedLocales(), context.locale()) || !context.hlis().stream()
-                .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), context.locale()))) {
-            throw new IllegalStateException(
-                    "Cannot execute a simple dialog as provided locale is not supported by all services.");
-        } else {
-            boolean isSingleDialog = false;
-            var audioSource = context.source();
-            DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
-            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
-            if (activeProcessor == null) {
-                isSingleDialog = true;
-                activeProcessor = singleDialogProcessors.get(audioSource.getId());
-            }
-            var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvider, b, this.interpretationService, this.speechSynthesizer);
-            if (activeProcessor == null) {
-                logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
-                        audioSource.getId());
-                processor.startSimpleDialog();
-                singleDialogProcessors.put(audioSource.getId(), processor);
-            } else if (!isSingleDialog && activeProcessor.isCompatible(processor)) {
-                logger.debug("Executing a simple dialog for active source {} ({})", audioSource.getLabel(null),
-                        audioSource.getId());
-                activeProcessor.startSimpleDialog();
-            } else {
-                throw new IllegalStateException(String.format(
-                        "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
-                        audioSource.getLabel(null)));
-            }
-        }
+        dialogManager.listenAndAnswer(context);
     }
 
     @Override
     public void registerDialog(DialogRegistration registration) throws IllegalStateException {
-        if (dialogRegistrationStorage.containsKey(registration.sourceId)) {
-            throw new IllegalStateException(String.format(
-                    "Cannot register dialog as a dialog is registered for audio source '%s'.", registration.sourceId));
-        }
-        synchronized (dialogRegistrationStorage) {
-            dialogRegistrationStorage.put(registration.sourceId, registration);
-        }
-        scheduleDialogRegistrations();
+        dialogManager.registerDialog(registration);
     }
 
     @Override
     public void unregisterDialog(DialogRegistration registration) {
-        unregisterDialog(registration.sourceId);
+        dialogManager.unregisterDialog(registration);
     }
 
     @Override
     public void unregisterDialog(String sourceId) {
-        synchronized (dialogRegistrationStorage) {
-            var registrationRef = dialogRegistrationStorage.remove(sourceId);
-            if (registrationRef != null) {
-                var dialog = dialogProcessors.get(sourceId);
-                if (dialog != null) {
-                    stopDialog(dialog.dialogContext);
-                }
-            }
-        }
+        dialogManager.unregisterDialog(sourceId);
     }
 
     @Override
     public List<DialogRegistration> getDialogRegistrations() {
-        var list = new ArrayList<DialogRegistration>();
-        dialogRegistrationStorage.getValues().forEach(dr -> {
-            if (dr != null) {
-                // update running state
-                dr.running = dialogProcessors.containsKey(dr.sourceId);
-                list.add(dr);
-            }
-        });
-        return list;
-    }
-
-    private boolean checkLocales(Set<Locale> supportedLocales, Locale locale) {
-        if (supportedLocales.isEmpty()) {
-            return true;
-        }
-        return supportedLocales.stream().anyMatch(sLocale -> {
-            var country = sLocale.getCountry();
-            return Objects.equals(sLocale.getLanguage(), locale.getLanguage())
-                    && (country == null || country.isBlank() || country.equals(locale.getCountry()));
-        });
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAudioSink(AudioSink audioSink) {
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeAudioSink(AudioSink audioSink) {
-        stopDialogs(dialog -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAudioSource(AudioSource audioSource) {
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeAudioSource(AudioSource audioSource) {
-        stopDialogs(dialog -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
+        return dialogManager.getDialogRegistrations();
     }
 
     @Override
@@ -894,82 +602,5 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             }
         }
         return null;
-    }
-
-    private void stopDialogs(Predicate<DialogProcessor> filter) {
-        synchronized (dialogRegistrationStorage) {
-            var dialogsToStop = dialogProcessors.values().stream().filter(filter).toList();
-            if (dialogsToStop.isEmpty()) {
-                return;
-            }
-            for (var dialog : dialogsToStop) {
-                stopDialog(dialog.dialogContext.source());
-            }
-        }
-    }
-
-    /**
-     * In order to reduce the number of dialog registration builds
-     * this method schedules a call to {@link #buildDialogRegistrations() buildDialogRegistrations} in five seconds
-     * and cancel the previous scheduled call if any.
-     */
-    private void scheduleDialogRegistrations() {
-        ScheduledFuture<?> job = this.dialogRegistrationFuture;
-        if (job != null) {
-            job.cancel(false);
-        }
-        dialogRegistrationFuture = scheduledExecutorService.schedule(this::buildDialogRegistrations, 5,
-                TimeUnit.SECONDS);
-    }
-
-    /**
-     * This method tries to start a dialog for each dialog registration.
-     * It's only called from {@link #scheduleDialogRegistrations() scheduleDialogRegistrations} in order to
-     * reduce the number of executions.
-     */
-    private void buildDialogRegistrations() {
-        synchronized (dialogRegistrationStorage) {
-            dialogRegistrationStorage.getValues().forEach(dr -> {
-                if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
-                    try {
-                        Conversation conversation = conversationManager
-                                .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
-                        startDialog(getDialogContextBuilder() //
-                                .withSink(audioManager.getSink(dr.sinkId)) //
-                                .withSource(audioManager.getSource(dr.sourceId)) //
-                                .withKS(getKS(dr.ksId)) //
-                                .withKeyword(dr.keyword) //
-                                .withSTT(getSTT(dr.sttId)) //
-                                .withTTS(getTTS(dr.ttsId)) //
-                                .withVoice(getVoice(dr.voiceId)) //
-                                .withHLIs(getHLIsByIds(dr.hliIds)) //
-                                .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
-                                .withLocale(dr.locale) //
-                                .withDialogGroup(dr.dialogGroup) //
-                                .withConversation(conversation) //
-                                .withLocationItem(dr.locationItem) //
-                                .withListeningItem(dr.listeningItem) //
-                                .withMelody(dr.listeningMelody) //
-                                .build());
-                    } catch (IllegalStateException e) {
-                        logger.debug("Unable to start dialog registration: {}", e.getMessage());
-                    }
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onBeforeDialogInterpretation(DialogContext context) {
-        lastDialogContext = context;
-    }
-
-    @Override
-    public void onDialogStopped(DialogContext context) {
-        var registration = dialogRegistrationStorage.get(context.source().getId());
-        if (registration != null) {
-            // try to rebuild in case it was manually stopped
-            scheduleDialogRegistrations();
-        }
     }
 }
