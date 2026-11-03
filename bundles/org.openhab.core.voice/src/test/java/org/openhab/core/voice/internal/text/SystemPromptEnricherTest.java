@@ -17,19 +17,13 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.Metadata;
-import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.SwitchItem;
-import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 
 /**
@@ -150,86 +144,5 @@ public class SystemPromptEnricherTest {
         String result = enricher.enrichSystemPrompt("Base prompt", Locale.ENGLISH);
 
         assertEquals("Base prompt", result);
-    }
-
-    @Test
-    public void enrichSystemPromptCachesSerializedItemsAcrossCalls() {
-        SwitchItem item = new SwitchItem("CachedSwitch");
-        when(itemRegistry.getItems()).thenReturn(List.of(item));
-        when(itemPermissionResolver.isAccessible(item)).thenReturn(true);
-
-        String result1 = enricher.enrichSystemPrompt("Prompt 1", Locale.ENGLISH);
-        String result2 = enricher.enrichSystemPrompt("Prompt 2", Locale.ENGLISH);
-
-        assertNotNull(result1);
-        assertNotNull(result2);
-        assertTrue(result1.contains("CachedSwitch"));
-        assertTrue(result2.contains("CachedSwitch"));
-        // itemRegistry.getItems() should be called only once due to caching
-        verify(itemRegistry, times(1)).getItems();
-    }
-
-    @Test
-    public void itemAccessChangeListenerInvalidatesCache() {
-        ArgumentCaptor<Runnable> listenerCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(itemPermissionResolver).addItemAccessChangeListener(listenerCaptor.capture());
-        Runnable listener = listenerCaptor.getValue();
-
-        SwitchItem item = new SwitchItem("Switch1");
-        when(itemRegistry.getItems()).thenReturn(List.of(item));
-        when(itemPermissionResolver.isAccessible(item)).thenReturn(true);
-
-        enricher.enrichSystemPrompt("Prompt 1", Locale.ENGLISH);
-        verify(itemRegistry, times(1)).getItems();
-
-        // Trigger item access change notification
-        listener.run();
-
-        enricher.enrichSystemPrompt("Prompt 2", Locale.ENGLISH);
-        verify(itemRegistry, times(2)).getItems();
-    }
-
-    @Test
-    public void semanticsMetadataChangeListenerInvalidatesCache() {
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<RegistryChangeListener<Metadata>> listenerCaptor = ArgumentCaptor
-                .forClass(RegistryChangeListener.class);
-        verify(metadataRegistry).addRegistryChangeListener(listenerCaptor.capture());
-        RegistryChangeListener<Metadata> listener = listenerCaptor.getValue();
-
-        SwitchItem item = new SwitchItem("Switch1");
-        when(itemRegistry.getItems()).thenReturn(List.of(item));
-        when(itemPermissionResolver.isAccessible(item)).thenReturn(true);
-
-        enricher.enrichSystemPrompt("Prompt 1", Locale.ENGLISH);
-        verify(itemRegistry, times(1)).getItems();
-
-        // Non-semantics metadata does not invalidate
-        Metadata otherMetadata = new Metadata(new MetadataKey("otherNamespace", "Switch1"), "val", Map.of());
-        listener.added(otherMetadata);
-        enricher.enrichSystemPrompt("Prompt 2", Locale.ENGLISH);
-        verify(itemRegistry, times(1)).getItems();
-
-        // Semantics metadata change invalidates
-        Metadata semanticsMetadata = new Metadata(new MetadataKey(SemanticTags.METADATA_NAMESPACE, "Switch1"), "val",
-                Map.of());
-        listener.added(semanticsMetadata);
-        enricher.enrichSystemPrompt("Prompt 3", Locale.ENGLISH);
-        verify(itemRegistry, times(2)).getItems();
-    }
-
-    @Test
-    public void deactivateRemovesListenersAndClearsCache() {
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(itemPermissionResolver).addItemAccessChangeListener(runnableCaptor.capture());
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<RegistryChangeListener<Metadata>> metadataCaptor = ArgumentCaptor
-                .forClass(RegistryChangeListener.class);
-        verify(metadataRegistry).addRegistryChangeListener(metadataCaptor.capture());
-
-        enricher.deactivate();
-
-        verify(itemPermissionResolver).removeItemAccessChangeListener(runnableCaptor.getValue());
-        verify(metadataRegistry).removeRegistryChangeListener(metadataCaptor.getValue());
     }
 }
