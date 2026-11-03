@@ -145,7 +145,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
     /**
      * Converts a {@link XmlTags} list into a list of Strings containing the respective tag values
      */
-    private static @Nullable List<String> toStrings(@Nullable XmlTags xmlTags) {
+    private @Nullable List<String> toStrings(@Nullable XmlTags xmlTags) {
         if (xmlTags == null) {
             return null;
         }
@@ -158,7 +158,10 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
         if (property != null) {
             tags.add(property);
         }
-        tags.addAll(xmlTags.getTag());
+        for (String tag : xmlTags.getTag()) {
+            logger.warn("DEPRECATED 'tag' use 'point' or 'property' instead (tag value: '{}').", tag);
+            tags.add(tag);
+        }
         return tags;
     }
 
