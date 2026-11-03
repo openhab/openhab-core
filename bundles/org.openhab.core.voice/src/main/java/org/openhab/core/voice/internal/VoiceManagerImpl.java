@@ -48,9 +48,6 @@ import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
-import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -64,7 +61,6 @@ import org.openhab.core.voice.internal.dialog.DialogProcessor;
 import org.openhab.core.voice.internal.stt.AudioTranscriber;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
-import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.stt.STTServiceRegistry;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
@@ -73,7 +69,6 @@ import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
-import org.openhab.core.voice.text.interpreter.llm.LLMItemSerializer;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.openhab.core.voice.tts.TTSException;
@@ -104,6 +99,9 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
  * @author Miguel Álvarez - Use dialog context
  * @author Miguel Álvarez - Add transcribe method
+ * @author Florian Hotze - Extract OSGi service tracking into
+ *         {@link org.openhab.core.common.registry.AbstractServiceRegistry}s; Extract shared functionality into
+ *         dedicated services
  */
 @Component(immediate = true, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
@@ -120,9 +118,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final HumanLanguageInterpreterRegistry hliRegistry;
     private final LLMToolRegistry llmToolRegistry;
     private final ConversationManager conversationManager;
-    private final ItemRegistry itemRegistry;
-    private final MetadataRegistry metadataRegistry;
-    private final ItemPermissionResolver itemPermissionResolver;
     private final AudioTranscriber audioTranscriber;
     private final InterpretationService interpretationService;
     private final SpeechSynthesizer speechSynthesizer;
@@ -237,8 +232,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             final @Reference HumanLanguageInterpreterRegistry hliRegistry,
             final @Reference ConversationManager conversationManager,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
-            final @Reference ItemRegistry itemRegistry, final @Reference MetadataRegistry metadataRegistry,
-            final @Reference ItemPermissionResolver itemPermissionResolver,
             final @Reference AudioTranscriber audioTranscriber,
             final @Reference InterpretationService interpretationService,
             final @Reference SpeechSynthesizer speechSynthesizer) {
@@ -254,9 +247,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.sttRegistry = sttRegistry;
         this.ksRegistry = ksRegistry;
         this.hliRegistry = hliRegistry;
-        this.itemRegistry = itemRegistry;
-        this.metadataRegistry = metadataRegistry;
-        this.itemPermissionResolver = itemPermissionResolver;
         this.audioTranscriber = audioTranscriber;
         this.interpretationService = interpretationService;
         this.speechSynthesizer = speechSynthesizer;
@@ -426,10 +416,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             if (nullSafeArgs.locationItem() != null && !nullSafeArgs.locationItem().isBlank()) {
                 locationItem = nullSafeArgs.locationItem();
             }
-            String enrichedPrompt = enrichSystemPrompt(configuration.getSystemPrompt(), locale);
             return interpretationService.interpret(text, interpreters,
                     conversationManager.getConversation(nullSafeArgs.conversationId()),
-                    llmToolRegistry.getByIds(nullSafeArgs.toolIdList()), locale, locationItem, enrichedPrompt);
+                    llmToolRegistry.getByIds(nullSafeArgs.toolIdList()), locale, locationItem,
+                    configuration.getSystemPrompt());
         }
 
         if (nullSafeArgs.hliIdList().isEmpty()) {
@@ -981,18 +971,5 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             // try to rebuild in case it was manually stopped
             scheduleDialogRegistrations();
         }
-    }
-
-    @Override
-    public String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale) {
-        String base = baseSystemPrompt != null ? baseSystemPrompt : "";
-        List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
-                .toList();
-        String serializedItems = LLMItemSerializer.serialize(accessibleItems, metadataRegistry, locale);
-        if (serializedItems.isEmpty()) {
-            return base;
-        }
-        String itemsSection = "Available items:\n" + serializedItems;
-        return base.isEmpty() ? itemsSection : base + "\n\n" + itemsSection;
     }
 }

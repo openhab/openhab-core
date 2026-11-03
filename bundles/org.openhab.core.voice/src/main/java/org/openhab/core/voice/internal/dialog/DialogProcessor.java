@@ -15,7 +15,6 @@ package org.openhab.core.voice.internal.dialog;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
@@ -364,8 +363,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 try {
                     String answer = interpretationService.interpret(question, dialogContext.hlis(),
                             dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
-                            dialogContext.locationItem(),
-                            eventListener.enrichSystemPrompt(dialogContext.systemPrompt(), dialogContext.locale()));
+                            dialogContext.locationItem(), dialogContext.systemPrompt());
                     say(answer);
                 } catch (InterpretationException e) {
                     String error = e.getMessage();
@@ -483,14 +481,5 @@ public class DialogProcessor implements KSListener, STTListener {
          * @param context used by the dialog processor
          */
         void onDialogStopped(DialogContext context);
-
-        /**
-         * Enriches the system prompt with additional context, e.g., available items.
-         *
-         * @param baseSystemPrompt the base system prompt
-         * @param locale the locale to use for command options localization
-         * @return the system prompt with the additional context
-         */
-        String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale);
     }
 }

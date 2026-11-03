@@ -41,6 +41,7 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
 public class InterpretationServiceTest {
 
     private @NonNullByDefault({}) InterpretationService service;
+    private @NonNullByDefault({}) SystemPromptEnricher systemPromptEnricher;
 
     private @NonNullByDefault({}) Conversation conversation;
     private @NonNullByDefault({}) HumanLanguageInterpreter hli1;
@@ -51,7 +52,10 @@ public class InterpretationServiceTest {
         LocaleProvider localeProvider = mock(LocaleProvider.class);
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
 
-        service = new InterpretationService(localeProvider);
+        systemPromptEnricher = mock(SystemPromptEnricher.class);
+        when(systemPromptEnricher.enrichSystemPrompt(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service = new InterpretationService(localeProvider, systemPromptEnricher);
 
         conversation = mock(Conversation.class);
         hli1 = mock(HumanLanguageInterpreter.class);
@@ -110,5 +114,18 @@ public class InterpretationServiceTest {
                 conversation, List.of(), Locale.ENGLISH, null, "base"));
 
         verify(conversation).addMessage(ConversationRole.OPENHAB, "error2");
+    }
+
+    @Test
+    public void interpretEnrichesSystemPromptAndPassesToContext() throws Exception {
+        when(systemPromptEnricher.enrichSystemPrompt(eq("base prompt"), eq(Locale.ENGLISH)))
+                .thenReturn("enriched prompt");
+        when(hli1.interpret(eq(Locale.ENGLISH), any(InterpreterContext.class))).thenReturn("success answer");
+
+        service.interpret("turn on light", List.of(hli1), conversation, List.of(), Locale.ENGLISH, null, "base prompt");
+
+        verify(systemPromptEnricher).enrichSystemPrompt("base prompt", Locale.ENGLISH);
+        verify(hli1).interpret(eq(Locale.ENGLISH),
+                argThat((InterpreterContext ctx) -> "enriched prompt".equals(ctx.systemPrompt())));
     }
 }
