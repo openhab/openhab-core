@@ -33,6 +33,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.internal.text.InterpretationService;
+import org.openhab.core.voice.internal.text.SystemPromptEnricher;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
@@ -60,7 +61,10 @@ public class DialogProcessorTest {
         LocaleProvider localeProvider = mock(LocaleProvider.class);
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
 
-        interpretationService = new InterpretationService(localeProvider);
+        SystemPromptEnricher systemPromptEnricher = mock(SystemPromptEnricher.class);
+        when(systemPromptEnricher.enrichSystemPrompt(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        interpretationService = new InterpretationService(localeProvider, systemPromptEnricher);
     }
 
     @Test

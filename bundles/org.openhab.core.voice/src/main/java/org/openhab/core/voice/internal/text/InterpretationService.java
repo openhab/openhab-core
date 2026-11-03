@@ -46,10 +46,13 @@ public class InterpretationService {
     private final Logger logger = LoggerFactory.getLogger(InterpretationService.class);
 
     private final LocaleProvider localeProvider;
+    private final SystemPromptEnricher systemPromptEnricher;
 
     @Activate
-    public InterpretationService(final @Reference LocaleProvider localeProvider) {
+    public InterpretationService(final @Reference LocaleProvider localeProvider,
+            final @Reference SystemPromptEnricher systemPromptEnricher) {
         this.localeProvider = localeProvider;
+        this.systemPromptEnricher = systemPromptEnricher;
     }
 
     /**
@@ -61,13 +64,13 @@ public class InterpretationService {
      * @param tools tools available for LLM interpreters
      * @param locale target locale
      * @param locationItem optional location item
-     * @param enrichedSystemPrompt optional enriched system prompt
+     * @param baseSystemPrompt optional base LLM system prompt
      * @return the interpretation result
      * @throws InterpretationException if interpretation fails
      */
     public String interpret(String text, List<HumanLanguageInterpreter> interpreters, Conversation conversation,
             Collection<LLMTool> tools, @Nullable Locale locale, @Nullable String locationItem,
-            @Nullable String enrichedSystemPrompt) throws InterpretationException {
+            @Nullable String baseSystemPrompt) throws InterpretationException {
         try {
             conversation.addMessage(ConversationRole.USER, text);
         } catch (ConversationException e) {
@@ -76,10 +79,11 @@ public class InterpretationService {
                     errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
         }
 
-        InterpreterContext context = new InterpreterContext(conversation, tools, locationItem, enrichedSystemPrompt);
-        InterpretationException exception = null;
-
         Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
+        String enrichedPrompt = systemPromptEnricher.enrichSystemPrompt(baseSystemPrompt, nullSafeLocale);
+
+        InterpreterContext context = new InterpreterContext(conversation, tools, locationItem, enrichedPrompt);
+        InterpretationException exception = null;
 
         for (var interpreter : interpreters) {
             try {
