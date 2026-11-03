@@ -118,7 +118,7 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
 
-    public final DialogContext dialogContext;
+    private final DialogContext dialogContext;
     private final DialogAudioDriver audioDriver;
     private final DialogFeedbackService feedbackService;
     private final InterpretationService interpretationService;

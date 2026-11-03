@@ -108,7 +108,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         @Override
         public void removed(KSService ksService) {
             stopDialogs(dialog -> {
-                var dt = dialog.dialogContext.dt();
+                var dt = dialog.getContext().dt();
                 return dt != null && dt.getId().equals(ksService.getId());
             });
         }
@@ -126,7 +126,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
         @Override
         public void removed(STTService sttService) {
-            stopDialogs(dialog -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
+            stopDialogs(dialog -> dialog.getContext().stt().getId().equals(sttService.getId()));
         }
 
         @Override
@@ -143,7 +143,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         @Override
         public void removed(LLMTool tool) {
             stopDialogs(
-                    dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
+                    dialog -> dialog.getContext().llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
         }
 
         @Override
@@ -159,7 +159,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
         @Override
         public void removed(HumanLanguageInterpreter humanLanguageInterpreter) {
-            stopDialogs(dialog -> dialog.dialogContext.hlis().stream()
+            stopDialogs(dialog -> dialog.getContext().hlis().stream()
                     .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
         }
 
@@ -176,7 +176,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
         @Override
         public void removed(TTSService ttsService) {
-            stopDialogs(dialog -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
+            stopDialogs(dialog -> dialog.getContext().tts().getId().equals(ttsService.getId()));
         }
 
         @Override
@@ -268,7 +268,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     protected void removeAudioSink(AudioSink audioSink) {
-        stopDialogs(dialog -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
+        stopDialogs(dialog -> dialog.getContext().sink().getId().equals(audioSink.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -277,7 +277,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     protected void removeAudioSource(AudioSource audioSource) {
-        stopDialogs(dialog -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
+        stopDialogs(dialog -> dialog.getContext().source().getId().equals(audioSource.getId()));
     }
 
     @Override
@@ -437,7 +437,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         if (registration != null) {
             var dialog = dialogProcessors.get(sourceId);
             if (dialog != null) {
-                stopDialog(dialog.dialogContext);
+                stopDialog(dialog.getContext());
             }
         }
     }
@@ -481,7 +481,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             return;
         }
         for (var dialog : dialogsToStop) {
-            stopDialog(dialog.dialogContext.source());
+            stopDialog(dialog.getContext().source());
         }
     }
 
