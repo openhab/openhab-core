@@ -43,6 +43,53 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles a dialog with the user as a pure state machine orchestrating trigger listening, speech recognition,
  * human language interpretation, and speech synthesis.
+ * <p>
+ * The processor operates through the following states:
+ * <ul>
+ * <li>{@link DialogState#IDLE}: The initial state and the resting state for one-shot (simple) dialogs. Also reached
+ * when the dialog is explicitly stopped.</li>
+ * <li>{@link DialogState#WAITING_FOR_TRIGGER}: Active state for persistent dialogs waiting for keyword spotting or
+ * an external dialog trigger.</li>
+ * <li>{@link DialogState#LISTENING}: Speech-to-text recognition is actively listening and streaming audio from the
+ * audio source.</li>
+ * <li>{@link DialogState#INTERPRETING}: Audio stream is closed; the recognized transcription text is being processed
+ * by the {@link InterpretationService} across configured human language interpreters and LLM tools.</li>
+ * <li>{@link DialogState#SPEAKING}: The interpretation result or an error message is synthesized and played to the
+ * audio sink via {@link SpeechSynthesizer}.</li>
+ * </ul>
+ * <p>
+ * <b>State Transitions:</b>
+ * 
+ * <pre>
+ *                 +---------------------+
+ *                 |        IDLE         |&lt;--------------------------+
+ *                 +---------------------+                           |
+ *                    | (start)     | (startSimpleDialog)            |
+ *                    v             v                                |
+ *   +---------------------+   +---------------------+               |
+ *   | WAITING_FOR_TRIGGER |   |      LISTENING      |               |
+ *   +---------------------+   +---------------------+               |
+ *     ^        | (triggered)      ^             |                   |
+ *     |        |                  |             |                   |
+ *     |        +------------------+             | (STT recognized)  |
+ *     |                                         v                   |
+ *     |                               +---------------------+       |
+ *     |                               |    INTERPRETING     |       |
+ *     |                               +---------------------+       |
+ *     |                                         | (interpreted)     |
+ *     |                                         v                   |
+ *     |                               +---------------------+       |
+ *     |                               |      SPEAKING       |       |
+ *     |                               +---------------------+       |
+ *     |                                         |                   |
+ *     |                                         v (finishDialog)    |
+ *     |                                   [persistent?]             |
+ *     |                                      /     \                |
+ *     |                              yes    /       \  no           |
+ *     +------------------------------------+         +--------------+
+ * </pre>
+ * 
+ * Any active state transitions immediately to {@link DialogState#IDLE} upon calling {@link #stop()}.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Send commands to an item to indicate the keyword has been spotted
