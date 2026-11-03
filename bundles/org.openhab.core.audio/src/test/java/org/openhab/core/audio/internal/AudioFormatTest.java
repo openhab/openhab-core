@@ -38,6 +38,7 @@ public class AudioFormatTest {
     private final Long testFrequency = 1024L;
     private final Integer testChannels = 1;
 
+    @SuppressWarnings("deprecation")
     @Test
     public void thereIsNoBestMatchForAnAudioFormatIfOneOfTheFieldsIsNull() {
         Set<AudioFormat> inputs = new HashSet<>();
@@ -68,6 +69,7 @@ public class AudioFormatTest {
         assertThat("The best match for the audio format was not as expected", bestMatch, is(nullValue()));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void waveContainerIsPreferredWhenDeterminingABestMatch() {
         Set<AudioFormat> audioFormats = new HashSet<>();
@@ -85,6 +87,7 @@ public class AudioFormatTest {
                 is(waveContainerAudioFormat));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void theCompatibleWaveContainerIsTheBestMatch() {
         Set<AudioFormat> inputs = new HashSet<>();
@@ -104,6 +107,7 @@ public class AudioFormatTest {
         assertThat("The best match for the audio format was not as expected", bestMatch, is(alawAudioFormat));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void thereIsNoBestMatchIfNoWaveContainer() {
         Set<AudioFormat> inputs = new HashSet<>();
