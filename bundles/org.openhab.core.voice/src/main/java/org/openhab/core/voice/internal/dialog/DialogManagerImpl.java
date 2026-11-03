@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.dialog;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -185,7 +186,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         }
     };
 
-    private final Map<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
+    private final Map<String, DialogContext> activeDialogGroups = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
     private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
     private @Nullable DialogContext lastDialogContext;
@@ -347,14 +348,12 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     public void listenAndAnswer(DialogContext context) throws IllegalStateException {
         validateLocaleCompatibility(context);
 
-        synchronized (activeDialogGroups) {
-            if (!activeDialogGroups.containsKey(context.dialogGroup())) {
-                logger.debug("Acquiring dialog group '{}'", context.dialogGroup());
-                activeDialogGroups.put(context.dialogGroup(), context);
-            } else {
-                logger.warn("Ignoring listenAndAnswer, dialog group '{}' running", context.dialogGroup());
-                return;
-            }
+        if (!activeDialogGroups.containsKey(context.dialogGroup())) {
+            logger.debug("Acquiring dialog group '{}'", context.dialogGroup());
+            activeDialogGroups.put(context.dialogGroup(), context);
+        } else {
+            logger.warn("Ignoring listenAndAnswer, dialog group '{}' running", context.dialogGroup());
+            return;
         }
 
         boolean isSingleDialog = false;
@@ -381,9 +380,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
                     audioSource.getId());
             activeProcessor.startSimpleDialog();
         } else {
-            synchronized (activeDialogGroups) {
-                activeDialogGroups.remove(context.dialogGroup());
-            }
+            activeDialogGroups.remove(context.dialogGroup());
             throw new IllegalStateException(String.format(
                     "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
                     audioSource.getLabel(null)));
@@ -442,9 +439,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
     @Override
     public void onDialogStopped(DialogContext context) {
-        synchronized (activeDialogGroups) {
-            activeDialogGroups.remove(context.dialogGroup());
-        }
+        activeDialogGroups.remove(context.dialogGroup());
         var registration = dialogRegistrationStorage.get(context.source().getId());
         if (registration != null) {
             scheduleDialogRegistrations();
@@ -547,7 +542,8 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         }
         return supportedLocales.stream().anyMatch(sLocale -> {
             var country = sLocale.getCountry();
-            return Objects.equals(sLocale.getLanguage(), locale.getLanguage()) && (country.isBlank() || country.equals(locale.getCountry()));
+            return Objects.equals(sLocale.getLanguage(), locale.getLanguage())
+                    && (country.isBlank() || country.equals(locale.getCountry()));
         });
     }
 
@@ -582,6 +578,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     private @Nullable STTService getSTT(@Nullable String id) {
         return id == null ? null : sttRegistry.get(id);
     }
+
     private @Nullable HumanLanguageInterpreter getHLI() {
         String defaultHLI = configuration.getDefaultHLI();
         if (defaultHLI != null) {
