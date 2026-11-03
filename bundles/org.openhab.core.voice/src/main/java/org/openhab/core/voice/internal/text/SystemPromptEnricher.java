@@ -14,20 +14,28 @@ package org.openhab.core.voice.internal.text;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMItemSerializer;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * Service for enriching LLM system prompts with additional context, such as accessible items and their semantics.
+ * <p>
+ * Caches the serialized items string per locale and invalidates it when item access or semantic metadata changes.
  *
  * @author Florian Hotze - Initial contribution
  */
@@ -39,6 +47,32 @@ public class SystemPromptEnricher {
     private final MetadataRegistry metadataRegistry;
     private final ItemPermissionResolver itemPermissionResolver;
 
+    private final Map<String, String> serializedItemsCache = new ConcurrentHashMap<>();
+    private final Runnable itemAccessChangeListener = this::invalidateCache;
+
+    private final RegistryChangeListener<Metadata> semanticsMetadataChangeListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(Metadata element) {
+            invalidateIfSemanticsMetadata(element);
+        }
+
+        @Override
+        public void removed(Metadata element) {
+            invalidateIfSemanticsMetadata(element);
+        }
+
+        @Override
+        public void updated(Metadata oldElement, Metadata element) {
+            invalidateIfSemanticsMetadata(element);
+        }
+
+        private void invalidateIfSemanticsMetadata(Metadata metadata) {
+            if (metadata.getUID().getNamespace().equals(SemanticTags.METADATA_NAMESPACE)) {
+                invalidateCache();
+            }
+        }
+    };
+
     @Activate
     public SystemPromptEnricher(final @Reference ItemRegistry itemRegistry,
             final @Reference MetadataRegistry metadataRegistry,
@@ -46,6 +80,16 @@ public class SystemPromptEnricher {
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.itemPermissionResolver = itemPermissionResolver;
+
+        this.itemPermissionResolver.addItemAccessChangeListener(itemAccessChangeListener);
+        this.metadataRegistry.addRegistryChangeListener(semanticsMetadataChangeListener);
+    }
+
+    @Deactivate
+    public void deactivate() {
+        metadataRegistry.removeRegistryChangeListener(semanticsMetadataChangeListener);
+        itemPermissionResolver.removeItemAccessChangeListener(itemAccessChangeListener);
+        invalidateCache();
     }
 
     /**
@@ -56,9 +100,7 @@ public class SystemPromptEnricher {
      * @return the enriched system prompt, or the original base system prompt if nothing was added
      */
     public @Nullable String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale) {
-        List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
-                .toList();
-        String serializedItems = LLMItemSerializer.serialize(accessibleItems, metadataRegistry, locale);
+        String serializedItems = getSerializedItems(locale);
         if (serializedItems.isEmpty()) {
             return baseSystemPrompt;
         }
@@ -66,5 +108,22 @@ public class SystemPromptEnricher {
         String itemsSection = "Available items:\n" + serializedItems;
         return baseSystemPrompt != null && !baseSystemPrompt.isBlank() ? baseSystemPrompt.trim() + "\n\n" + itemsSection
                 : itemsSection;
+    }
+
+    private String getSerializedItems(@Nullable Locale locale) {
+        String cacheKey = locale != null ? locale.toLanguageTag() : "";
+        String cached = serializedItemsCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+        List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
+                .toList();
+        String serialized = LLMItemSerializer.serialize(accessibleItems, metadataRegistry, locale);
+        serializedItemsCache.put(cacheKey, serialized);
+        return serialized;
+    }
+
+    void invalidateCache() {
+        serializedItemsCache.clear();
     }
 }
