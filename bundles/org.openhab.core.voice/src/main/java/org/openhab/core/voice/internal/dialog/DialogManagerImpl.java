@@ -13,14 +13,12 @@
 package org.openhab.core.voice.internal.dialog;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -186,9 +184,22 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         }
     };
 
-    private final Map<String, DialogContext> activeDialogGroups = Collections.synchronizedMap(new WeakHashMap<>());
-    private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
+    /**
+     * Maps a dialog group to its active {@link DialogContext} (if any dialog active).
+     * This is used to prevent concurrent dialogs from being started for the same dialog group.
+     * Dialog groups are user-defined, and e.g., used to prevent multiple dialogs from running simultaneously in an open
+     * space.
+     */
+    private final Map<String, DialogContext> activeDialogGroups = new ConcurrentHashMap<>();
+    /**
+     * Maps {@link AudioSource} IDs to {@link DialogProcessor} instances for active, persistent dialogs.
+     */
+    private final Map<String, DialogProcessor> dialogProcessors = new ConcurrentHashMap<>();
+    /**
+     * Maps {@link AudioSource} IDs to {@link DialogProcessor} instances for one-off/single-run dialogs.
+     */
     private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
+
     private @Nullable DialogContext lastDialogContext;
     private @Nullable ScheduledFuture<?> dialogRegistrationFuture;
 
@@ -300,42 +311,47 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     public @Nullable DTServiceHandle startDialog(DialogContext context) throws IllegalStateException {
         validateLocaleCompatibility(context);
 
-        DialogProcessor processor = dialogProcessors.get(context.source().getId());
-        if (processor == null) {
+        synchronized (dialogProcessors) {
+            if (dialogProcessors.containsKey(context.source().getId())) {
+                throw new IllegalStateException(
+                        String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
+                                context.source().getLabel(null)));
+            }
+
             logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                     context.source().getId());
             DialogAudioDriver audioDriver = new DialogAudioDriver(context);
             DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
-            processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
-                    speechSynthesizer, i18nProvider, this);
+            DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService,
+                    interpretationService, speechSynthesizer, i18nProvider, this);
             dialogProcessors.put(context.source().getId(), processor);
             return processor.start();
-        } else {
-            throw new IllegalStateException(
-                    String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
-                            context.source().getLabel(null)));
         }
     }
 
     @Override
     public void stopDialog(@Nullable AudioSource source) throws IllegalStateException {
         AudioSource audioSource = (source == null) ? audioManager.getSource() : source;
-        if (audioSource != null) {
-            DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
-            singleDialogProcessors.values().removeIf(p -> !p.isProcessing());
-            if (processor == null) {
-                processor = singleDialogProcessors.get(audioSource.getId());
-            }
-            if (processor != null) {
-                processor.stop();
-                logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
-            } else {
-                throw new IllegalStateException(
-                        String.format("Cannot stop dialog as no dialog is started for audio source '%s'.",
-                                audioSource.getLabel(null)));
-            }
-        } else {
+        if (audioSource == null) {
             throw new IllegalStateException("Cannot stop dialog as audio source is missing.");
+        }
+
+        DialogProcessor processor;
+        synchronized (dialogProcessors) {
+            processor = dialogProcessors.remove(audioSource.getId());
+        }
+
+        singleDialogProcessors.values().removeIf(p -> !p.isProcessing());
+        if (processor == null) {
+            singleDialogProcessors.remove(audioSource.getId());
+        }
+
+        if (processor != null) {
+            processor.stop();
+            logger.debug("Dialog stopped for source {} ({})", audioSource.getLabel(null), audioSource.getId());
+        } else {
+            throw new IllegalStateException(String.format(
+                    "Cannot stop dialog as no dialog is started for audio source '%s'.", audioSource.getLabel(null)));
         }
     }
 
@@ -348,52 +364,58 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     public void listenAndAnswer(DialogContext context) throws IllegalStateException {
         validateLocaleCompatibility(context);
 
-        if (!activeDialogGroups.containsKey(context.dialogGroup())) {
-            logger.debug("Acquiring dialog group '{}'", context.dialogGroup());
-            activeDialogGroups.put(context.dialogGroup(), context);
-        } else {
-            logger.warn("Ignoring listenAndAnswer, dialog group '{}' running", context.dialogGroup());
+        String group = context.dialogGroup();
+        if (activeDialogGroups.putIfAbsent(group, context) != null) {
+            logger.warn("Ignoring listenAndAnswer, dialog group '{}' already running", group);
             return;
         }
 
-        boolean isSingleDialog = false;
-        var audioSource = context.source();
-        DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
-        singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
-        if (activeProcessor == null) {
-            isSingleDialog = true;
-            activeProcessor = singleDialogProcessors.get(audioSource.getId());
-        }
+        logger.debug("Acquiring dialog group '{}'", context.dialogGroup());
 
-        DialogAudioDriver audioDriver = new DialogAudioDriver(context);
-        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
-        var processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
-                speechSynthesizer, i18nProvider, this);
+        try {
+            boolean isSingleDialog = false;
+            var audioSource = context.source();
+            DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
+            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
+            if (activeProcessor == null) {
+                isSingleDialog = true;
+                activeProcessor = singleDialogProcessors.get(audioSource.getId());
+            }
 
-        if (activeProcessor == null) {
-            logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
-                    audioSource.getId());
-            processor.startSimpleDialog();
-            singleDialogProcessors.put(audioSource.getId(), processor);
-        } else if (!isSingleDialog && activeProcessor.isCompatible(processor)) {
-            logger.debug("Executing a simple dialog for active source {} ({})", audioSource.getLabel(null),
-                    audioSource.getId());
-            activeProcessor.startSimpleDialog();
-        } else {
+            DialogAudioDriver audioDriver = new DialogAudioDriver(context);
+            DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
+            var processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                    speechSynthesizer, i18nProvider, this);
+
+            if (activeProcessor == null) {
+                logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
+                        audioSource.getId());
+                processor.startSimpleDialog();
+                singleDialogProcessors.put(audioSource.getId(), processor);
+            } else if (!isSingleDialog && activeProcessor.isCompatible(processor)) {
+                logger.debug("Executing a simple dialog for active source {} ({})", audioSource.getLabel(null),
+                        audioSource.getId());
+                activeProcessor.startSimpleDialog();
+            } else {
+                activeDialogGroups.remove(context.dialogGroup());
+                throw new IllegalStateException(String.format(
+                        "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
+                        audioSource.getLabel(null)));
+            }
+        } catch (RuntimeException e) {
             activeDialogGroups.remove(context.dialogGroup());
-            throw new IllegalStateException(String.format(
-                    "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
-                    audioSource.getLabel(null)));
+            throw e;
         }
     }
 
     @Override
     public void registerDialog(DialogRegistration registration) throws IllegalStateException {
-        if (dialogRegistrationStorage.containsKey(registration.sourceId)) {
-            throw new IllegalStateException(String.format(
-                    "Cannot register dialog as a dialog is registered for audio source '%s'.", registration.sourceId));
-        }
         synchronized (dialogRegistrationStorage) {
+            if (dialogRegistrationStorage.containsKey(registration.sourceId)) {
+                throw new IllegalStateException(
+                        String.format("Cannot register dialog as a dialog is registered for audio source '%s'.",
+                                registration.sourceId));
+            }
             dialogRegistrationStorage.put(registration.sourceId, registration);
         }
         scheduleDialogRegistrations();
@@ -423,7 +445,11 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     @Override
     public List<DialogRegistration> getDialogRegistrations() {
         var list = new ArrayList<DialogRegistration>();
-        dialogRegistrationStorage.getValues().forEach(dr -> {
+        Collection<@Nullable DialogRegistration> dialogRegistrations;
+        synchronized (dialogRegistrationStorage) {
+            dialogRegistrations = dialogRegistrationStorage.getValues();
+        }
+        dialogRegistrations.forEach(dr -> {
             if (dr != null) {
                 dr.running = dialogProcessors.containsKey(dr.sourceId);
                 list.add(dr);
@@ -440,21 +466,22 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     @Override
     public void onDialogStopped(DialogContext context) {
         activeDialogGroups.remove(context.dialogGroup());
-        var registration = dialogRegistrationStorage.get(context.source().getId());
+        DialogRegistration registration;
+        synchronized (dialogRegistrationStorage) {
+            registration = dialogRegistrationStorage.get(context.source().getId());
+        }
         if (registration != null) {
             scheduleDialogRegistrations();
         }
     }
 
     private void stopDialogs(Predicate<DialogProcessor> filter) {
-        synchronized (dialogRegistrationStorage) {
-            var dialogsToStop = dialogProcessors.values().stream().filter(filter).toList();
-            if (dialogsToStop.isEmpty()) {
-                return;
-            }
-            for (var dialog : dialogsToStop) {
-                stopDialog(dialog.dialogContext.source());
-            }
+        var dialogsToStop = dialogProcessors.values().stream().filter(filter).toList();
+        if (dialogsToStop.isEmpty()) {
+            return;
+        }
+        for (var dialog : dialogsToStop) {
+            stopDialog(dialog.dialogContext.source());
         }
     }
 
@@ -468,35 +495,37 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     private void buildDialogRegistrations() {
+        Collection<@Nullable DialogRegistration> dialogRegistrations;
         synchronized (dialogRegistrationStorage) {
-            dialogRegistrationStorage.getValues().forEach(dr -> {
-                if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
-                    try {
-                        Conversation conversation = conversationManager
-                                .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
-                        startDialog(getDialogContextBuilder() //
-                                .withSink(audioManager.getSink(dr.sinkId)) //
-                                .withSource(audioManager.getSource(dr.sourceId)) //
-                                .withKS(getKS(dr.ksId)) //
-                                .withKeyword(dr.keyword) //
-                                .withSTT(getSTT(dr.sttId)) //
-                                .withTTS(getTTS(dr.ttsId)) //
-                                .withVoice(getVoice(dr.voiceId)) //
-                                .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
-                                .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
-                                .withLocale(dr.locale) //
-                                .withDialogGroup(dr.dialogGroup) //
-                                .withConversation(conversation) //
-                                .withLocationItem(dr.locationItem) //
-                                .withListeningItem(dr.listeningItem) //
-                                .withMelody(dr.listeningMelody) //
-                                .build());
-                    } catch (IllegalStateException e) {
-                        logger.debug("Unable to start dialog registration: {}", e.getMessage());
-                    }
-                }
-            });
+            dialogRegistrations = dialogRegistrationStorage.getValues();
         }
+        dialogRegistrations.forEach(dr -> {
+            if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
+                try {
+                    Conversation conversation = conversationManager
+                            .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
+                    startDialog(getDialogContextBuilder() //
+                            .withSink(audioManager.getSink(dr.sinkId)) //
+                            .withSource(audioManager.getSource(dr.sourceId)) //
+                            .withKS(getKS(dr.ksId)) //
+                            .withKeyword(dr.keyword) //
+                            .withSTT(getSTT(dr.sttId)) //
+                            .withTTS(getTTS(dr.ttsId)) //
+                            .withVoice(getVoice(dr.voiceId)) //
+                            .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
+                            .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
+                            .withLocale(dr.locale) //
+                            .withDialogGroup(dr.dialogGroup) //
+                            .withConversation(conversation) //
+                            .withLocationItem(dr.locationItem) //
+                            .withListeningItem(dr.listeningItem) //
+                            .withMelody(dr.listeningMelody) //
+                            .build());
+                } catch (IllegalStateException e) {
+                    logger.debug("Unable to start dialog registration: {}", e.getMessage());
+                }
+            }
+        });
     }
 
     private static void validateLocaleCompatibility(DialogContext context) throws IllegalStateException {
