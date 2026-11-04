@@ -131,6 +131,7 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         // create thing and bridge types
         for (ThingTypeXmlResult type : thingTypeRefs) {
             try {
+                type.setBundleSymbolicName(bundle.getSymbolicName());
                 thingTypeProvider.add(bundle, type.toThingType());
             } catch (RuntimeException e) {
                 logger.error("Could not register ThingType: {}", type.getUID(), e);
