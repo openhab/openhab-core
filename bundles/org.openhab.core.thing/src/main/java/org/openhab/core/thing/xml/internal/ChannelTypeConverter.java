@@ -37,6 +37,8 @@ import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -57,6 +59,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  */
 @NonNullByDefault
 public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<ChannelTypeXmlResult> {
+
+    private final Logger logger = LoggerFactory.getLogger(ChannelTypeConverter.class);
 
     record ItemType(@Nullable String itemType, @Nullable String unitHint) {
     }
@@ -115,14 +119,19 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
             for (Object tagNodeObject : tagsNode) {
                 NodeValue tagNode = (NodeValue) tagNodeObject;
 
-                if ("tag".equals(tagNode.getNodeName())) {
-                    String tag = (String) tagNode.getValue();
-
-                    if (tag != null) {
-                        tags.add(tag);
+                String name = tagNode.getNodeName();
+                switch (name) {
+                    case "point", "property", "tag" -> {
+                        Object value = tagNode.getValue();
+                        if ("tag".equals(name)) {
+                            logger.warn("DEPRECATED 'tag' use 'point' or 'property' instead (tag value: '{}').", value);
+                        }
+                        if (value instanceof String tag) {
+                            tags.add(tag);
+                        }
                     }
-                } else {
-                    throw new ConversionException("The 'tags' node must only contain 'tag' nodes!");
+                    default -> throw new ConversionException(
+                            "The 'tags' node must only contain 'point', 'property', or DEPRECATED 'tag' nodes!");
                 }
             }
         }

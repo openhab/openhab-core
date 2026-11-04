@@ -103,6 +103,8 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.alias("channel-group", ChannelXmlResult.class);
         xstream.alias("category", NodeValue.class);
         xstream.alias("tags", NodeList.class);
+        xstream.alias("point", NodeValue.class);
+        xstream.alias("property", NodeValue.class);
         xstream.alias("tag", NodeValue.class);
         xstream.alias("state", StateDescription.class);
         xstream.alias("command", CommandDescription.class);
@@ -117,7 +119,7 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.alias("filter", List.class);
         xstream.alias("criteria", FilterCriteria.class);
         xstream.alias("properties", NodeList.class);
-        xstream.alias("property", NodeValue.class);
+        /* {@code xstream.alias("property", NodeValue.class)} already declared above => do not duplicate */
         xstream.alias("representation-property", NodeValue.class);
         xstream.alias("command-options", NodeList.class);
         xstream.alias("autoUpdatePolicy", NodeValue.class);

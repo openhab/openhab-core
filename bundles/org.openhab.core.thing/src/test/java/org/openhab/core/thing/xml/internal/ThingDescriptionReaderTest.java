@@ -13,8 +13,8 @@
 package org.openhab.core.thing.xml.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -62,7 +62,7 @@ public class ThingDescriptionReaderTest {
         assertThat(thingTypeXmlResult.getUID().toString(), is("hue:lamp"));
         assertThat(thingTypeXmlResult.label, is("HUE Lamp"));
         assertThat(thingTypeXmlResult.description, is("My own great HUE Lamp."));
-        assertThat(thingTypeXmlResult.semanticEquipmentTag, is("LightBulb"));
+        assertThat(thingTypeXmlResult.semanticEquipmentTag, is("Lightbulb"));
         List<String> supportedBridgeTypeUIDs = thingTypeXmlResult.getBuilder().build().getSupportedBridgeTypeUIDs();
         assertThat(supportedBridgeTypeUIDs.size(), is(2));
         assertTrue(supportedBridgeTypeUIDs.contains("hue:bridge"));
