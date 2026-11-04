@@ -69,7 +69,7 @@ public class DialogAudioDriver {
      *
      * @param listener the listener receiving trigger events
      * @return {@link DTServiceHandle} or null if starting failed
-     * @throws IllegalStateException if dialog trigger is not configured
+     * @throws IllegalStateException if the dialog trigger is not configured
      */
     public @Nullable DTServiceHandle startTrigger(KSListener listener) throws IllegalStateException {
         DTService dtService = dialogContext.dt();

@@ -103,7 +103,7 @@ import org.slf4j.LoggerFactory;
  * @author Florian Hotze - Refactor into pure state machine
  */
 @NonNullByDefault
-public class DialogProcessor implements KSListener, STTListener {
+public class DialogProcessor {
 
     /**
      * States of the dialog state machine.
@@ -125,6 +125,78 @@ public class DialogProcessor implements KSListener, STTListener {
     private final SpeechSynthesizer speechSynthesizer;
     private final VoiceI18nProvider i18nProvider;
     private final DialogEventListener eventListener;
+
+    private final KSListener ksListener = new KSListener() {
+        @Override
+        public void dtEventReceived(DTEvent dtEvent) {
+            if (dtEvent instanceof DTTriggeredEvent) {
+                logger.debug("{} event received",
+                        (dtEvent instanceof KSpottedEvent) ? "KSpottedEvent" : "DTTriggeredEvent");
+                try {
+                    startSimpleDialog();
+                } catch (IllegalStateException e) {
+                    logger.warn("{}", e.getMessage());
+                }
+            } else if (dtEvent instanceof DTErrorEvent dte) {
+                logger.debug("{} event received", dte instanceof KSErrorEvent ? "KSErrorEvent" : "DTErrorEvent");
+                String text = i18nProvider.getFormattedText("error.ks-error", dialogContext.locale(), dte.getMessage());
+                say(text);
+            }
+        }
+
+        @Override
+        public void ksEventReceived(KSEvent ksEvent) {
+            dtEventReceived(ksEvent);
+        }
+    };
+
+    private final STTListener sttListener = new STTListener() {
+        @Override
+        public synchronized void sttEventReceived(STTEvent sttEvent) {
+            switch (sttEvent) {
+                case SpeechRecognitionEvent sre -> {
+                    logger.debug("SpeechRecognitionEvent event received");
+                    String question = sre.getTranscript();
+                    logger.debug("Text recognized: {}", question);
+                    feedbackService.setListening(false);
+                    audioDriver.stopRecognition();
+                    state = DialogState.INTERPRETING;
+                    eventListener.onBeforeDialogInterpretation(dialogContext);
+                    try {
+                        String answer = interpretationService.interpret(question, dialogContext.hlis(),
+                                dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
+                                dialogContext.locationItem(), dialogContext.systemPrompt());
+                        state = DialogState.SPEAKING;
+                        say(answer);
+                    } catch (InterpretationException e) {
+                        String error = e.getMessage();
+                        state = DialogState.SPEAKING;
+                        say(error != null ? error : "Unexpected error");
+                    }
+                    finishDialog();
+                }
+                case RecognitionStartEvent recognitionStartEvent -> {
+                    logger.debug("RecognitionStartEvent event received");
+                    feedbackService.setListening(true);
+                }
+                case RecognitionStopEvent recognitionStopEvent -> {
+                    logger.debug("RecognitionStopEvent event received");
+                    feedbackService.setListening(false);
+                }
+                case SpeechRecognitionErrorEvent sre -> {
+                    String message = sre.getMessage();
+                    logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
+                    audioDriver.stopRecognition();
+                    feedbackService.setListening(false);
+                    if (!message.isEmpty()) {
+                        say(message);
+                    }
+                    finishDialog();
+                }
+                default -> logger.debug("Unknown STT event received: {}", sttEvent);
+            }
+        }
+    };
 
     private DialogState state = DialogState.IDLE;
 
@@ -155,7 +227,7 @@ public class DialogProcessor implements KSListener, STTListener {
      */
     public @Nullable DTServiceHandle start() throws IllegalStateException {
         state = DialogState.WAITING_FOR_TRIGGER;
-        DTServiceHandle handle = audioDriver.startTrigger(this);
+        DTServiceHandle handle = audioDriver.startTrigger(ksListener);
         feedbackService.playStartSound();
         return handle;
     }
@@ -167,7 +239,7 @@ public class DialogProcessor implements KSListener, STTListener {
         state = DialogState.LISTENING;
         feedbackService.playListeningSound();
         try {
-            audioDriver.startRecognition(this);
+            audioDriver.startRecognition(sttListener);
         } catch (STTException e) {
             String text = i18nProvider.getFormattedText("error.stt-exception", dialogContext.locale(), e.getMessage());
             say(text);
@@ -198,68 +270,6 @@ public class DialogProcessor implements KSListener, STTListener {
      */
     public boolean isProcessing() {
         return state == DialogState.LISTENING;
-    }
-
-    @Override
-    public void dtEventReceived(DTEvent dtEvent) {
-        if (dtEvent instanceof DTTriggeredEvent) {
-            logger.debug("{} event received",
-                    (dtEvent instanceof KSpottedEvent) ? "KSpottedEvent" : "DTTriggeredEvent");
-            try {
-                startSimpleDialog();
-            } catch (IllegalStateException e) {
-                logger.warn("{}", e.getMessage());
-            }
-        } else if (dtEvent instanceof DTErrorEvent dte) {
-            logger.debug("{} event received", dte instanceof KSErrorEvent ? "KSErrorEvent" : "DTErrorEvent");
-            String text = i18nProvider.getFormattedText("error.ks-error", dialogContext.locale(), dte.getMessage());
-            say(text);
-        }
-    }
-
-    @Override
-    public void ksEventReceived(KSEvent ksEvent) {
-        dtEventReceived(ksEvent);
-    }
-
-    @Override
-    public synchronized void sttEventReceived(STTEvent sttEvent) {
-        if (sttEvent instanceof SpeechRecognitionEvent sre) {
-            logger.debug("SpeechRecognitionEvent event received");
-            String question = sre.getTranscript();
-            logger.debug("Text recognized: {}", question);
-            feedbackService.setListening(false);
-            audioDriver.stopRecognition();
-            state = DialogState.INTERPRETING;
-            eventListener.onBeforeDialogInterpretation(dialogContext);
-            try {
-                String answer = interpretationService.interpret(question, dialogContext.hlis(),
-                        dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
-                        dialogContext.locationItem(), dialogContext.systemPrompt());
-                state = DialogState.SPEAKING;
-                say(answer);
-            } catch (InterpretationException e) {
-                String error = e.getMessage();
-                state = DialogState.SPEAKING;
-                say(error != null ? error : "Unexpected error");
-            }
-            finishDialog();
-        } else if (sttEvent instanceof RecognitionStartEvent) {
-            logger.debug("RecognitionStartEvent event received");
-            feedbackService.setListening(true);
-        } else if (sttEvent instanceof RecognitionStopEvent) {
-            logger.debug("RecognitionStopEvent event received");
-            feedbackService.setListening(false);
-        } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
-            String message = sre.getMessage();
-            logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
-            audioDriver.stopRecognition();
-            feedbackService.setListening(false);
-            if (!message.isEmpty()) {
-                say(message);
-            }
-            finishDialog();
-        }
     }
 
     private void finishDialog() {
