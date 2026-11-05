@@ -250,6 +250,9 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         ksRegistry.removeRegistryChangeListener(ksListener);
         dialogProcessors.values().forEach(DialogProcessor::stop);
         dialogProcessors.clear();
+        singleDialogProcessors.values().forEach(DialogProcessor::stop);
+        singleDialogProcessors.clear();
+        activeDialogGroups.clear();
         ScheduledFuture<?> future = this.dialogRegistrationFuture;
         if (future != null) {
             future.cancel(true);
