@@ -368,46 +368,40 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         validateLocaleCompatibility(context);
 
         String group = context.dialogGroup();
-        if (activeDialogGroups.putIfAbsent(group, context) != null) {
+        if (activeDialogGroups.containsKey(group)) {
             logger.warn("Ignoring listenAndAnswer, dialog group '{}' already running", group);
             return;
         }
 
-        logger.debug("Acquiring dialog group '{}'", context.dialogGroup());
+        boolean isSingleDialog = false;
+        var audioSource = context.source();
+        DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
+        singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
+        if (activeProcessor == null) {
+            isSingleDialog = true;
+            activeProcessor = singleDialogProcessors.get(audioSource.getId());
+        }
 
-        try {
-            boolean isSingleDialog = false;
-            var audioSource = context.source();
-            DialogProcessor activeProcessor = dialogProcessors.get(audioSource.getId());
-            singleDialogProcessors.values().removeIf(e -> !e.isProcessing());
-            if (activeProcessor == null) {
-                isSingleDialog = true;
-                activeProcessor = singleDialogProcessors.get(audioSource.getId());
-            }
+        DialogAudioDriver audioDriver = new DialogAudioDriver(context);
+        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
+        var processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, this);
 
-            DialogAudioDriver audioDriver = new DialogAudioDriver(context);
-            DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
-            var processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
-                    speechSynthesizer, i18nProvider, this);
-
-            if (activeProcessor == null) {
-                logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
-                        audioSource.getId());
-                processor.startSimpleDialog();
+        if (activeProcessor == null) {
+            logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
+                    audioSource.getId());
+            processor.startSimpleDialog();
+            if (processor.isProcessing()) {
                 singleDialogProcessors.put(audioSource.getId(), processor);
-            } else if (!isSingleDialog && activeProcessor.isCompatible(processor)) {
-                logger.debug("Executing a simple dialog for active source {} ({})", audioSource.getLabel(null),
-                        audioSource.getId());
-                activeProcessor.startSimpleDialog();
-            } else {
-                activeDialogGroups.remove(context.dialogGroup());
-                throw new IllegalStateException(String.format(
-                        "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
-                        audioSource.getLabel(null)));
             }
-        } catch (RuntimeException e) {
-            activeDialogGroups.remove(context.dialogGroup());
-            throw e;
+        } else if (!isSingleDialog && activeProcessor.isCompatible(processor)) {
+            logger.debug("Executing a simple dialog for active source {} ({})", audioSource.getLabel(null),
+                    audioSource.getId());
+            activeProcessor.startSimpleDialog();
+        } else {
+            throw new IllegalStateException(String.format(
+                    "Cannot execute a simple dialog as a dialog is already started for audio source '%s'.",
+                    audioSource.getLabel(null)));
         }
     }
 
@@ -462,13 +456,31 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     @Override
+    public boolean onAcquireGroup(DialogContext context) {
+        String group = context.dialogGroup();
+        DialogContext existing = activeDialogGroups.putIfAbsent(group, context);
+        if (existing == null || existing == context) {
+            logger.debug("Acquiring dialog group '{}'", group);
+            return true;
+        }
+        logger.warn("Dialog group '{}' already running", group);
+        return false;
+    }
+
+    @Override
+    public void onReleaseGroup(DialogContext context) {
+        String group = context.dialogGroup();
+        logger.debug("Releasing dialog group '{}'", group);
+        activeDialogGroups.remove(group, context);
+    }
+
+    @Override
     public void onBeforeDialogInterpretation(DialogContext context) {
         lastDialogContext = context;
     }
 
     @Override
     public void onDialogStopped(DialogContext context) {
-        activeDialogGroups.remove(context.dialogGroup());
         DialogRegistration registration;
         synchronized (dialogRegistrationStorage) {
             registration = dialogRegistrationStorage.get(context.source().getId());

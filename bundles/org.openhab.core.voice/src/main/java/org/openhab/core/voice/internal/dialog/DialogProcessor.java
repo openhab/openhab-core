@@ -233,6 +233,10 @@ public class DialogProcessor {
      * Starts a single dialog sequence (trigger spotted or direct listening).
      */
     public void startSimpleDialog() {
+        if (!eventListener.onAcquireGroup(dialogContext)) {
+            logger.warn("Ignoring dialog start event, dialog group '{}' running", dialogContext.dialogGroup());
+            return;
+        }
         state = DialogState.LISTENING;
         feedbackService.playListeningSound();
         try {
@@ -252,6 +256,7 @@ public class DialogProcessor {
         feedbackService.setListening(false);
         feedbackService.playStopSound();
         state = DialogState.IDLE;
+        eventListener.onReleaseGroup(dialogContext);
         eventListener.onDialogStopped(dialogContext);
     }
 
@@ -270,6 +275,7 @@ public class DialogProcessor {
     }
 
     private void finishDialog() {
+        eventListener.onReleaseGroup(dialogContext);
         if (dialogContext.dt() != null && dialogContext.keyword() != null) {
             state = DialogState.WAITING_FOR_TRIGGER;
         } else {
@@ -323,6 +329,21 @@ public class DialogProcessor {
     }
 
     public interface DialogEventListener {
+        /**
+         * Attempts to acquire the dialog group for the dialog interaction.
+         *
+         * @param context used by the dialog processor
+         * @return true if the group was acquired, false if another dialog is already active in that group
+         */
+        boolean onAcquireGroup(DialogContext context);
+
+        /**
+         * Releases the dialog group when an active dialog interaction finishes.
+         *
+         * @param context used by the dialog processor
+         */
+        void onReleaseGroup(DialogContext context);
+
         /**
          * Runs before starting to interpret the transcription result.
          *
