@@ -346,7 +346,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
         singleDialogProcessors.values().removeIf(p -> !p.isProcessing());
         if (processor == null) {
-            singleDialogProcessors.remove(audioSource.getId());
+            processor = singleDialogProcessors.remove(audioSource.getId());
         }
 
         if (processor != null) {
