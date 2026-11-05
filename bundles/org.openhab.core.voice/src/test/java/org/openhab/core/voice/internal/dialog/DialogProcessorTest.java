@@ -75,6 +75,7 @@ public class DialogProcessorTest {
         when(systemPromptEnricher.enrichSystemPrompt(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         interpretationService = new InterpretationService(localeProvider, systemPromptEnricher);
+        when(eventListener.onAcquireGroup(any())).thenReturn(true);
     }
 
     private DialogContext createTestContext(List<HumanLanguageInterpreter> hlis) {
@@ -224,6 +225,39 @@ public class DialogProcessorTest {
         verify(audioDriver).stopAll();
         verify(feedbackService).setListening(false);
         verify(feedbackService).playStopSound();
+        verify(eventListener).onReleaseGroup(context);
         verify(eventListener).onDialogStopped(context);
+    }
+
+    @Test
+    public void startSimpleDialogDoesNotStartWhenGroupAcquisitionFails() {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        when(eventListener.onAcquireGroup(any())).thenReturn(false);
+
+        processor.startSimpleDialog();
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(audioDriver);
+        verifyNoInteractions(feedbackService);
+    }
+
+    @Test
+    public void finishDialogReleasesGroupForPersistentDialog() throws STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        verify(eventListener).onReleaseGroup(context);
+        verify(eventListener, never()).onDialogStopped(context);
     }
 }

@@ -102,4 +102,29 @@ public class DialogAudioDriverTest {
         verify(sttHandle).abort();
         verify(audioStream).close();
     }
+
+    @Test
+    public void stopAllAbortsTriggerAndRecognitionAndClosesStreams() throws Exception {
+        AudioStream streamKS = mock(AudioStream.class);
+        AudioStream streamSTT = mock(AudioStream.class);
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(ksService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(streamKS, streamSTT);
+        when(ksService.spot(eq(ksListener), eq(streamKS), eq(Locale.ENGLISH), eq("keyword"))).thenReturn(ksHandle);
+        when(sttService.recognize(eq(sttListener), eq(streamSTT), eq(Locale.ENGLISH))).thenReturn(sttHandle);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        driver.startTrigger(ksListener);
+        driver.startRecognition(sttListener);
+
+        driver.stopAll();
+        verify(ksHandle).abort();
+        verify(streamKS).close();
+        verify(sttHandle).abort();
+        verify(streamSTT).close();
+    }
 }

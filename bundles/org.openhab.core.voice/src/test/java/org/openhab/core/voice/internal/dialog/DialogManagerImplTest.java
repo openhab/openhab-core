@@ -16,11 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
@@ -42,13 +45,18 @@ import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.DialogRegistration;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
+import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
+import org.openhab.core.voice.dialog.trigger.ks.KSException;
+import org.openhab.core.voice.dialog.trigger.ks.KSListener;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
 import org.openhab.core.voice.internal.VoiceI18nProvider;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
+import org.openhab.core.voice.stt.STTException;
 import org.openhab.core.voice.stt.STTService;
+import org.openhab.core.voice.stt.STTServiceHandle;
 import org.openhab.core.voice.stt.STTServiceRegistry;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
@@ -83,46 +91,57 @@ public class DialogManagerImplTest {
     private final ConfigDescriptionRegistry configDescriptionRegistry = mock(ConfigDescriptionRegistry.class);
 
     private final InMemoryStorage<DialogRegistration> storage = new InMemoryStorage<>();
+    private final Map<String, AudioStream> sourceStreams = new HashMap<>();
+    private final Map<String, KSServiceHandle> ksHandles = new HashMap<>();
+    private final Map<String, STTServiceHandle> sttHandles = new HashMap<>();
     private @NonNullByDefault({}) DialogManagerImpl dialogManager;
 
     @BeforeEach
     public void setUp() {
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
         doReturn(storage).when(storageService).getStorage(any(), any());
+        sourceStreams.clear();
+        ksHandles.clear();
+        sttHandles.clear();
 
         dialogManager = new DialogManagerImpl(localeProvider, audioManager, eventPublisher, storageService,
                 llmToolRegistry, ttsRegistry, sttRegistry, ksRegistry, hliRegistry, conversationManager,
                 interpretationService, speechSynthesizer, i18nProvider, configDescriptionRegistry);
     }
 
-    private DialogContext createValidContext(String sourceId, String sinkId) throws Exception {
+    private DialogContext createValidContext(String sourceId, String sinkId)
+            throws AudioException, STTException, KSException {
         return createValidContextBuilder(sourceId, sinkId).build();
     }
 
-    private DialogContext.Builder createValidContextBuilder(String sourceId, String sinkId) throws Exception {
+    private DialogContext.Builder createValidContextBuilder(String sourceId, String sinkId)
+            throws AudioException, STTException, KSException {
+        return createValidContextBuilder(sourceId, sinkId, true, "keyword");
+    }
+
+    private DialogContext.Builder createValidContextBuilder(String sourceId, String sinkId, boolean withDT,
+            String keyword) throws AudioException, STTException, KSException {
         AudioSource source = mock(AudioSource.class);
         when(source.getId()).thenReturn(sourceId);
         when(source.getLabel(null)).thenReturn(sourceId);
         when(source.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-        when(source.getInputStream(any())).thenReturn(mock(AudioStream.class));
+        AudioStream audioStream = mock(AudioStream.class);
+        sourceStreams.put(sourceId, audioStream);
+        when(source.getInputStream(any())).thenReturn(audioStream);
 
         AudioSink sink = mock(AudioSink.class);
         when(sink.getId()).thenReturn(sinkId);
         when(sink.getLabel(null)).thenReturn(sinkId);
         when(sink.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
 
-        KSService ks = mock(KSService.class);
-        when(ks.getId()).thenReturn("test-ks");
-        when(ks.getUID()).thenReturn("test-ks");
-        when(ks.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
-        when(ks.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-        when(ks.spot(any(), any(), any(), any())).thenReturn(mock(KSServiceHandle.class));
-
         STTService stt = mock(STTService.class);
         when(stt.getId()).thenReturn("test-stt");
         when(stt.getUID()).thenReturn("test-stt");
         when(stt.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
         when(stt.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        STTServiceHandle sttHandle = mock(STTServiceHandle.class);
+        sttHandles.put(sourceId, sttHandle);
+        when(stt.recognize(any(), any(), any())).thenReturn(sttHandle);
 
         TTSService tts = mock(TTSService.class);
         when(tts.getId()).thenReturn("test-tts");
@@ -133,8 +152,34 @@ public class DialogManagerImplTest {
         when(hli.getUID()).thenReturn("test-hli");
         when(hli.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
 
-        return new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source).withSink(sink).withKS(ks)
-                .withSTT(stt).withTTS(tts).withHLIs(List.of(hli));
+        var builder = new DialogContext.Builder(keyword, Locale.ENGLISH).withSource(source).withSink(sink).withSTT(stt)
+                .withTTS(tts).withHLIs(List.of(hli));
+
+        if (withDT) {
+            KSService ks = mock(KSService.class);
+            when(ks.getId()).thenReturn("test-ks");
+            when(ks.getUID()).thenReturn("test-ks");
+            when(ks.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
+            when(ks.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+            KSServiceHandle ksHandle = mock(KSServiceHandle.class);
+            ksHandles.put(sourceId, ksHandle);
+            when(ks.spot(any(), any(), any(), any())).thenReturn(ksHandle);
+            builder.withKS(ks);
+        }
+
+        return builder;
+    }
+
+    private KSServiceHandle getKSHandle(String sourceId) {
+        return Objects.requireNonNull(ksHandles.get(sourceId));
+    }
+
+    private STTServiceHandle getSTTHandle(String sourceId) {
+        return Objects.requireNonNull(sttHandles.get(sourceId));
+    }
+
+    private AudioStream getSourceStream(String sourceId) {
+        return Objects.requireNonNull(sourceStreams.get(sourceId));
     }
 
     @Test
@@ -160,7 +205,8 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void unregisterDialogStopsActiveDialogIfRunning() throws Exception {
+    public void unregisterDialogStopsActiveDialogIfRunning()
+            throws AudioException, STTException, KSException, IOException {
         DialogRegistration reg = new DialogRegistration("source-1", "sink-1");
         dialogManager.registerDialog(reg);
 
@@ -169,20 +215,14 @@ public class DialogManagerImplTest {
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
         dialogManager.unregisterDialog("source-1");
-        assertFalse(storage.containsKey("source-1"));
-        assertEquals(0, dialogManager.getDialogsContexts().size());
+
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
     }
 
     @Test
-    public void onBeforeDialogInterpretationUpdatesLastContext() {
-        AudioSource source = mock(AudioSource.class);
-        AudioSink sink = mock(AudioSink.class);
-        STTService stt = mock(STTService.class);
-        TTSService tts = mock(TTSService.class);
-        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
-
-        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source).withSink(sink)
-                .withSTT(stt).withTTS(tts).withHLI(hli).build();
+    public void onBeforeDialogInterpretationUpdatesLastContext() throws AudioException, STTException, KSException {
+        DialogContext context = createValidContext("source-1", "sink-1");
         assertNull(dialogManager.getLastDialogContext());
 
         dialogManager.onBeforeDialogInterpretation(context);
@@ -190,55 +230,54 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void listenAndAnswerPreventsDuplicateExecutionOnSameDialogGroup() throws Exception {
-        AudioSource source1 = mock(AudioSource.class);
-        when(source1.getId()).thenReturn("source-1");
-        when(source1.getLabel(null)).thenReturn("Source 1");
-        when(source1.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-        when(source1.getInputStream(any())).thenReturn(mock(AudioStream.class));
-
-        AudioSource source2 = mock(AudioSource.class);
-        when(source2.getId()).thenReturn("source-2");
-        when(source2.getLabel(null)).thenReturn("Source 2");
-        when(source2.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-        when(source2.getInputStream(any())).thenReturn(mock(AudioStream.class));
-
-        AudioSink sink = mock(AudioSink.class);
-        when(sink.getId()).thenReturn("sink-1");
-        when(sink.getLabel(null)).thenReturn("Sink 1");
-
-        TTSService tts = mock(TTSService.class);
-
-        STTService stt = mock(STTService.class);
-        when(stt.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
-        when(stt.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-
-        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
-        when(hli.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
-
-        DialogContext context1 = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source1).withSink(sink)
-                .withTTS(tts).withSTT(stt).withHLIs(List.of(hli)).withDialogGroup("group-A").build();
-
-        DialogContext context2 = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source2).withSink(sink)
-                .withTTS(tts).withSTT(stt).withHLIs(List.of(hli)).withDialogGroup("group-A").build();
+    public void listenAndAnswerPreventsDuplicateExecutionOnSameDialogGroup()
+            throws AudioException, STTException, KSException {
+        DialogContext context1 = createValidContextBuilder("source-1", "sink-1").withDialogGroup("group-A").build();
+        DialogContext context2 = createValidContextBuilder("source-2", "sink-1").withDialogGroup("group-A").build();
 
         dialogManager.listenAndAnswer(context1);
-        verify(source1).getInputStream(any());
+        verify(context1.source()).getInputStream(any());
 
         // Second dialog on same group should be rejected and not start audio stream
         dialogManager.listenAndAnswer(context2);
-        verify(source2, never()).getInputStream(any());
+        verify(context2.source(), never()).getInputStream(any());
 
         // Releasing context1 releases dialog group
-        dialogManager.onDialogStopped(context1);
+        dialogManager.onReleaseGroup(context1);
 
         // Now context2 can run
         dialogManager.listenAndAnswer(context2);
-        verify(source2).getInputStream(any());
+        verify(context2.source()).getInputStream(any());
     }
 
     @Test
-    public void startDialogSuccessfullyStartsAndTracksProcessor() throws Exception {
+    public void listenAndAnswerWithCompatibleActiveDialogDelegatesToActiveProcessor()
+            throws AudioException, STTException, KSException {
+        DialogContext.Builder builder = createValidContextBuilder("source-1", "sink-1");
+        DialogContext persistentContext = builder.withDialogGroup("group-1").build();
+        dialogManager.startDialog(persistentContext);
+
+        DialogContext simpleContext = builder.withDialogGroup("group-2").build();
+        assertDoesNotThrow(() -> dialogManager.listenAndAnswer(simpleContext));
+    }
+
+    @Test
+    public void listenAndAnswerWithIncompatibleActiveDialogThrows() throws AudioException, STTException, KSException {
+        DialogContext persistentContext = createValidContext("source-1", "sink-1");
+        dialogManager.startDialog(persistentContext);
+
+        AudioSink differentSink = mock(AudioSink.class);
+        when(differentSink.getId()).thenReturn("sink-different");
+        when(differentSink.getLabel(null)).thenReturn("sink-different");
+
+        DialogContext incompatibleContext = createValidContextBuilder("source-1", "sink-1").withSink(differentSink)
+                .withDialogGroup("group-different").build();
+
+        assertThrows(IllegalStateException.class, () -> dialogManager.listenAndAnswer(incompatibleContext));
+    }
+
+    @Test
+    public void startDialogSuccessfullyStartsAndTracksProcessor() throws AudioException, STTException, KSException {
         DialogContext context = createValidContext("source-1", "sink-1");
         DTServiceHandle handle = dialogManager.startDialog(context);
 
@@ -248,7 +287,7 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void startDialogPreventsDuplicateForSameAudioSource() throws Exception {
+    public void startDialogPreventsDuplicateForSameAudioSource() throws AudioException, STTException, KSException {
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
 
@@ -256,36 +295,19 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void startDialogThrowsWhenMissingDialogTrigger() {
-        AudioSource source = mock(AudioSource.class);
-        AudioSink sink = mock(AudioSink.class);
-        STTService stt = mock(STTService.class);
-        TTSService tts = mock(TTSService.class);
-        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
-
-        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source).withSink(sink)
-                .withSTT(stt).withTTS(tts).withHLIs(List.of(hli)).build();
-
+    public void startDialogThrowsWhenMissingDialogTrigger() throws AudioException, STTException, KSException {
+        DialogContext context = createValidContextBuilder("source-1", "sink-1", false, "keyword").build();
         assertThrows(IllegalStateException.class, () -> dialogManager.startDialog(context));
     }
 
     @Test
-    public void startDialogThrowsWhenKSKeywordMissingOrEmpty() {
-        AudioSource source = mock(AudioSource.class);
-        AudioSink sink = mock(AudioSink.class);
-        KSService ks = mock(KSService.class);
-        STTService stt = mock(STTService.class);
-        TTSService tts = mock(TTSService.class);
-        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
-
-        DialogContext context = new DialogContext.Builder("", Locale.ENGLISH).withSource(source).withSink(sink)
-                .withKS(ks).withSTT(stt).withTTS(tts).withHLIs(List.of(hli)).build();
-
+    public void startDialogThrowsWhenKSKeywordMissingOrEmpty() throws AudioException, STTException, KSException {
+        DialogContext context = createValidContextBuilder("source-1", "sink-1", true, "").build();
         assertThrows(IllegalStateException.class, () -> dialogManager.startDialog(context));
     }
 
     @Test
-    public void startDialogThrowsWhenKSLocaleIncompatible() throws Exception {
+    public void startDialogThrowsWhenKSLocaleIncompatible() throws AudioException, STTException, KSException {
         DialogContext.Builder builder = createValidContextBuilder("source-1", "sink-1");
         KSService ks = mock(KSService.class);
         when(ks.getId()).thenReturn("ks-de");
@@ -298,7 +320,7 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void startDialogThrowsWhenSTTLocaleIncompatible() throws Exception {
+    public void startDialogThrowsWhenSTTLocaleIncompatible() throws AudioException, STTException, KSException {
         DialogContext.Builder builder = createValidContextBuilder("source-1", "sink-1");
         STTService stt = mock(STTService.class);
         when(stt.getId()).thenReturn("stt-de");
@@ -312,7 +334,7 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void startDialogThrowsWhenHLILocaleIncompatible() throws Exception {
+    public void startDialogThrowsWhenHLILocaleIncompatible() throws AudioException, STTException, KSException {
         DialogContext.Builder builder = createValidContextBuilder("source-1", "sink-1");
         HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
         when(hli.getId()).thenReturn("hli-de");
@@ -326,7 +348,7 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void startDialogThrowsWhenVoiceLocaleIncompatible() throws Exception {
+    public void startDialogThrowsWhenVoiceLocaleIncompatible() throws AudioException, STTException, KSException {
         DialogContext.Builder builder = createValidContextBuilder("source-1", "sink-1");
         Voice voice = mock(Voice.class);
         when(voice.getUID()).thenReturn("tts:voice-de");
@@ -339,25 +361,46 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void stopDialogStopsAndRemovesRunningProcessor() throws Exception {
+    public void stopDialogStopsAndRemovesRunningProcessor()
+            throws AudioException, STTException, KSException, IOException {
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
         dialogManager.stopDialog(context);
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
 
         assertThrows(IllegalStateException.class, () -> dialogManager.stopDialog(context.source()));
     }
 
     @Test
-    public void stopDialogWithNullSourceUsesDefaultAudioSource() throws Exception {
+    public void stopDialogStopsSingleDialogSuccessfully()
+            throws AudioException, STTException, KSException, IOException {
+        DialogContext context = createValidContext("source-single", "sink-single");
+
+        dialogManager.listenAndAnswer(context);
+        verify(context.source()).getInputStream(any());
+        verify(context.stt()).recognize(any(), any(), any());
+
+        assertDoesNotThrow(() -> dialogManager.stopDialog(context.source()));
+        verify(getSTTHandle("source-single")).abort();
+        verify(getSourceStream("source-single")).close();
+        assertThrows(IllegalStateException.class, () -> dialogManager.stopDialog(context.source()));
+    }
+
+    @Test
+    public void stopDialogWithNullSourceUsesDefaultAudioSource()
+            throws AudioException, STTException, KSException, IOException {
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
 
         when(audioManager.getSource()).thenReturn(context.source());
         dialogManager.stopDialog((AudioSource) null);
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
     }
 
     @Test
@@ -367,7 +410,7 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void getDialogRegistrationsMarksRunningStateCorrectly() throws Exception {
+    public void getDialogRegistrationsMarksRunningStateCorrectly() throws AudioException, STTException, KSException {
         DialogRegistration reg1 = new DialogRegistration("source-1", "sink-1");
         DialogRegistration reg2 = new DialogRegistration("source-2", "sink-2");
         dialogManager.registerDialog(reg1);
@@ -395,31 +438,39 @@ public class DialogManagerImplTest {
 
         DialogContext.Builder builder = dialogManager.getDialogContextBuilder();
         assertNotNull(builder);
+        DialogContext context = builder.build();
+        assertEquals(defaultSource, context.source());
+        assertEquals(defaultSink, context.sink());
     }
 
     @Test
-    public void removingAudioSinkStopsDependentDialog() throws Exception {
+    public void removingAudioSinkStopsDependentDialog() throws AudioException, STTException, KSException, IOException {
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
         dialogManager.removeAudioSink(context.sink());
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
     }
 
     @Test
-    public void removingAudioSourceStopsDependentDialog() throws Exception {
+    public void removingAudioSourceStopsDependentDialog()
+            throws AudioException, STTException, KSException, IOException {
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
         dialogManager.removeAudioSource(context.source());
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void removingServiceStopsDependentDialog() throws Exception {
+    public void removingServiceStopsDependentDialog() throws AudioException, STTException, KSException, IOException {
         ArgumentCaptor<RegistryChangeListener<TTSService>> ttsCaptor = ArgumentCaptor
                 .forClass(RegistryChangeListener.class);
         ArgumentCaptor<RegistryChangeListener<STTService>> sttCaptor = ArgumentCaptor
@@ -446,6 +497,8 @@ public class DialogManagerImplTest {
 
         ttsCaptor.getValue().removed(context1.tts());
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
 
         // Test STT service removal
         DialogContext context2 = createValidContext("source-2", "sink-2");
@@ -454,22 +507,28 @@ public class DialogManagerImplTest {
 
         sttCaptor.getValue().removed(context2.stt());
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-2")).abort();
+        verify(getSourceStream("source-2")).close();
 
         // Test KS service removal
         DialogContext context3 = createValidContext("source-3", "sink-3");
         dialogManager.startDialog(context3);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
-        ksCaptor.getValue().removed((KSService) context3.dt());
+        ksCaptor.getValue().removed((KSService) Objects.requireNonNull(context3.dt()));
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-3")).abort();
+        verify(getSourceStream("source-3")).close();
 
         // Test HLI service removal
         DialogContext context4 = createValidContext("source-4", "sink-4");
         dialogManager.startDialog(context4);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
-        hliCaptor.getValue().removed(context4.hlis().get(0));
+        hliCaptor.getValue().removed(context4.hlis().getFirst());
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-4")).abort();
+        verify(getSourceStream("source-4")).close();
 
         // Test LLMTool removal
         LLMTool tool = mock(LLMTool.class);
@@ -480,10 +539,12 @@ public class DialogManagerImplTest {
 
         llmCaptor.getValue().removed(tool);
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-5")).abort();
+        verify(getSourceStream("source-5")).close();
     }
 
     @Test
-    public void deactivateStopsAllRunningDialogs() throws Exception {
+    public void deactivateStopsAllRunningDialogs() throws AudioException, STTException, KSException, IOException {
         DialogContext context1 = createValidContext("source-1", "sink-1");
         DialogContext context2 = createValidContext("source-2", "sink-2");
 
@@ -491,71 +552,66 @@ public class DialogManagerImplTest {
         dialogManager.startDialog(context2);
         assertEquals(2, dialogManager.getDialogsContexts().size());
 
+        DialogContext contextSingle = createValidContext("source-single", "sink-single");
+        dialogManager.listenAndAnswer(contextSingle);
+
         dialogManager.deactivate();
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(getKSHandle("source-1")).abort();
+        verify(getSourceStream("source-1")).close();
+        verify(getKSHandle("source-2")).abort();
+        verify(getSourceStream("source-2")).close();
+        verify(getSTTHandle("source-single")).abort();
+        verify(getSourceStream("source-single")).close();
     }
 
     @Test
-    public void listenAndAnswerWithCompatibleActiveDialogDelegatesToActiveProcessor() throws Exception {
-        AudioSource source = mock(AudioSource.class);
-        when(source.getId()).thenReturn("source-1");
-        when(source.getLabel(null)).thenReturn("source-1");
-        when(source.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-        when(source.getInputStream(any())).thenReturn(mock(AudioStream.class));
-
-        AudioSink sink = mock(AudioSink.class);
-        when(sink.getId()).thenReturn("sink-1");
-        when(sink.getLabel(null)).thenReturn("sink-1");
-        when(sink.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-
-        KSService ks = mock(KSService.class);
-        when(ks.getId()).thenReturn("test-ks");
-        when(ks.getUID()).thenReturn("test-ks");
-        when(ks.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
-        when(ks.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-        when(ks.spot(any(), any(), any(), any())).thenReturn(mock(KSServiceHandle.class));
-
-        STTService stt = mock(STTService.class);
-        when(stt.getId()).thenReturn("test-stt");
-        when(stt.getUID()).thenReturn("test-stt");
-        when(stt.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
-        when(stt.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
-
-        TTSService tts = mock(TTSService.class);
-        when(tts.getId()).thenReturn("test-tts");
-        when(tts.getUID()).thenReturn("test-tts");
-
-        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
-        when(hli.getId()).thenReturn("test-hli");
-        when(hli.getUID()).thenReturn("test-hli");
-        when(hli.getSupportedLocales()).thenReturn(Set.of(Locale.ENGLISH));
-
-        DialogContext persistentContext = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source)
-                .withSink(sink).withKS(ks).withSTT(stt).withTTS(tts).withHLIs(List.of(hli)).withDialogGroup("group-1")
+    public void persistentDialogTriggerPreventsConcurrentExecutionInSameGroup()
+            throws AudioException, STTException, KSException {
+        DialogContext context1 = createValidContextBuilder("source-1", "sink-1").withDialogGroup("group-shared")
                 .build();
+        AudioSource source1 = context1.source();
+        KSService ks1 = (KSService) Objects.requireNonNull(context1.dt());
 
-        dialogManager.startDialog(persistentContext);
-
-        DialogContext simpleContext = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source)
-                .withSink(sink).withKS(ks).withSTT(stt).withTTS(tts).withHLIs(List.of(hli)).withDialogGroup("group-2")
+        DialogContext context2 = createValidContextBuilder("source-2", "sink-2").withDialogGroup("group-shared")
                 .build();
+        AudioSource source2 = context2.source();
+        KSService ks2 = (KSService) Objects.requireNonNull(context2.dt());
 
-        assertDoesNotThrow(() -> dialogManager.listenAndAnswer(simpleContext));
-    }
+        dialogManager.startDialog(context1);
+        dialogManager.startDialog(context2);
 
-    @Test
-    public void listenAndAnswerWithIncompatibleActiveDialogThrows() throws Exception {
-        DialogContext persistentContext = createValidContext("source-1", "sink-1");
-        dialogManager.startDialog(persistentContext);
+        ArgumentCaptor<KSListener> ksListenerCaptor1 = ArgumentCaptor.forClass(KSListener.class);
+        verify(ks1).spot(ksListenerCaptor1.capture(), any(), any(), any());
+        ArgumentCaptor<KSListener> ksListenerCaptor2 = ArgumentCaptor.forClass(KSListener.class);
+        verify(ks2).spot(ksListenerCaptor2.capture(), any(), any(), any());
 
-        AudioSink differentSink = mock(AudioSink.class);
-        when(differentSink.getId()).thenReturn("sink-different");
-        when(differentSink.getLabel(null)).thenReturn("sink-different");
+        STTService stt1 = context1.stt();
+        STTService stt2 = context2.stt();
 
-        DialogContext incompatibleContext = createValidContextBuilder("source-1", "sink-1").withSink(differentSink)
-                .withDialogGroup("group-different").build();
+        // Persistent dialogs start listening for keyword trigger
+        verify(source1, times(1)).getInputStream(any());
+        verify(source2, times(1)).getInputStream(any());
+        verify(stt1, never()).recognize(any(), any(), any());
+        verify(stt2, never()).recognize(any(), any(), any());
 
-        assertThrows(IllegalStateException.class, () -> dialogManager.listenAndAnswer(incompatibleContext));
+        // First trigger succeeds and acquires group-shared, starting STT recognition
+        ksListenerCaptor1.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source1, times(2)).getInputStream(any());
+        verify(stt1).recognize(any(), any(), any());
+
+        // Second trigger on same group is ignored and does not start STT recognition
+        ksListenerCaptor2.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source2, times(1)).getInputStream(any());
+        verify(stt2, never()).recognize(any(), any(), any());
+
+        // Releasing dialog 1 frees group-shared
+        dialogManager.onReleaseGroup(context1);
+
+        // Now dialog 2 can trigger and start STT recognition
+        ksListenerCaptor2.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source2, times(2)).getInputStream(any());
+        verify(stt2).recognize(any(), any(), any());
     }
 
     private static class InMemoryStorage<T> implements Storage<T> {
