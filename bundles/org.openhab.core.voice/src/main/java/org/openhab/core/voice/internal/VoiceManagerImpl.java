@@ -12,19 +12,13 @@
  */
 package org.openhab.core.voice.internal;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,10 +26,7 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
-import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.VoiceManager;
@@ -43,22 +34,18 @@ import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.DialogRegistration;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
-import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
 import org.openhab.core.voice.internal.dialog.DialogManager;
 import org.openhab.core.voice.internal.stt.AudioTranscriber;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.STTService;
-import org.openhab.core.voice.stt.STTServiceRegistry;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
-import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.openhab.core.voice.tts.TTSException;
 import org.openhab.core.voice.tts.TTSService;
-import org.openhab.core.voice.tts.TTSServiceRegistry;
 import org.openhab.core.voice.tts.Voice;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -87,46 +74,35 @@ import org.slf4j.LoggerFactory;
         property = Constants.SERVICE_PID + "=org.openhab.voice")
 @ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfigurationConstants.CONFIG_URI)
 @NonNullByDefault
-public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
+public class VoiceManagerImpl implements VoiceManager {
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
 
     private final LocaleProvider localeProvider;
     private final AudioManager audioManager;
-    private final TTSServiceRegistry ttsRegistry;
-    private final STTServiceRegistry sttRegistry;
-    private final KSServiceRegistry ksRegistry;
-    private final HumanLanguageInterpreterRegistry hliRegistry;
     private final LLMToolRegistry llmToolRegistry;
     private final ConversationManager conversationManager;
     private final AudioTranscriber audioTranscriber;
     private final InterpretationService interpretationService;
     private final SpeechSynthesizer speechSynthesizer;
     private final DialogManager dialogManager;
-    private final VoiceManagerConfiguration configuration;
+    private final VoiceServiceResolver voiceServiceResolver;
 
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
-            final @Reference LLMToolRegistry llmToolRegistry, final @Reference TTSServiceRegistry ttsRegistry,
-            final @Reference STTServiceRegistry sttRegistry, final @Reference KSServiceRegistry ksRegistry,
-            final @Reference HumanLanguageInterpreterRegistry hliRegistry,
-            final @Reference ConversationManager conversationManager,
-            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference LLMToolRegistry llmToolRegistry, final @Reference ConversationManager conversationManager,
             final @Reference AudioTranscriber audioTranscriber,
             final @Reference InterpretationService interpretationService,
-            final @Reference SpeechSynthesizer speechSynthesizer, final @Reference DialogManager dialogManager) {
+            final @Reference SpeechSynthesizer speechSynthesizer, final @Reference DialogManager dialogManager,
+            final @Reference VoiceServiceResolver voiceServiceResolver) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
-        this.ttsRegistry = ttsRegistry;
-        this.sttRegistry = sttRegistry;
-        this.ksRegistry = ksRegistry;
-        this.hliRegistry = hliRegistry;
         this.audioTranscriber = audioTranscriber;
         this.interpretationService = interpretationService;
         this.speechSynthesizer = speechSynthesizer;
         this.dialogManager = dialogManager;
-        this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
+        this.voiceServiceResolver = voiceServiceResolver;
     }
 
     @Activate
@@ -134,12 +110,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         modified(config);
     }
 
-    @SuppressWarnings("null")
     @Modified
     protected void modified(Map<String, Object> config) {
-        if (config != null) {
-            configuration.update(config);
-        }
     }
 
     @Override
@@ -173,25 +145,25 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
         try {
             TTSService tts = null;
-            Voice voice = null;
-            String selectedVoiceId = voiceId;
-            if (selectedVoiceId == null) {
-                // use the configured default, if set
-                selectedVoiceId = configuration.getDefaultVoice();
-            }
-            if (selectedVoiceId == null) {
-                tts = getTTS();
-                if (tts != null) {
-                    voice = getPreferredVoice(tts.getAvailableVoices());
+            Voice voice;
+            if (voiceId != null) {
+                voice = voiceServiceResolver.getVoice(voiceId);
+                if (voice != null) {
+                    tts = voiceServiceResolver.getTTS(voice);
                 }
             } else {
-                voice = getVoice(selectedVoiceId);
+                voice = voiceServiceResolver.getDefaultVoice();
                 if (voice != null) {
-                    tts = getTTS(voice);
+                    tts = voiceServiceResolver.getTTS(voice);
+                } else {
+                    tts = voiceServiceResolver.getTTS();
+                    if (tts != null) {
+                        voice = voiceServiceResolver.getPreferredVoice(tts.getAvailableVoices());
+                    }
                 }
             }
             if (tts == null) {
-                throw new TTSException("No TTS service can be found for voice " + selectedVoiceId);
+                throw new TTSException("No TTS service can be found for voice " + voiceId);
             }
             if (voice == null) {
                 throw new TTSException(
@@ -219,7 +191,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             logger.warn("Audio source '{}' not available", audioSourceId != null ? audioSourceId : "default");
             return "";
         }
-        var sttService = sttId != null ? getSTT(sttId) : getSTT();
+        var sttService = sttId != null ? voiceServiceResolver.getSTT(sttId) : voiceServiceResolver.getSTT();
         if (sttService == null) {
             logger.warn("Speech-to-text service '{}' not available", sttId != null ? sttId : "default");
             return "";
@@ -229,7 +201,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public String transcribe(AudioStream audioStream, @Nullable String sttId, @Nullable Locale locale) {
-        var sttService = sttId != null ? getSTT(sttId) : getSTT();
+        var sttService = sttId != null ? voiceServiceResolver.getSTT(sttId) : voiceServiceResolver.getSTT();
         if (sttService == null) {
             logger.warn("Speech-to-text service '{}' not available", sttId != null ? sttId : "default");
             return "";
@@ -252,12 +224,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         InterpretationArguments nullSafeArgs = args != null ? args : new InterpretationArguments("", "", "*", "", null);
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
         if (nullSafeArgs.hliIdList().isEmpty()) {
-            HumanLanguageInterpreter interpreter = getHLI();
+            HumanLanguageInterpreter interpreter = voiceServiceResolver.getHLI();
             if (interpreter != null) {
                 interpreters.add(interpreter);
             }
         } else {
-            interpreters = getHLIsByIds(nullSafeArgs.hliIdList());
+            interpreters = voiceServiceResolver.getHLIsByIds(nullSafeArgs.hliIdList());
         }
 
         if (!interpreters.isEmpty()) {
@@ -272,7 +244,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             return interpretationService.interpret(text, interpreters,
                     conversationManager.getConversation(nullSafeArgs.conversationId()),
                     llmToolRegistry.getByIds(nullSafeArgs.toolIdList()), locale, locationItem,
-                    configuration.getSystemPrompt());
+                    voiceServiceResolver.getConfiguration().getSystemPrompt());
         }
 
         if (nullSafeArgs.hliIdList().isEmpty()) {
@@ -283,69 +255,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         }
     }
 
-    private @Nullable Voice getVoice(@Nullable String id) {
-        if (id == null) {
-            return null;
-        } else if (id.contains(":")) {
-            // it is a fully qualified unique id
-            String[] segments = id.split(":");
-            TTSService tts = getTTS(segments[0]);
-            if (tts != null) {
-                return getVoice(tts.getAvailableVoices(), segments[1]);
-            }
-        } else {
-            // voiceId is not fully qualified
-            TTSService tts = getTTS();
-            if (tts != null) {
-                return getVoice(tts.getAvailableVoices(), id);
-            }
-        }
-        return null;
-    }
-
-    private @Nullable Voice getVoice(Set<Voice> voices, String id) {
-        for (Voice voice : voices) {
-            if (voice.getUID().endsWith(":" + id)) {
-                return voice;
-            }
-        }
-        return null;
-    }
-
     @Override
     public @Nullable Voice getPreferredVoice(Set<Voice> voices) {
-        // Express preferences with a Language Priority List
-        Locale locale = localeProvider.getLocale();
-
-        // Get collection of voice locales
-        Collection<Locale> locales = new ArrayList<>();
-        for (Voice currentVoice : voices) {
-            locales.add(currentVoice.getLocale());
-        }
-
-        // Determine preferred locale based on RFC 4647
-        String ranges = locale.toLanguageTag();
-        List<Locale.LanguageRange> languageRanges = Locale.LanguageRange.parse(ranges + "-*");
-        Locale preferredLocale = Locale.lookup(languageRanges, locales);
-
-        // As a last resort choose some Locale
-        if (preferredLocale == null && !voices.isEmpty()) {
-            preferredLocale = locales.iterator().next();
-        }
-        if (preferredLocale == null) {
-            return null;
-        }
-
-        // Determine preferred voice
-        Voice preferredVoice = null;
-        for (Voice currentVoice : voices) {
-            if (preferredLocale.equals(currentVoice.getLocale())) {
-                preferredVoice = currentVoice;
-            }
-        }
-
-        // Return preferred voice
-        return preferredVoice;
+        return voiceServiceResolver.getPreferredVoice(voices);
     }
 
     @Override
@@ -406,201 +318,81 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public @Nullable TTSService getTTS() {
-        TTSService tts = null;
-        String defaultTTS = configuration.getDefaultTTS();
-        if (defaultTTS != null) {
-            tts = ttsRegistry.get(defaultTTS);
-            if (tts == null) {
-                logger.warn("Default TTS service '{}' not available!", defaultTTS);
-            }
-        } else {
-            tts = ttsRegistry.stream().findFirst().orElse(null);
-            if (tts == null) {
-                logger.debug("No TTS service available!");
-            }
-        }
-        return tts;
+        return voiceServiceResolver.getTTS();
     }
 
     @Override
     public @Nullable TTSService getTTS(@Nullable String id) {
-        return id == null ? null : ttsRegistry.get(id);
-    }
-
-    private @Nullable TTSService getTTS(Voice voice) {
-        return getTTS(voice.getUID().split(":")[0]);
+        return voiceServiceResolver.getTTS(id);
     }
 
     @Override
     public Collection<TTSService> getTTSs() {
-        return new HashSet<>(ttsRegistry.getAll());
+        return voiceServiceResolver.getTTSs();
     }
 
     @Override
     public @Nullable STTService getSTT() {
-        STTService stt = null;
-        String defaultSTT = configuration.getDefaultSTT();
-        if (defaultSTT != null) {
-            stt = sttRegistry.get(defaultSTT);
-            if (stt == null) {
-                logger.warn("Default STT service '{}' not available!", defaultSTT);
-            }
-        } else {
-            stt = sttRegistry.stream().findFirst().orElse(null);
-            if (stt == null) {
-                logger.debug("No STT service available!");
-            }
-        }
-        return stt;
+        return voiceServiceResolver.getSTT();
     }
 
     @Override
     public @Nullable STTService getSTT(@Nullable String id) {
-        return id == null ? null : sttRegistry.get(id);
+        return voiceServiceResolver.getSTT(id);
     }
 
     @Override
     public Collection<STTService> getSTTs() {
-        return new HashSet<>(sttRegistry.getAll());
+        return voiceServiceResolver.getSTTs();
     }
 
     @Override
     public @Nullable KSService getKS() {
-        KSService ks = null;
-        String defaultKS = configuration.getDefaultKS();
-        if (defaultKS != null) {
-            ks = ksRegistry.get(defaultKS);
-            if (ks == null) {
-                logger.warn("Default KS service '{}' not available!", defaultKS);
-            }
-        } else {
-            ks = ksRegistry.stream().findFirst().orElse(null);
-            if (ks == null) {
-                logger.debug("No KS service available!");
-            }
-        }
-        return ks;
+        return voiceServiceResolver.getKS();
     }
 
     @Override
     public @Nullable KSService getKS(@Nullable String id) {
-        return id == null ? null : ksRegistry.get(id);
+        return voiceServiceResolver.getKS(id);
     }
 
     @Override
     public Collection<KSService> getKSs() {
-        return new HashSet<>(ksRegistry.getAll());
+        return voiceServiceResolver.getKSs();
     }
 
     @Override
     public @Nullable HumanLanguageInterpreter getHLI() {
-        HumanLanguageInterpreter hli = null;
-        String defaultHLI = configuration.getDefaultHLI();
-        if (defaultHLI != null) {
-            hli = hliRegistry.get(defaultHLI);
-            if (hli == null) {
-                logger.warn("Default HumanLanguageInterpreter '{}' not available!", defaultHLI);
-            }
-        } else {
-            hli = hliRegistry.stream().findFirst().orElse(null);
-            if (hli == null) {
-                logger.debug("No HumanLanguageInterpreter available!");
-            }
-        }
-        return hli;
+        return voiceServiceResolver.getHLI();
     }
 
     @Override
     public @Nullable HumanLanguageInterpreter getHLI(@Nullable String id) {
-        return id == null ? null : hliRegistry.get(id);
+        return voiceServiceResolver.getHLI(id);
     }
 
     @Override
     public List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids) {
-        return hliRegistry.getByIds(ids);
+        return voiceServiceResolver.getHLIsByIds(ids);
     }
 
     @Override
     public List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids) {
-        return hliRegistry.getByIds(ids);
+        return voiceServiceResolver.getHLIsByIds(ids);
     }
 
     @Override
     public Collection<HumanLanguageInterpreter> getHLIs() {
-        return new HashSet<>(hliRegistry.getAll());
+        return voiceServiceResolver.getHLIs();
     }
 
     @Override
     public Set<Voice> getAllVoices() {
-        return getAllVoicesSorted(localeProvider.getLocale());
-    }
-
-    private Set<Voice> getAllVoicesSorted(Locale locale) {
-        return ttsRegistry.stream().map(TTSService::getAvailableVoices).flatMap(Collection::stream)
-                .sorted(createVoiceComparator(locale)).collect(Collectors
-                        .collectingAndThen(Collectors.toCollection(LinkedHashSet::new), Collections::unmodifiableSet));
-    }
-
-    /**
-     * Creates a comparator which compares voices using the given locale in the following order:
-     * <ol>
-     * <li>Voice TTSService label (localized with the given locale)
-     * <li>Voice locale display name (localized with the given locale)
-     * <li>Voice label
-     * </ol>
-     *
-     * @param locale the locale used for comparing {@link TTSService} labels and {@link Voice} locale display names
-     * @return the localized voice comparator
-     */
-    private Comparator<Voice> createVoiceComparator(Locale locale) {
-        Comparator<Voice> byTTSLabel = (Voice v1, Voice v2) -> {
-            TTSService tts1 = getTTS(v1);
-            TTSService tts2 = getTTS(v2);
-            return (tts1 == null || tts2 == null) ? 0
-                    : tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale));
-        };
-        Comparator<Voice> byVoiceLocale = (Voice v1, Voice v2) -> v1.getLocale().getDisplayName(locale)
-                .compareToIgnoreCase(v2.getLocale().getDisplayName(locale));
-        return byTTSLabel.thenComparing(byVoiceLocale).thenComparing(Voice::getLabel);
+        return voiceServiceResolver.getAllVoices();
     }
 
     @Override
     public @Nullable Voice getDefaultVoice() {
-        String localDefaultVoice = configuration.getDefaultVoice();
-        return localDefaultVoice != null ? getVoice(localDefaultVoice) : null;
-    }
-
-    @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
-            @Nullable Locale locale) {
-        if (VoiceConfigurationConstants.CONFIG_URI.equals(uri.toString())) {
-            switch (param) {
-                case VoiceConfigurationConstants.CONFIG_DEFAULT_HLI:
-                    return hliRegistry.stream()
-                            .sorted((hli1, hli2) -> hli1.getLabel(locale).compareToIgnoreCase(hli2.getLabel(locale)))
-                            .map(hli -> new ParameterOption(hli.getId(), hli.getLabel(locale))).toList();
-                case VoiceConfigurationConstants.CONFIG_DEFAULT_KS:
-                    return ksRegistry.stream()
-                            .sorted((ks1, ks2) -> ks1.getLabel(locale).compareToIgnoreCase(ks2.getLabel(locale)))
-                            .map(ks -> new ParameterOption(ks.getId(), ks.getLabel(locale))).toList();
-                case VoiceConfigurationConstants.CONFIG_DEFAULT_STT:
-                    return sttRegistry.stream()
-                            .sorted((stt1, stt2) -> stt1.getLabel(locale).compareToIgnoreCase(stt2.getLabel(locale)))
-                            .map(stt -> new ParameterOption(stt.getId(), stt.getLabel(locale))).toList();
-                case VoiceConfigurationConstants.CONFIG_DEFAULT_TTS:
-                    return ttsRegistry.stream()
-                            .sorted((tts1, tts2) -> tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale)))
-                            .map(tts -> new ParameterOption(tts.getId(), tts.getLabel(locale))).toList();
-                case VoiceConfigurationConstants.CONFIG_DEFAULT_VOICE:
-                    Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
-                    return getAllVoicesSorted(nullSafeLocale)
-                            .stream().filter(v -> getTTS(v) != null).map(
-                                    v -> new ParameterOption(v.getUID(),
-                                            String.format("%s - %s - %s", getTTS(v).getLabel(nullSafeLocale),
-                                                    v.getLocale().getDisplayName(nullSafeLocale), v.getLabel())))
-                            .toList();
-            }
-        }
-        return null;
+        return voiceServiceResolver.getDefaultVoice();
     }
 }

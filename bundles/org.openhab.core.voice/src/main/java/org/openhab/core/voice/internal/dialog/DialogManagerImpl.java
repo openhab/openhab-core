@@ -32,7 +32,6 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.storage.Storage;
@@ -45,7 +44,7 @@ import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
 import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.internal.VoiceI18nProvider;
-import org.openhab.core.voice.internal.VoiceManagerConfiguration;
+import org.openhab.core.voice.internal.VoiceServiceResolver;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.STTService;
@@ -58,7 +57,6 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.openhab.core.voice.tts.TTSService;
 import org.openhab.core.voice.tts.TTSServiceRegistry;
-import org.openhab.core.voice.tts.Voice;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -97,7 +95,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     private final InterpretationService interpretationService;
     private final SpeechSynthesizer speechSynthesizer;
     private final VoiceI18nProvider i18nProvider;
-    private final VoiceManagerConfiguration configuration;
+    private final VoiceServiceResolver voiceServiceResolver;
 
     private final RegistryChangeListener<KSService> ksListener = new RegistryChangeListener<>() {
         @Override
@@ -212,7 +210,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             final @Reference ConversationManager conversationManager,
             final @Reference InterpretationService interpretationService,
             final @Reference SpeechSynthesizer speechSynthesizer, final @Reference VoiceI18nProvider i18nProvider,
-            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+            final @Reference VoiceServiceResolver voiceServiceResolver) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
@@ -227,7 +225,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         this.interpretationService = interpretationService;
         this.speechSynthesizer = speechSynthesizer;
         this.i18nProvider = i18nProvider;
-        this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
+        this.voiceServiceResolver = voiceServiceResolver;
     }
 
     @Activate
@@ -262,7 +260,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
     @Modified
     protected void modified(Map<String, Object> config) {
-        configuration.update(config);
+        scheduleDialogRegistrations();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -285,19 +283,20 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
 
     @Override
     public DialogContext.Builder getDialogContextBuilder() {
-        return new DialogContext.Builder(configuration.getKeyword(), localeProvider.getLocale()) //
+        var config = voiceServiceResolver.getConfiguration();
+        return new DialogContext.Builder(config.getKeyword(), localeProvider.getLocale()) //
                 .withSink(audioManager.getSink()) //
                 .withSource(audioManager.getSource()) //
                 .withConversation(conversationManager.getConversation("")) //
-                .withKS(getKS()) //
-                .withSTT(getSTT()) //
-                .withTTS(getTTS()) //
-                .withHLI(getHLI()) //
-                .withVoice(getDefaultVoice()) //
-                .withMelody(configuration.getListeningMelody()) //
-                .withListeningItem(configuration.getListeningItem()) //
+                .withKS(voiceServiceResolver.getKS()) //
+                .withSTT(voiceServiceResolver.getSTT()) //
+                .withTTS(voiceServiceResolver.getTTS()) //
+                .withHLI(voiceServiceResolver.getHLI()) //
+                .withVoice(voiceServiceResolver.getDefaultVoice()) //
+                .withMelody(config.getListeningMelody()) //
+                .withListeningItem(config.getListeningItem()) //
                 .withLLMTools(llmToolRegistry.getAll()) //
-                .withSystemPrompt(configuration.getSystemPrompt());
+                .withSystemPrompt(config.getSystemPrompt());
     }
 
     @Override
@@ -522,11 +521,11 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
                     startDialog(getDialogContextBuilder() //
                             .withSink(audioManager.getSink(dr.sinkId)) //
                             .withSource(audioManager.getSource(dr.sourceId)) //
-                            .withKS(getKS(dr.ksId)) //
+                            .withKS(voiceServiceResolver.getKS(dr.ksId)) //
                             .withKeyword(dr.keyword) //
-                            .withSTT(getSTT(dr.sttId)) //
-                            .withTTS(getTTS(dr.ttsId)) //
-                            .withVoice(getVoice(dr.voiceId)) //
+                            .withSTT(voiceServiceResolver.getSTT(dr.sttId)) //
+                            .withTTS(voiceServiceResolver.getTTS(dr.ttsId)) //
+                            .withVoice(voiceServiceResolver.getVoice(dr.voiceId)) //
                             .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
                             .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
                             .withLocale(dr.locale) //
@@ -593,97 +592,5 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             return Objects.equals(sLocale.getLanguage(), locale.getLanguage())
                     && (country.isBlank() || country.equals(locale.getCountry()));
         });
-    }
-
-    private @Nullable KSService getKS() {
-        String defaultKS = configuration.getDefaultKS();
-        if (defaultKS != null) {
-            KSService ks = ksRegistry.get(defaultKS);
-            if (ks == null) {
-                logger.warn("Default KS service '{}' not available!", defaultKS);
-            }
-            return ks;
-        }
-        return ksRegistry.stream().findFirst().orElse(null);
-    }
-
-    private @Nullable KSService getKS(@Nullable String id) {
-        return id == null ? null : ksRegistry.get(id);
-    }
-
-    private @Nullable STTService getSTT() {
-        String defaultSTT = configuration.getDefaultSTT();
-        if (defaultSTT != null) {
-            STTService stt = sttRegistry.get(defaultSTT);
-            if (stt == null) {
-                logger.warn("Default STT service '{}' not available!", defaultSTT);
-            }
-            return stt;
-        }
-        return sttRegistry.stream().findFirst().orElse(null);
-    }
-
-    private @Nullable STTService getSTT(@Nullable String id) {
-        return id == null ? null : sttRegistry.get(id);
-    }
-
-    private @Nullable HumanLanguageInterpreter getHLI() {
-        String defaultHLI = configuration.getDefaultHLI();
-        if (defaultHLI != null) {
-            HumanLanguageInterpreter hli = hliRegistry.get(defaultHLI);
-            if (hli == null) {
-                logger.warn("Default HumanLanguageInterpreter '{}' not available!", defaultHLI);
-            }
-            return hli;
-        }
-        return hliRegistry.stream().findFirst().orElse(null);
-    }
-
-    private @Nullable TTSService getTTS() {
-        String defaultTTS = configuration.getDefaultTTS();
-        if (defaultTTS != null) {
-            TTSService tts = ttsRegistry.get(defaultTTS);
-            if (tts == null) {
-                logger.warn("Default TTS service '{}' not available!", defaultTTS);
-            }
-            return tts;
-        }
-        return ttsRegistry.stream().findFirst().orElse(null);
-    }
-
-    private @Nullable TTSService getTTS(@Nullable String id) {
-        return id == null ? null : ttsRegistry.get(id);
-    }
-
-    private @Nullable Voice getDefaultVoice() {
-        String localDefaultVoice = configuration.getDefaultVoice();
-        return localDefaultVoice != null ? getVoice(localDefaultVoice) : null;
-    }
-
-    private @Nullable Voice getVoice(@Nullable String id) {
-        if (id == null) {
-            return null;
-        } else if (id.contains(":")) {
-            String[] segments = id.split(":");
-            TTSService tts = getTTS(segments[0]);
-            if (tts != null) {
-                return getVoice(tts.getAvailableVoices(), segments[1]);
-            }
-        } else {
-            TTSService tts = getTTS();
-            if (tts != null) {
-                return getVoice(tts.getAvailableVoices(), id);
-            }
-        }
-        return null;
-    }
-
-    private @Nullable Voice getVoice(Set<Voice> voices, String id) {
-        for (Voice voice : voices) {
-            if (voice.getUID().endsWith(":" + id)) {
-                return voice;
-            }
-        }
-        return null;
     }
 }

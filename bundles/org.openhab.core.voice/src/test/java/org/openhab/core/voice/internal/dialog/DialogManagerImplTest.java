@@ -52,6 +52,8 @@ import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceRegistry;
 import org.openhab.core.voice.internal.VoiceI18nProvider;
+import org.openhab.core.voice.internal.VoiceManagerConfiguration;
+import org.openhab.core.voice.internal.VoiceServiceResolver;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.STTException;
@@ -88,7 +90,7 @@ public class DialogManagerImplTest {
     private final InterpretationService interpretationService = mock(InterpretationService.class);
     private final SpeechSynthesizer speechSynthesizer = mock(SpeechSynthesizer.class);
     private final VoiceI18nProvider i18nProvider = mock(VoiceI18nProvider.class);
-    private final ConfigDescriptionRegistry configDescriptionRegistry = mock(ConfigDescriptionRegistry.class);
+    private final VoiceServiceResolver voiceServiceResolver = mock(VoiceServiceResolver.class);
 
     private final InMemoryStorage<DialogRegistration> storage = new InMemoryStorage<>();
     private final Map<String, AudioStream> sourceStreams = new HashMap<>();
@@ -99,6 +101,8 @@ public class DialogManagerImplTest {
     @BeforeEach
     public void setUp() {
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
+        when(voiceServiceResolver.getConfiguration())
+                .thenReturn(new VoiceManagerConfiguration(mock(ConfigDescriptionRegistry.class)));
         doReturn(storage).when(storageService).getStorage(any(), any());
         sourceStreams.clear();
         ksHandles.clear();
@@ -106,7 +110,7 @@ public class DialogManagerImplTest {
 
         dialogManager = new DialogManagerImpl(localeProvider, audioManager, eventPublisher, storageService,
                 llmToolRegistry, ttsRegistry, sttRegistry, ksRegistry, hliRegistry, conversationManager,
-                interpretationService, speechSynthesizer, i18nProvider, configDescriptionRegistry);
+                interpretationService, speechSynthesizer, i18nProvider, voiceServiceResolver);
     }
 
     private DialogContext createValidContext(String sourceId, String sinkId)
