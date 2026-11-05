@@ -23,18 +23,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.api.Authentication;
-import org.eclipse.jetty.client.api.AuthenticationStore;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.BasicAuthentication;
@@ -63,7 +64,51 @@ public class HttpUtil {
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
-    private static HttpClientFactory httpClientFactory;
+    private static final String PROXY_CLIENT_CONSUMER_NAME = "HttpUtil-proxy";
+
+    private static volatile HttpClientFactory httpClientFactory;
+
+    /**
+     * Maximum number of dedicated proxy http clients that are kept at the same time. Every client has its own thread
+     * pool, so the number must stay small.
+     */
+    private static final int MAX_PROXY_HTTP_CLIENTS = 8;
+
+    /**
+     * Proxy http clients that were not used for this long are retired.
+     */
+    private static final long PROXY_HTTP_CLIENT_IDLE_NANOS = TimeUnit.MINUTES.toNanos(10);
+
+    /**
+     * Guards {@link #PROXY_HTTP_CLIENTS}, the leases of its entries and the binding of {@link #httpClientFactory}, so
+     * that a client can never be published for a factory that is already gone.
+     */
+    private static final Object PROXY_LOCK = new Object();
+
+    /**
+     * Dedicated http clients for requests that have to be routed through a proxy, one per distinct proxy
+     * configuration, in access order (least recently used first). The shared common http client must never be
+     * modified, since it is used concurrently by everyone else. Guarded by {@link #PROXY_LOCK}.
+     */
+    private static final Map<ProxyKey, ProxyClient> PROXY_HTTP_CLIENTS = new LinkedHashMap<>(16, 0.75f, true);
+
+    private record ProxyKey(String host, int port, String user, String password) {
+    }
+
+    /**
+     * A cached proxy http client. A retired client is no longer handed out and is stopped as soon as the last request
+     * that uses it has finished. All fields are guarded by {@link #PROXY_LOCK}.
+     */
+    private static final class ProxyClient {
+        final HttpClient client;
+        long lastUsedNanos = System.nanoTime();
+        int leases;
+        boolean retired;
+
+        ProxyClient(HttpClient client) {
+            this.client = client;
+        }
+    }
 
     private static class ProxyParams {
         String proxyHost;
@@ -186,12 +231,10 @@ public class HttpUtil {
             InputStream content, String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) throws IOException {
         // Referenced http client factory not available
-        if (httpClientFactory == null) {
+        final HttpClientFactory factory = httpClientFactory;
+        if (factory == null) {
             throw new IllegalStateException("Http client factory not available");
         }
-        // Get shared http client from factory "on-demand"
-        final HttpClient httpClient = httpClientFactory.getCommonHttpClient();
-
         URI uri = null;
         try {
             uri = new URI(url);
@@ -200,20 +243,29 @@ public class HttpUtil {
             throw new IOException(e);
         }
 
-        HttpProxy proxy = null;
-        // Only configure a proxy if a host is provided
+        // Only use a proxy if a host is provided. Requests without proxy use the shared http client from the
+        // factory "on-demand", requests with proxy use a dedicated client, so that the shared client is never
+        // modified.
+        ProxyClient proxyClient = null;
+        final HttpClient httpClient;
         if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(uri, nonProxyHosts)) {
-            AuthenticationStore authStore = httpClient.getAuthenticationStore();
-            ProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();
-            List<Proxy> proxies = proxyConfig.getProxies();
-
-            proxy = new HttpProxy(proxyHost, proxyPort);
-            proxies.add(proxy);
-
-            authStore.addAuthentication(
-                    new BasicAuthentication(proxy.getURI(), Authentication.ANY_REALM, proxyUser, proxyPassword));
+            proxyClient = acquireProxyClient(proxyHost, proxyPort, proxyUser, proxyPassword);
+            httpClient = proxyClient.client;
+        } else {
+            httpClient = factory.getCommonHttpClient();
         }
 
+        try {
+            return sendRequest(httpClient, httpMethod, uri, httpHeaders, content, contentType, timeout);
+        } finally {
+            if (proxyClient != null) {
+                releaseProxyClient(proxyClient);
+            }
+        }
+    }
+
+    private static ContentResponse sendRequest(HttpClient httpClient, String httpMethod, URI uri,
+            Properties httpHeaders, InputStream content, String contentType, int timeout) throws IOException {
         final HttpMethod method = HttpUtil.createHttpMethod(httpMethod);
 
         final Request request = httpClient.newRequest(uri).method(method).timeout(timeout, TimeUnit.MILLISECONDS);
@@ -265,11 +317,126 @@ public class HttpUtil {
             return response;
         } catch (Exception e) {
             throw new IOException(e);
-        } finally {
-            if (proxy != null) {
-                // Remove the proxy, that has been added for this request
-                httpClient.getProxyConfiguration().getProxies().remove(proxy);
+        }
+    }
+
+    /**
+     * Returns the proxy http client for the given proxy configuration, creating it if necessary, and leases it. The
+     * caller must call {@link #releaseProxyClient(ProxyClient)} when the request has finished.
+     */
+    private static ProxyClient acquireProxyClient(String proxyHost, int proxyPort, String proxyUser,
+            String proxyPassword) throws IOException {
+        final ProxyKey key = new ProxyKey(proxyHost, proxyPort, proxyUser == null ? "" : proxyUser,
+                proxyPassword == null ? "" : proxyPassword);
+        final List<HttpClient> toStop = new ArrayList<>();
+        try {
+            synchronized (PROXY_LOCK) {
+                // The factory is read under the lock that unbinding also takes, so a client is never created for or
+                // published after a factory that is already gone.
+                final HttpClientFactory factory = httpClientFactory;
+                if (factory == null) {
+                    throw new IllegalStateException("Http client factory not available");
+                }
+                final long now = System.nanoTime();
+                retireIdleProxyClients(now, toStop);
+
+                ProxyClient entry = PROXY_HTTP_CLIENTS.get(key);
+                if (entry == null) {
+                    final HttpClient client = factory.createHttpClient(PROXY_CLIENT_CONSUMER_NAME);
+                    try {
+                        // drop proxies inherited from system properties, this client must only use the given one
+                        client.getProxyConfiguration().getProxies().clear();
+                        HttpProxy proxy = new HttpProxy(proxyHost, proxyPort);
+                        client.getProxyConfiguration().getProxies().add(proxy);
+                        if (!key.user().isBlank()) {
+                            client.getAuthenticationStore().addAuthentication(new BasicAuthentication(proxy.getURI(),
+                                    Authentication.ANY_REALM, key.user(), key.password()));
+                        }
+                        client.start();
+                    } catch (Exception e) {
+                        toStop.add(client);
+                        throw new IOException("Could not start http client for proxy " + proxyHost + ":" + proxyPort,
+                                e);
+                    }
+                    entry = new ProxyClient(client);
+                    PROXY_HTTP_CLIENTS.put(key, entry);
+                    retireOverflowingProxyClients(entry, toStop);
+                }
+                entry.lastUsedNanos = now;
+                entry.leases++;
+                return entry;
             }
+        } finally {
+            toStop.forEach(HttpUtil::stopQuietly);
+        }
+    }
+
+    private static void releaseProxyClient(ProxyClient entry) {
+        boolean stop = false;
+        synchronized (PROXY_LOCK) {
+            entry.leases--;
+            entry.lastUsedNanos = System.nanoTime();
+            stop = entry.retired && entry.leases == 0;
+        }
+        if (stop) {
+            stopQuietly(entry.client);
+        }
+    }
+
+    /**
+     * Retires all clients that were not used for a long time. Must be called while holding {@link #PROXY_LOCK}.
+     */
+    private static void retireIdleProxyClients(long now, List<HttpClient> toStop) {
+        final Iterator<ProxyClient> it = PROXY_HTTP_CLIENTS.values().iterator();
+        while (it.hasNext()) {
+            final ProxyClient entry = it.next();
+            if (entry.leases == 0 && now - entry.lastUsedNanos > PROXY_HTTP_CLIENT_IDLE_NANOS) {
+                it.remove();
+                retire(entry, toStop);
+            }
+        }
+    }
+
+    /**
+     * Retires the least recently used clients while there are too many. Must be called while holding
+     * {@link #PROXY_LOCK}.
+     */
+    private static void retireOverflowingProxyClients(ProxyClient keep, List<HttpClient> toStop) {
+        final Iterator<ProxyClient> it = PROXY_HTTP_CLIENTS.values().iterator();
+        while (PROXY_HTTP_CLIENTS.size() > MAX_PROXY_HTTP_CLIENTS && it.hasNext()) {
+            final ProxyClient entry = it.next();
+            if (entry != keep) {
+                it.remove();
+                retire(entry, toStop);
+            }
+        }
+    }
+
+    /**
+     * Marks the client as retired. It is stopped right away if no request uses it, otherwise by the last request that
+     * releases it. Must be called while holding {@link #PROXY_LOCK}.
+     */
+    private static void retire(ProxyClient entry, List<HttpClient> toStop) {
+        entry.retired = true;
+        if (entry.leases == 0) {
+            toStop.add(entry.client);
+        }
+    }
+
+    private static void retireAllProxyHttpClients() {
+        final List<HttpClient> toStop = new ArrayList<>();
+        synchronized (PROXY_LOCK) {
+            PROXY_HTTP_CLIENTS.values().forEach(entry -> retire(entry, toStop));
+            PROXY_HTTP_CLIENTS.clear();
+        }
+        toStop.forEach(HttpUtil::stopQuietly);
+    }
+
+    private static void stopQuietly(HttpClient client) {
+        try {
+            client.stop();
+        } catch (Exception e) {
+            LOGGER.debug("Error while stopping proxy http client", e);
         }
     }
 
@@ -588,10 +755,17 @@ public class HttpUtil {
 
     @Reference
     protected void setHttpClientFactory(final HttpClientFactory httpClientFactory) {
-        HttpUtil.httpClientFactory = httpClientFactory;
+        synchronized (PROXY_LOCK) {
+            HttpUtil.httpClientFactory = httpClientFactory;
+        }
     }
 
     protected void unsetHttpClientFactory(final HttpClientFactory httpClientFactory) {
-        HttpUtil.httpClientFactory = null;
+        synchronized (PROXY_LOCK) {
+            if (HttpUtil.httpClientFactory == httpClientFactory) {
+                HttpUtil.httpClientFactory = null;
+            }
+        }
+        retireAllProxyHttpClients();
     }
 }
