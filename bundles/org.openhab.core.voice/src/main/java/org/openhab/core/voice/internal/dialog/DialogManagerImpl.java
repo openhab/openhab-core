@@ -458,7 +458,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     public boolean onAcquireGroup(DialogContext context) {
         String group = context.dialogGroup();
         DialogContext existing = activeDialogGroups.putIfAbsent(group, context);
-        if (existing == null || existing.equals(context)) {
+        if (existing == null) {
             logger.debug("Acquiring dialog group '{}'", group);
             return true;
         }
@@ -509,37 +509,35 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     private void buildDialogRegistrations() {
-        Collection<@Nullable DialogRegistration> dialogRegistrations;
         synchronized (dialogRegistrationStorage) {
-            dialogRegistrations = dialogRegistrationStorage.getValues();
-        }
-        dialogRegistrations.forEach(dr -> {
-            if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
-                try {
-                    Conversation conversation = conversationManager
-                            .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
-                    startDialog(getDialogContextBuilder() //
-                            .withSink(audioManager.getSink(dr.sinkId)) //
-                            .withSource(audioManager.getSource(dr.sourceId)) //
-                            .withKS(voiceServiceResolver.getKS(dr.ksId)) //
-                            .withKeyword(dr.keyword) //
-                            .withSTT(voiceServiceResolver.getSTT(dr.sttId)) //
-                            .withTTS(voiceServiceResolver.getTTS(dr.ttsId)) //
-                            .withVoice(voiceServiceResolver.getVoice(dr.voiceId)) //
-                            .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
-                            .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
-                            .withLocale(dr.locale) //
-                            .withDialogGroup(dr.dialogGroup) //
-                            .withConversation(conversation) //
-                            .withLocationItem(dr.locationItem) //
-                            .withListeningItem(dr.listeningItem) //
-                            .withMelody(dr.listeningMelody) //
-                            .build());
-                } catch (IllegalStateException e) {
-                    logger.debug("Unable to start dialog registration: {}", e.getMessage());
+            dialogRegistrationStorage.getValues().forEach(dr -> {
+                if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
+                    try {
+                        Conversation conversation = conversationManager
+                                .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
+                        startDialog(getDialogContextBuilder() //
+                                .withSink(audioManager.getSink(dr.sinkId)) //
+                                .withSource(audioManager.getSource(dr.sourceId)) //
+                                .withKS(voiceServiceResolver.getKS(dr.ksId)) //
+                                .withKeyword(dr.keyword) //
+                                .withSTT(voiceServiceResolver.getSTT(dr.sttId)) //
+                                .withTTS(voiceServiceResolver.getTTS(dr.ttsId)) //
+                                .withVoice(voiceServiceResolver.getVoice(dr.voiceId)) //
+                                .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
+                                .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
+                                .withLocale(dr.locale) //
+                                .withDialogGroup(dr.dialogGroup) //
+                                .withConversation(conversation) //
+                                .withLocationItem(dr.locationItem) //
+                                .withListeningItem(dr.listeningItem) //
+                                .withMelody(dr.listeningMelody) //
+                                .build());
+                    } catch (IllegalStateException e) {
+                        logger.debug("Unable to start dialog registration: {}", e.getMessage());
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private static void validatePersistentDialogContext(DialogContext context) throws IllegalStateException {
@@ -563,7 +561,8 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             throw new IllegalStateException(
                     "Cannot start dialog as provided locale is not supported by all HLI services.");
         }
-        if (context.voice() != null && !context.voice().getLocale().equals(context.locale())) {
+        if (context.voice() != null
+                && !context.voice().getLocale().getLanguage().equals(context.locale().getLanguage())) {
             throw new IllegalStateException(
                     "Cannot start dialog as provided locale is not supported by TTS voice " + context.voice().getUID());
         }

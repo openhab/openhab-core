@@ -52,7 +52,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = VoiceServiceResolver.class, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID)
+@Component(service = { VoiceServiceResolver.class,
+        ConfigOptionProvider.class }, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID)
 @NonNullByDefault
 public class VoiceServiceResolver implements ConfigOptionProvider {
 

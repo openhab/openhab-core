@@ -70,8 +70,9 @@ public class DialogAudioDriver {
      * @param listener the listener receiving trigger events
      * @return {@link DTServiceHandle} or null if starting failed
      * @throws IllegalStateException if the dialog trigger is not configured
+     * @throws DTException if the DT service failed to start listening
      */
-    public @Nullable DTServiceHandle startTrigger(KSListener listener) throws IllegalStateException {
+    public DTServiceHandle startTrigger(KSListener listener) throws IllegalStateException, DTException {
         DTService dtService = dialogContext.dt();
         String keyword = dialogContext.keyword();
         if (dtService == null || keyword == null) {
@@ -79,33 +80,32 @@ public class DialogAudioDriver {
         }
 
         stopTrigger();
+
+        AudioFormat fmt = null;
+        if (dtService instanceof KSService ksService) {
+            fmt = ksFormat;
+            if (fmt == null) {
+                throw new KSException("No compatible audio format found for KS '" + ksService.getId() + "' and source '"
+                        + dialogContext.source().getId() + "'");
+            }
+        }
+
         try {
             if (dtService instanceof KSService ksService) {
-                AudioFormat fmt = ksFormat;
-                if (fmt == null) {
-                    logger.warn("No compatible audio format found for KS '{}' and source '{}'", ksService.getId(),
-                            dialogContext.source().getId());
-                    return null;
-                }
                 AudioStream stream = dialogContext.source().getInputStream(fmt);
                 streamKS = stream;
-                dtServiceHandle = ksService.spot(listener, stream, dialogContext.locale(), keyword);
+                return dtServiceHandle = ksService.spot(listener, stream, dialogContext.locale(), keyword);
             } else if (dtService instanceof BasicDTService basicDTService) {
-                dtServiceHandle = basicDTService.registerListener(listener);
-            } else {
-                logger.warn("DialogAudioDriver is not able to handle this DTService implementation '{}'",
-                        dtService.getClass().getName());
+                return dtServiceHandle = basicDTService.registerListener(listener);
             }
-            return dtServiceHandle;
+            throw new DTException("DialogAudioDriver is not able to handle this DTService implementation '"
+                    + dtService.getClass().getName() + "'");
         } catch (AudioException e) {
-            logger.warn("Encountered audio error: {}", e.getMessage());
+            throw new KSException("Error creating the audio stream: " + e.getMessage(), e);
         } catch (KSException e) {
-            logger.warn("Encountered error calling spotting: {}", e.getMessage());
             closeStreamKS();
-        } catch (DTException e) {
-            logger.warn("Encountered error starting the dialog trigger: {}", e.getMessage());
+            throw e;
         }
-        return null;
     }
 
     /**
@@ -115,22 +115,19 @@ public class DialogAudioDriver {
      * @return {@link STTServiceHandle} or null if starting failed
      * @throws STTException if the STT service failed to start recognition
      */
-    public @Nullable STTServiceHandle startRecognition(STTListener listener) throws STTException {
+    public STTServiceHandle startRecognition(STTListener listener) throws STTException {
         stopRecognition();
         AudioFormat fmt = sttFormat;
         if (fmt == null) {
-            logger.warn("No compatible audio format found for stt '{}' and source '{}'", dialogContext.stt().getId(),
-                    dialogContext.source().getId());
-            return null;
+            throw new STTException("No compatible audio format found for STT '" + dialogContext.stt().getId()
+                    + "' and source '" + dialogContext.source().getId() + "'");
         }
         try {
             AudioStream stream = dialogContext.source().getInputStream(fmt);
             streamSTT = stream;
-            sttServiceHandle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
-            return sttServiceHandle;
+            return sttServiceHandle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
         } catch (AudioException e) {
-            logger.warn("Error creating the audio stream: {}", e.getMessage());
-            return null;
+            throw new STTException("Error creating the audio stream: " + e.getMessage(), e);
         } catch (STTException e) {
             closeStreamSTT();
             throw e;

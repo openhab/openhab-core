@@ -57,14 +57,13 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Tests for {@link org.openhab.core.voice.internal.VoiceManagerImpl}
+ * Tests for {@link VoiceManagerImpl}
  *
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
 @NonNullByDefault
 public class VoiceManagerImplTest extends JavaOSGiTest {
-    private static final URI VOICE_CONFIG_URI = URI.create("system:voice");
     private static final String CONFIG_DEFAULT_SINK = "defaultSink";
     private static final String CONFIG_DEFAULT_SOURCE = "defaultSource";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";

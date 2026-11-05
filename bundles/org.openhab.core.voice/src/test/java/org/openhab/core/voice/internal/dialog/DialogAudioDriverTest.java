@@ -28,8 +28,8 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.voice.dialog.DialogContext;
+import org.openhab.core.voice.dialog.trigger.DTException;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
-import org.openhab.core.voice.dialog.trigger.ks.KSException;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceHandle;
@@ -61,7 +61,7 @@ public class DialogAudioDriverTest {
     private final STTServiceHandle sttHandle = mock(STTServiceHandle.class);
 
     @Test
-    public void startTriggerAndStopTriggerManagesStreamAndHandle() throws AudioException, KSException, IOException {
+    public void startTriggerAndStopTriggerManagesStreamAndHandle() throws AudioException, DTException, IOException {
         when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
         when(ksService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
         when(audioSource.getInputStream(any())).thenReturn(audioStream);

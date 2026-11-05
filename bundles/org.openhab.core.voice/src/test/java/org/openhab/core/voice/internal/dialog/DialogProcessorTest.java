@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,8 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.voice.dialog.DialogContext;
+import org.openhab.core.voice.dialog.trigger.DTErrorEvent;
+import org.openhab.core.voice.dialog.trigger.DTException;
 import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
@@ -94,6 +98,28 @@ public class DialogProcessorTest {
                 .withSTT(stt).withTTS(tts).withVoice(voice).withHLIs(interpreters).build();
     }
 
+    private DialogContext createTestContext(List<HumanLanguageInterpreter> hlis, boolean withDt) {
+        AudioSource source = mock(AudioSource.class);
+        AudioSink sink = mock(AudioSink.class);
+        KSService ks = mock(KSService.class);
+        STTService stt = mock(STTService.class);
+        TTSService tts = mock(TTSService.class);
+        Voice voice = mock(Voice.class);
+        when(voice.getLocale()).thenReturn(Locale.ENGLISH);
+        when(tts.getAvailableVoices()).thenReturn(Set.of(voice));
+        List<HumanLanguageInterpreter> interpreters = hlis.isEmpty() ? List.of(mock(HumanLanguageInterpreter.class))
+                : hlis;
+
+        DialogContext.Builder builder = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(source)
+                .withSink(sink).withSTT(stt).withTTS(tts).withVoice(voice).withHLIs(interpreters);
+
+        if (withDt) {
+            builder.withKS(ks);
+        }
+
+        return builder.build();
+    }
+
     @Test
     public void interpreterLoopReturnsFastAfterUnrecoverableInterpretationException()
             throws STTException, InterpretationException {
@@ -152,7 +178,7 @@ public class DialogProcessorTest {
     }
 
     @Test
-    public void startTransitionsToWaitingForTriggerAndPlaysStartSound() {
+    public void startTransitionsToWaitingForTriggerAndPlaysStartSound() throws DTException {
         DialogContext context = createTestContext(List.of());
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, eventListener);
@@ -166,7 +192,7 @@ public class DialogProcessorTest {
 
     @Test
     public void startSimpleDialogTransitionsToListeningAndPlaysListeningSound() throws STTException {
-        DialogContext context = createTestContext(List.of());
+        DialogContext context = createTestContext(List.of(), false);
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, eventListener);
 
@@ -179,7 +205,7 @@ public class DialogProcessorTest {
     }
 
     @Test
-    public void dtEventReceivedTriggeredStartsSimpleDialog() throws STTException {
+    public void dtEventReceivedTriggeredStartsSimpleDialog() throws STTException, DTException {
         DialogContext context = createTestContext(List.of());
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, eventListener);
@@ -231,7 +257,7 @@ public class DialogProcessorTest {
 
     @Test
     public void startSimpleDialogDoesNotStartWhenGroupAcquisitionFails() {
-        DialogContext context = createTestContext(List.of());
+        DialogContext context = createTestContext(List.of(), false);
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, eventListener);
 
@@ -242,6 +268,23 @@ public class DialogProcessorTest {
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(audioDriver);
         verifyNoInteractions(feedbackService);
+    }
+
+    @Test
+    public void startSimpleDialogFinishesDialogImmediatelyWhenRecognitionFails() throws STTException {
+        DialogContext context = createTestContext(List.of(), false);
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        when(audioDriver.startRecognition(any())).thenThrow(STTException.class);
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+
+        processor.startSimpleDialog();
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(feedbackService);
+        verify(eventListener).onReleaseGroup(context);
+        verify(eventListener).onDialogStopped(context);
     }
 
     @Test
@@ -259,5 +302,196 @@ public class DialogProcessorTest {
         assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
         verify(eventListener).onReleaseGroup(context);
         verify(eventListener, never()).onDialogStopped(context);
+    }
+
+    @Test
+    public void stopDuringListeningRejectsSpeechRecognitionEvents() throws STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        processor.stop();
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(speechSynthesizer);
+    }
+
+    @Test
+    public void stopDuringListeningRejectsSpeechRecognitionErrorEvent() throws STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        processor.stop();
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(speechSynthesizer);
+    }
+
+    @Test
+    public void stopDuringListeningRejectsRecognitionStartAndStopEvents() throws STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        processor.stop();
+        reset(feedbackService);
+
+        sttListenerCaptor.getValue().sttEventReceived(new RecognitionStartEvent());
+        sttListenerCaptor.getValue().sttEventReceived(new RecognitionStopEvent());
+
+        verifyNoInteractions(feedbackService);
+    }
+
+    @Test
+    public void stopDuringInterpretationDiscardsResultAndDoesNotSpeakOrRestoreWaitingForTrigger()
+            throws STTException, InterruptedException, InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        when(hli.getId()).thenReturn("hli");
+
+        CountDownLatch enterInterpretLatch = new CountDownLatch(1);
+        CountDownLatch stopLatch = new CountDownLatch(1);
+
+        when(hli.interpret(any(Locale.class), any(InterpreterContext.class))).thenAnswer(invocation -> {
+            enterInterpretLatch.countDown();
+            assertTrue(stopLatch.await(5, TimeUnit.SECONDS));
+            return "answer";
+        });
+
+        DialogContext context = createTestContext(List.of(hli));
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        Thread thread = new Thread(
+                () -> sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f)));
+        thread.start();
+
+        assertTrue(enterInterpretLatch.await(5, TimeUnit.SECONDS));
+        processor.stop();
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        stopLatch.countDown();
+
+        thread.join(5000);
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(speechSynthesizer);
+    }
+
+    @Test
+    public void stopDuringInterpretationDiscardsInterpretationException()
+            throws STTException, InterruptedException, InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        when(hli.getId()).thenReturn("hli");
+
+        CountDownLatch enterInterpretLatch = new CountDownLatch(1);
+        CountDownLatch stopLatch = new CountDownLatch(1);
+
+        when(hli.interpret(any(Locale.class), any(InterpreterContext.class))).thenAnswer(invocation -> {
+            enterInterpretLatch.countDown();
+            assertTrue(stopLatch.await(5, TimeUnit.SECONDS));
+            throw new InterpretationException("some error");
+        });
+
+        DialogContext context = createTestContext(List.of(hli));
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        Thread thread = new Thread(() -> {
+            sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+        });
+        thread.start();
+
+        assertTrue(enterInterpretLatch.await(5, TimeUnit.SECONDS));
+        processor.stop();
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        stopLatch.countDown();
+
+        thread.join(5000);
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(speechSynthesizer);
+    }
+
+    @Test
+    public void triggerIgnoredWhenProcessorNotWaitingForTrigger() throws DTException, STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<KSListener> ksListenerCaptor = ArgumentCaptor.forClass(KSListener.class);
+        processor.start();
+        verify(audioDriver).startTrigger(ksListenerCaptor.capture());
+
+        // First trigger transitions to LISTENING
+        ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+
+        // Second trigger while in LISTENING is ignored
+        ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+        verify(audioDriver, times(1)).startRecognition(any(STTListener.class));
+    }
+
+    @Test
+    public void dtErrorEventSpeaksWhenWaitingForTrigger() throws DTException, STTException {
+        DialogContext context = createTestContext(List.of());
+        when(i18nProvider.getFormattedText(eq("error.ks-error"), any(), eq("something went wrong")))
+                .thenReturn("Error: something went wrong");
+
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<KSListener> ksListenerCaptor = ArgumentCaptor.forClass(KSListener.class);
+        processor.start();
+        verify(audioDriver).startTrigger(ksListenerCaptor.capture());
+
+        ksListenerCaptor.getValue().dtEventReceived(new DTErrorEvent("something went wrong"));
+
+        verify(audioDriver, never()).startRecognition(any(STTListener.class));
+        verify(speechSynthesizer).say(eq("Error: something went wrong"), eq(context.tts()), eq(context.voice()),
+                eq(context.sink()), eq(null));
+    }
+
+    @Test
+    public void dtErrorEventIgnoredWhenStoppedOrNotWaitingForTrigger() throws DTException, STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<KSListener> ksListenerCaptor = ArgumentCaptor.forClass(KSListener.class);
+        processor.start();
+        verify(audioDriver).startTrigger(ksListenerCaptor.capture());
+
+        processor.stop();
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+
+        ksListenerCaptor.getValue().dtEventReceived(new DTErrorEvent("something went wrong"));
+
+        verify(audioDriver, never()).startRecognition(any(STTListener.class));
+        verifyNoInteractions(speechSynthesizer);
     }
 }
