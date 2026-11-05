@@ -21,10 +21,8 @@ import org.openhab.core.voice.dialog.trigger.DTErrorEvent;
 import org.openhab.core.voice.dialog.trigger.DTEvent;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
-import org.openhab.core.voice.dialog.trigger.ks.KSErrorEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
-import org.openhab.core.voice.dialog.trigger.ks.KSpottedEvent;
 import org.openhab.core.voice.internal.VoiceI18nProvider;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
@@ -130,15 +128,14 @@ public class DialogProcessor {
         @Override
         public void dtEventReceived(DTEvent dtEvent) {
             if (dtEvent instanceof DTTriggeredEvent) {
-                logger.debug("{} event received",
-                        (dtEvent instanceof KSpottedEvent) ? "KSpottedEvent" : "DTTriggeredEvent");
+                logger.debug("{} event received", dtEvent.getClass().getSimpleName());
                 try {
                     startSimpleDialog();
                 } catch (IllegalStateException e) {
                     logger.warn("{}", e.getMessage());
                 }
             } else if (dtEvent instanceof DTErrorEvent dte) {
-                logger.debug("{} event received", dte instanceof KSErrorEvent ? "KSErrorEvent" : "DTErrorEvent");
+                logger.debug("{} event received", dte.getClass().getSimpleName());
                 String text = i18nProvider.getFormattedText("error.ks-error", dialogContext.locale(), dte.getMessage());
                 say(text);
             }
