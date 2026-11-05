@@ -459,7 +459,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     public boolean onAcquireGroup(DialogContext context) {
         String group = context.dialogGroup();
         DialogContext existing = activeDialogGroups.putIfAbsent(group, context);
-        if (existing == null || existing == context) {
+        if (existing == null || existing.equals(context)) {
             logger.debug("Acquiring dialog group '{}'", group);
             return true;
         }

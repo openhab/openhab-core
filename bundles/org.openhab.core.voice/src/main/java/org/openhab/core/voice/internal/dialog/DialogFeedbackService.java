@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handles audio tone synthesis and listening item visual feedback for a dialog.
+ * Handles audio tone synthesis and listening item feedback for a dialog.
  *
  * @author Florian Hotze - Initial contribution
  */

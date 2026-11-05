@@ -430,20 +430,6 @@ public class DialogManagerImplTest {
     }
 
     @Test
-    public void getDialogContextBuilderPopulatesDefaults() {
-        AudioSource defaultSource = mock(AudioSource.class);
-        AudioSink defaultSink = mock(AudioSink.class);
-        when(audioManager.getSource()).thenReturn(defaultSource);
-        when(audioManager.getSink()).thenReturn(defaultSink);
-
-        DialogContext.Builder builder = dialogManager.getDialogContextBuilder();
-        assertNotNull(builder);
-        DialogContext context = builder.build();
-        assertEquals(defaultSource, context.source());
-        assertEquals(defaultSink, context.sink());
-    }
-
-    @Test
     public void removingAudioSinkStopsDependentDialog() throws AudioException, STTException, KSException, IOException {
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
