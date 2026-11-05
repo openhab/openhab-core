@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
@@ -47,8 +48,7 @@ public class DialogFeedbackServiceTest {
     private final TTSService tts = mock(TTSService.class);
     private final HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
 
-    private DialogContext createContext(@NonNullByDefault({}) String listeningItem,
-            @NonNullByDefault({}) String melody) {
+    private DialogContext createContext(@Nullable String listeningItem, @Nullable String melody) {
         return new DialogContext.Builder("keyword", Locale.ENGLISH).withSink(audioSink).withSource(audioSource)
                 .withSTT(stt).withTTS(tts).withHLI(hli).withListeningItem(listeningItem).withMelody(melody).build();
     }
