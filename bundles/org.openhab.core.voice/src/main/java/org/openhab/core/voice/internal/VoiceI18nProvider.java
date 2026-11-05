@@ -77,18 +77,12 @@ public class VoiceI18nProvider {
      * @return formatted localized text or fallback
      */
     public @Nullable String getFormattedText(String key, Locale locale, @Nullable Object... args) {
-        String template = getText(key, locale);
-        if (template != null) {
-            String result = template;
-            for (int i = 0; i < args.length; i++) {
-                Object arg = args[i];
-                result = result.replace("{" + i + "}", arg != null ? String.valueOf(arg) : "");
-            }
-            return result;
+        Bundle b = bundle;
+        String defaultText = (args.length > 0 && args[0] != null) ? String.valueOf(args[0]) : null;
+        String formatted = b != null ? i18nProvider.getText(b, key, null, locale, args) : null;
+        if (formatted != null) {
+            return formatted;
         }
-        if (args.length > 0 && args[0] != null) {
-            return String.valueOf(args[0]);
-        }
-        return null;
+        return defaultText;
     }
 }
