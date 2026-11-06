@@ -252,15 +252,14 @@ public abstract class GenericItem implements ActiveItem {
      */
     public void setState(State state, @Nullable State lastState, @Nullable ZonedDateTime lastStateUpdate,
             @Nullable ZonedDateTime lastStateChange, @Nullable String source) {
-        State oldState = this.state;
-        this.state = state;
-        this.lastState = lastState != null ? lastState : this.lastState;
-        this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate : this.lastStateUpdate;
-        this.lastStateChange = lastStateChange != null ? lastStateChange : this.lastStateChange;
-        notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state, lastStateUpdate, source);
-        if (!oldState.equals(state)) {
-            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange, source);
+        synchronized (this) {
+            // If a previous state is supplied set it and its timestamp.
+            if (lastState != null) {
+                this.lastState = lastState;
+                this.lastStateChange = lastStateChange;
+            }
+
+            applyState(state, lastStateUpdate, source);
         }
     }
 
@@ -273,20 +272,34 @@ public abstract class GenericItem implements ActiveItem {
      * @param state new state of this item
      */
     protected final void applyState(State state, @Nullable String source) {
-        ZonedDateTime now = ZonedDateTime.now();
-        State oldState = this.state;
-        boolean stateChanged = !oldState.equals(state);
-        this.state = state;
-        if (stateChanged) {
-            lastState = oldState; // update before we notify listeners
+        applyState(state, ZonedDateTime.now(), source);
+    }
+
+    protected final void applyState(State state, @Nullable ZonedDateTime timestamp, @Nullable String source) {
+        State oldState;
+        boolean stateChanged;
+        ZonedDateTime oldLastStateUpdate;
+        ZonedDateTime oldLastStateChange;
+
+        synchronized (this) {
+            oldState = this.state;
+            stateChanged = !oldState.equals(state);
+            oldLastStateUpdate = this.lastStateUpdate;
+            oldLastStateChange = this.lastStateChange;
+
+            this.state = state;
+            this.lastStateUpdate = timestamp;
+            if (stateChanged) {
+                this.lastState = oldState;
+                this.lastStateChange = timestamp;
+            }
         }
+
         notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state, lastStateUpdate, source);
+        sendStateUpdatedEvent(state, oldLastStateUpdate, source);
         if (stateChanged) {
-            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange, source);
-            lastStateChange = now; // update after we've notified listeners
+            sendStateChangedEvent(state, oldState, oldLastStateUpdate, oldLastStateChange, source);
         }
-        lastStateUpdate = now;
     }
 
     /**
