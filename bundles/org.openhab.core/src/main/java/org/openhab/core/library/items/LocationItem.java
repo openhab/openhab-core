@@ -100,7 +100,7 @@ public class LocationItem extends GenericItem {
 
     @Override
     public void setTimeSeries(TimeSeries timeSeries) {
-        if (timeSeries.getStates().allMatch(s -> s.state() instanceof PointType)) {
+        if (timeSeries.getStates().allMatch(s -> isAcceptedState(ACCEPTED_DATA_TYPES, s.state()))) {
             applyTimeSeries(timeSeries);
         } else {
             logSetTypeError(timeSeries);
