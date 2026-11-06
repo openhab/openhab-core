@@ -137,6 +137,11 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.oauth2client/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-energy" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.energy/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-automation-module-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script/${project.version}</bundle>
