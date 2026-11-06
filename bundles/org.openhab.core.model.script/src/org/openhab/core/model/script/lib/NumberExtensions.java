@@ -20,6 +20,7 @@ import javax.measure.quantity.Dimensionless;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
 
 /**
@@ -89,6 +90,60 @@ public class NumberExtensions {
         BigDecimal xValue = numberToBigDecimal(x);
         BigDecimal yValue = numberToBigDecimal(y);
         return xValue.divide(yValue, 8, RoundingMode.HALF_UP);
+    }
+
+    // Calculation operators for states
+
+    public static Number operator_plus(State x, State y) {
+        return plus(stateToNumber(x), stateToNumber(y));
+    }
+
+    public static Number operator_plus(State x, Number y) {
+        return plus(stateToNumber(x), y);
+    }
+
+    public static Number operator_plus(Number x, State y) {
+        return plus(x, stateToNumber(y));
+    }
+
+    public static Number operator_minus(State x) {
+        return minus(stateToNumber(x));
+    }
+
+    public static Number operator_minus(State x, State y) {
+        return minus(stateToNumber(x), stateToNumber(y));
+    }
+
+    public static Number operator_minus(State x, Number y) {
+        return minus(stateToNumber(x), y);
+    }
+
+    public static Number operator_minus(Number x, State y) {
+        return minus(x, stateToNumber(y));
+    }
+
+    public static Number operator_multiply(State x, State y) {
+        return multiply(stateToNumber(x), stateToNumber(y));
+    }
+
+    public static Number operator_multiply(State x, Number y) {
+        return multiply(stateToNumber(x), y);
+    }
+
+    public static Number operator_multiply(Number x, State y) {
+        return multiply(x, stateToNumber(y));
+    }
+
+    public static Number operator_divide(State x, State y) {
+        return divide(stateToNumber(x), stateToNumber(y));
+    }
+
+    public static Number operator_divide(State x, Number y) {
+        return divide(stateToNumber(x), y);
+    }
+
+    public static Number operator_divide(Number x, State y) {
+        return divide(x, stateToNumber(y));
     }
 
     // Comparison operations between numbers
@@ -407,5 +462,63 @@ public class NumberExtensions {
 
     private static boolean isAbstractUnitOne(QuantityType<?> left) {
         return Units.ONE.equals(left.getUnit());
+    }
+
+    private static Number stateToNumber(State state) {
+        if (state == null) {
+            return null;
+        }
+        if (state instanceof Number number) {
+            return number;
+        }
+        throw new IllegalArgumentException(
+                "State '" + state + "' of type '" + state.getClass().getSimpleName() + "' cannot be used as a number");
+    }
+
+    private static Number plus(Number x, Number y) {
+        if (x instanceof QuantityType<?> qx && y instanceof QuantityType<?> qy) {
+            return operator_plus(qx, qy);
+        }
+        return operator_plus(x, y);
+    }
+
+    private static Number minus(Number x) {
+        if (x instanceof QuantityType<?> qx) {
+            return operator_minus(qx);
+        }
+        return operator_minus(x);
+    }
+
+    private static Number minus(Number x, Number y) {
+        if (x instanceof QuantityType<?> qx && y instanceof QuantityType<?> qy) {
+            return operator_minus(qx, qy);
+        }
+        return operator_minus(x, y);
+    }
+
+    private static Number multiply(Number x, Number y) {
+        if (x instanceof QuantityType<?> qx && y instanceof QuantityType<?> qy) {
+            return operator_multiply(qx, qy);
+        }
+        if (x instanceof QuantityType<?> qx) {
+            return operator_multiply(qx, y);
+        }
+        if (y instanceof QuantityType<?> qy) {
+            return operator_multiply(x, qy);
+        }
+        return operator_multiply(x, y);
+    }
+
+    private static Number divide(Number x, Number y) {
+        if (x instanceof QuantityType<?> qx && y instanceof QuantityType<?> qy) {
+            return operator_divide(qx, qy);
+        }
+        if (x instanceof QuantityType<?> qx) {
+            return operator_divide(qx, y);
+        }
+        if (y instanceof QuantityType<?> qy) {
+            return operator_divide(x, qy);
+        }
+        return operator_divide(x, y);
     }
 }
