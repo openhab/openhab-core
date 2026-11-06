@@ -20,6 +20,18 @@
 		</channel-groups>
 	</thing-type>
 
+	<!-- Hue thing with both ungrouped channels and channel groups -->
+	<thing-type id="mixed">
+		<label>HUE Mixed Channels</label>
+		<description>Thing exposing both ungrouped channels and channel groups.</description>
+		<channels>
+			<channel id="color" typeId="color"/>
+		</channels>
+		<channel-groups>
+			<channel-group id="alarm_system" typeId="alarm_system"/>
+		</channel-groups>
+	</thing-type>
+
 	<!-- Color Channel -->
 	<channel-type id="color">
 		<item-type>Color</item-type>
