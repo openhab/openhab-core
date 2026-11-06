@@ -177,7 +177,10 @@ public interface VoiceManager {
     /**
      * Returns an object with the services and configurations last used for dialog processing if any.
      * The underling value is updated before an active dialog starts to interpret the transcription result.
+     *
+     * @deprecated Use {@link #getDialogsContexts()} instead to get all the dialog contexts.
      */
+    @Deprecated
     @Nullable
     DialogContext getLastDialogContext();
 

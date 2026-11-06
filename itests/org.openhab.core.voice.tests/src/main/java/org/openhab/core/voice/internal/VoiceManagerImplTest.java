@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSource;
-import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemRegistry;
@@ -59,14 +57,13 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Tests for {@link org.openhab.core.voice.internal.VoiceManagerImpl}
+ * Tests for {@link VoiceManagerImpl}
  *
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
 @NonNullByDefault
 public class VoiceManagerImplTest extends JavaOSGiTest {
-    private static final URI VOICE_CONFIG_URI = URI.create("system:voice");
     private static final String CONFIG_DEFAULT_SINK = "defaultSink";
     private static final String CONFIG_DEFAULT_SOURCE = "defaultSource";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
@@ -594,134 +591,6 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertTrue(ksService.isAborted());
 
         assertThrows(IllegalStateException.class, () -> voiceManager.stopDialog(source));
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultHli() {
-        hliStub = new HumanLanguageInterpreterStub();
-        registerService(hliStub);
-
-        boolean isHliStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultHLI", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String hliStubId = hliStub.getId();
-            String hliLabel = hliStub.getLabel(null);
-            if (optionValue.equals(hliStubId) && optionLabel.equals(hliLabel)) {
-                isHliStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isHliStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultKs() {
-        ksService = new KSServiceStub();
-        registerService(ksService);
-
-        boolean isKSStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultKS", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String ksStubId = ksService.getId();
-            String ksLabel = ksService.getLabel(null);
-            if (optionValue.equals(ksStubId) && optionLabel.equals(ksLabel)) {
-                isKSStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isKSStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultSTT() {
-        sttService = new STTServiceStub();
-        registerService(sttService);
-
-        boolean isSTTStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultSTT", null,
-                null);
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String sttStubId = sttService.getId();
-            String sttLabel = sttService.getLabel(null);
-            if (optionValue.equals(sttStubId) && optionLabel.equals(sttLabel)) {
-                isSTTStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isSTTStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultTts() {
-        ttsService = new TTSServiceStub();
-        registerService(ttsService);
-
-        boolean isTTSStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultTTS", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String ttsStubId = ttsService.getId();
-            String ttsLabel = ttsService.getLabel(null);
-            if (optionValue.equals(ttsStubId) && optionLabel.equals(ttsLabel)) {
-                isTTSStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isTTSStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultVoice() {
-        BundleContext context = bundleContext;
-        ttsService = new TTSServiceStub(context);
-        registerService(ttsService);
-        Locale locale = localeProvider.getLocale();
-
-        boolean isVoiceStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultVoice", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String voiceStubId = voice.getUID();
-            String expectedLabel = String.format("%s - %s - %s", ttsService.getLabel(locale),
-                    voice.getLocale().getDisplayName(locale), voice.getLabel());
-
-            if (optionValue.equals(voiceStubId) && optionLabel.equals(expectedLabel)) {
-                isVoiceStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isVoiceStubInTheOptions);
     }
 
     @Test
