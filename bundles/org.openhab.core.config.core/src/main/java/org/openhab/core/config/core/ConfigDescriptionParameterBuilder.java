@@ -55,6 +55,8 @@ public class ConfigDescriptionParameterBuilder {
     private List<ParameterOption> options = new ArrayList<>();
     private List<FilterCriteria> filterCriteria = new ArrayList<>();
 
+    private Boolean dynamic;
+
     private ConfigDescriptionParameterBuilder(String name, Type type) {
         this.name = name;
         this.type = type;
@@ -299,6 +301,11 @@ public class ConfigDescriptionParameterBuilder {
     public ConfigDescriptionParameter build() throws IllegalArgumentException {
         return new ConfigDescriptionParameter(name, type, min, max, step, pattern, required, readOnly, multiple,
                 context, defaultValue, label, description, options, filterCriteria, groupName, advanced, limitToOptions,
-                multipleLimit, unit, unitLabel, verify);
+                multipleLimit, unit, unitLabel, verify, dynamic);
+    }
+
+    public ConfigDescriptionParameterBuilder withDynamic(Boolean dynamic) {
+        this.dynamic = dynamic;
+        return this;
     }
 }

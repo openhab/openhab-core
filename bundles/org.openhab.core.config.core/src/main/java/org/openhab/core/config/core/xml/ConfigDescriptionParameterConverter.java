@@ -55,10 +55,10 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
     public ConfigDescriptionParameterConverter() {
         super(ConfigDescriptionParameter.class);
 
-        this.attributeMapValidator = new ConverterAttributeMapValidator(
-                new String[][] { { "name", "true" }, { "type", "true" }, { "min", "false" }, { "max", "false" },
-                        { "step", "false" }, { "pattern", "false" }, { "required", "false" }, { "readOnly", "false" },
-                        { "multiple", "false" }, { "groupName", "false" }, { "unit", "false" } });
+        this.attributeMapValidator = new ConverterAttributeMapValidator(new String[][] { { "name", "true" },
+                { "type", "true" }, { "min", "false" }, { "max", "false" }, { "step", "false" }, { "pattern", "false" },
+                { "required", "false" }, { "readOnly", "false" }, { "multiple", "false" }, { "groupName", "false" },
+                { "unit", "false" }, { "dynamic", "false" } });
     }
 
     private @Nullable Type toType(@Nullable String xmlType) {
@@ -91,6 +91,10 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         return b != null && b;
     }
 
+    private Boolean trueIfNull(@Nullable Boolean b) {
+        return b == null || b;
+    }
+
     @Override
     public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         ConfigDescriptionParameter configDescriptionParam;
@@ -108,6 +112,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         Boolean multiple = falseIfNull(toBoolean(attributes.get("multiple")));
         String groupName = attributes.get("groupName");
         String unit = attributes.get("unit");
+        Boolean dynamic = trueIfNull(toBoolean(attributes.get("dynamic")));
 
         // read values
         ConverterValueMap valueMap = new ConverterValueMap(reader, context);
@@ -140,7 +145,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
                 .withMultiple(multiple).withContext(parameterContext).withDefault(defaultValue).withLabel(label)
                 .withDescription(description).withOptions(options).withFilterCriteria(filterCriteria)
                 .withGroupName(groupName).withAdvanced(advanced).withVerify(verify).withLimitToOptions(limitToOptions)
-                .withMultipleLimit(multipleLimit).withUnit(unit).withUnitLabel(unitLabel).build();
+                .withMultipleLimit(multipleLimit).withUnit(unit).withUnitLabel(unitLabel).withDynamic(dynamic).build();
 
         return configDescriptionParam;
     }
