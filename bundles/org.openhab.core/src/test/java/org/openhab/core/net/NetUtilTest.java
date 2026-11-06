@@ -15,13 +15,18 @@ package org.openhab.core.net;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.internal.common.SafeCallerImpl;
 
 /**
  * Tests for NetUtil class
@@ -151,5 +156,32 @@ public class NetUtilTest {
                 .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 16), 24);
 
         assertEquals(0, addresses.size());
+    }
+
+    @Test
+    public void primaryAddressResolvedOnceAnIpv4AddressAppears() {
+        SafeCallerImpl safeCaller = new SafeCallerImpl(null);
+        var netUtil = new NetUtil(safeCaller) {
+            volatile @Nullable String localAddress;
+
+            @Override
+            @Nullable
+            String getFirstLocalIPv4Address() {
+                return localAddress;
+            }
+        };
+        NetworkAddressChangeListener listener = mock(NetworkAddressChangeListener.class);
+        netUtil.addNetworkAddressChangeListener(listener);
+        try {
+            netUtil.activate(Map.of());
+            assertNull(netUtil.getPrimaryIpv4HostAddress());
+
+            netUtil.localAddress = "192.168.1.18";
+            verify(listener, timeout(5000)).onPrimaryAddressChanged(null, "192.168.1.18");
+            assertEquals("192.168.1.18", netUtil.getPrimaryIpv4HostAddress());
+        } finally {
+            netUtil.deactivate();
+            safeCaller.deactivate();
+        }
     }
 }

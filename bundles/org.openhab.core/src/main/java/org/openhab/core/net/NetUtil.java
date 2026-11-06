@@ -81,7 +81,7 @@ public class NetUtil implements NetworkAddressService {
     private static final Pattern IPV4_PATTERN = Pattern
             .compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
-    private @Nullable String primaryAddress;
+    private volatile @Nullable String primaryAddress;
     private @Nullable String configuredBroadcastAddress;
     private boolean useOnlyOneAddress;
     private boolean useIPv6;
@@ -214,7 +214,8 @@ public class NetUtil implements NetworkAddressService {
         networkAddressChangeListeners.remove(listener);
     }
 
-    private @Nullable String getFirstLocalIPv4Address() {
+    @Nullable
+    String getFirstLocalIPv4Address() {
         try {
             String hostAddress = null;
             final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -584,6 +585,7 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private void pollAndNotifyNetworkInterfaceAddress() {
+        resolveMissingPrimaryAddress();
         Collection<CidrAddress> newInterfaceAddresses = getAllInterfaceAddresses();
         if (networkAddressChangeListeners.isEmpty()) {
             // no listeners listening, just update
@@ -625,6 +627,14 @@ public class NetUtil implements NetworkAddressService {
                     .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
                     .build();
             safeListener.onChanged(unmodifiableAddedList, unmodifiableRemovedList);
+        }
+    }
+
+    // null only when none is configured and there was no IPv4 address yet, e.g. at boot before DHCP
+    private synchronized void resolveMissingPrimaryAddress() {
+        if (primaryAddress == null) {
+            primaryAddress = getFirstLocalIPv4Address();
+            notifyPrimaryAddressChange(null, primaryAddress);
         }
     }
 
