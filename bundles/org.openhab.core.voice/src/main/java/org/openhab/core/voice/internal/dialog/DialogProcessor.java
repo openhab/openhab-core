@@ -293,19 +293,15 @@ public class DialogProcessor {
      */
     public @Nullable DTServiceHandle start() throws IllegalStateException {
         stopped = false;
-        DTServiceHandle handle;
-        try {
-            handle = audioDriver.startTrigger(ksListener);
-        } catch (DTException e) {
-            logger.warn("Failed to start persistent dialog: {}", e.getMessage(), e);
-            String text = i18nProvider.getFormattedText("error.dt-exception", dialogContext.locale(), e.getMessage());
-            say(text);
-            finishDialog();
-            return null;
-        }
         state = DialogState.WAITING_FOR_TRIGGER;
         feedbackService.playStartSound();
-        return handle;
+        try {
+            return audioDriver.startTrigger(ksListener);
+        } catch (DTException e) {
+            logger.warn("Failed to start persistent dialog: {}", e.getMessage(), e);
+            state = DialogState.IDLE;
+            return null;
+        }
     }
 
     /**
@@ -322,6 +318,7 @@ public class DialogProcessor {
         synchronized (this) {
             this.currentSession = session;
         }
+        state = DialogState.LISTENING;
         try {
             audioDriver.startRecognition(session);
         } catch (STTException e) {
@@ -332,8 +329,9 @@ public class DialogProcessor {
             finishDialog();
             return;
         }
-        state = DialogState.LISTENING;
-        feedbackService.playListeningSound();
+        if (state == DialogState.LISTENING) {
+            feedbackService.playListeningSound();
+        }
     }
 
     /**
