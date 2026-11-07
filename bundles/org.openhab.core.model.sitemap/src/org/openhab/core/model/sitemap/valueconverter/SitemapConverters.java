@@ -27,8 +27,10 @@ public class SitemapConverters extends DefaultTerminalConverters {
             .compile("(?:[A-Za-z_][A-Za-z_\\-0-9]*|[0-9]+[A-Za-z_\\-][A-Za-z_\\-0-9]*)");
     private static final Pattern INT_PATTERN = Pattern.compile("(?:[0-9]+)");
     private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("(?:[A-Za-z_0-9][A-Za-z_0-9\\-]*)");
+    // Legacy standalone shorthand units accept lowercase d/w/y/h as well for backward compatibility with existing
+    // sitemaps; month stays uppercase M, as lowercase 'm' would be ambiguous with minutes.
     private static final String PERIOD_PART = "(?:P(?=\\d|T\\d)(?:\\d+Y)?(?:\\d+M)?(?:\\d+W)?(?:\\d+D)?"
-            + "(?:T(?=\\d)(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?)?|\\d*[YMWDh])";
+            + "(?:T(?=\\d)(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?)?|\\d*[yYwWMdDh])";
     private static final Pattern PERIOD_PATTERN = Pattern.compile("(?:" + PERIOD_PART + "?-)?" + PERIOD_PART);
     // Mirrors the Number rule: optional '-', then INT or FLOAT (INT '.' INT)
     private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(?:\\.[0-9]+)?");

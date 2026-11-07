@@ -128,8 +128,8 @@ public class SitemapDslTest extends JavaOSGiTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "h", "D", "3h", "2D", "P1D", "PT1H", "P1Y2M3DT4H5M6S", "P1D-P2D", "1h-2h", "h-D", "-P2D",
-            "-1h", "-D" })
+    @ValueSource(strings = { "h", "D", "3h", "2D", "d", "3d", "w", "2w", "y", "1y", "P1D", "PT1H", "P1Y2M3DT4H5M6S",
+            "P1D-P2D", "1h-2h", "h-D", "-P2D", "-1h", "-D" })
     public void periodRoundTrip(String period) {
         SitemapModel model = parse("sitemap test { Chart item=Temp period=" + period + " }");
         assertEquals(period, firstChart(model).getPeriod());
