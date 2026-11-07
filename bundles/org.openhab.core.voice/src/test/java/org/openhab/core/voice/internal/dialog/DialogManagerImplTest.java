@@ -24,6 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -57,11 +59,14 @@ import org.openhab.core.voice.internal.VoiceServiceResolver;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
 import org.openhab.core.voice.stt.STTException;
+import org.openhab.core.voice.stt.STTListener;
 import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.stt.STTServiceHandle;
 import org.openhab.core.voice.stt.STTServiceRegistry;
+import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterRegistry;
+import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
@@ -531,6 +536,73 @@ public class DialogManagerImplTest {
         assertEquals(0, dialogManager.getDialogsContexts().size());
         verify(getKSHandle("source-5")).abort();
         verify(getSourceStream("source-5")).close();
+    }
+
+    @Test
+    public void removingAudioSinkOrSourceStopsSingleDialog()
+            throws AudioException, STTException, KSException, IOException {
+        DialogContext context1 = createValidContext("source-single-1", "sink-single-1");
+        dialogManager.listenAndAnswer(context1);
+
+        dialogManager.removeAudioSink(context1.sink());
+        verify(getSTTHandle("source-single-1")).abort();
+        verify(getSourceStream("source-single-1")).close();
+
+        DialogContext context2 = createValidContext("source-single-2", "sink-single-2");
+        dialogManager.listenAndAnswer(context2);
+
+        dialogManager.removeAudioSource(context2.source());
+        verify(getSTTHandle("source-single-2")).abort();
+        verify(getSourceStream("source-single-2")).close();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void removingServiceStopsSingleDialog() throws AudioException, STTException, KSException, IOException {
+        ArgumentCaptor<RegistryChangeListener<STTService>> sttCaptor = ArgumentCaptor
+                .forClass(RegistryChangeListener.class);
+        dialogManager.activate(Map.of());
+        verify(sttRegistry).addRegistryChangeListener(sttCaptor.capture());
+
+        DialogContext context = createValidContext("source-single-stt", "sink-single-stt");
+        dialogManager.listenAndAnswer(context);
+
+        sttCaptor.getValue().removed(context.stt());
+        verify(getSTTHandle("source-single-stt")).abort();
+        verify(getSourceStream("source-single-stt")).close();
+    }
+
+    @Test
+    public void stopDialogStopsSingleDialogDuringInterpretation()
+            throws AudioException, STTException, KSException, InterpretationException, InterruptedException {
+        CountDownLatch enterInterpretLatch = new CountDownLatch(1);
+        CountDownLatch finishInterpretLatch = new CountDownLatch(1);
+        when(interpretationService.interpret(any(), any(), any(), any(), any(), any(), any())).thenAnswer(inv -> {
+            enterInterpretLatch.countDown();
+            assertTrue(finishInterpretLatch.await(5, TimeUnit.SECONDS));
+            return "ok";
+        });
+
+        DialogContext context = createValidContext("source-interpret", "sink-interpret");
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+
+        dialogManager.listenAndAnswer(context);
+        verify(context.stt()).recognize(sttListenerCaptor.capture(), any(), any());
+
+        Thread thread = new Thread(() -> {
+            sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("text", 1.0f));
+        });
+        thread.start();
+
+        assertTrue(enterInterpretLatch.await(5, TimeUnit.SECONDS));
+
+        // In INTERPRETING state, stopDialog should find and stop the singleDialogProcessor rather than throwing
+        assertDoesNotThrow(() -> dialogManager.stopDialog(context.source()));
+
+        finishInterpretLatch.countDown();
+        thread.join(5000);
+
+        verify(speechSynthesizer, never()).say(any(), any(), any(), any(), any());
     }
 
     @Test

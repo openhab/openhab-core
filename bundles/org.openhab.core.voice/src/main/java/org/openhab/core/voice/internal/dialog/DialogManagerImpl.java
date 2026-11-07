@@ -490,13 +490,23 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     private void stopDialogs(Predicate<DialogProcessor> filter) {
-        var dialogsToStop = dialogProcessors.values().stream().filter(filter).toList();
-        if (dialogsToStop.isEmpty()) {
-            return;
+        List<DialogProcessor> persistentToStop;
+        synchronized (dialogProcessors) {
+            persistentToStop = dialogProcessors.values().stream().filter(filter).toList();
+            for (var dialog : persistentToStop) {
+                dialogProcessors.remove(dialog.getContext().source().getId(), dialog);
+            }
         }
-        for (var dialog : dialogsToStop) {
-            stopDialog(dialog.getContext().source());
+        persistentToStop.forEach(DialogProcessor::stop);
+
+        List<DialogProcessor> singleToStop;
+        synchronized (singleDialogProcessors) {
+            singleToStop = singleDialogProcessors.values().stream().filter(filter).toList();
+            for (var dialog : singleToStop) {
+                singleDialogProcessors.remove(dialog.getContext().source().getId(), dialog);
+            }
         }
+        singleToStop.forEach(DialogProcessor::stop);
     }
 
     private void scheduleDialogRegistrations() {
