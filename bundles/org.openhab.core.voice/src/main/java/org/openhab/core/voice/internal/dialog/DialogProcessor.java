@@ -360,10 +360,14 @@ public class DialogProcessor {
     }
 
     /**
-     * Indicates if speech recognition is currently listening.
+     * Indicates if the dialog is actively processing (listening, interpreting, or speaking).
+     *
+     * @return true if the dialog is in {@link DialogState#LISTENING}, {@link DialogState#INTERPRETING}, or
+     *         {@link DialogState#SPEAKING}
      */
     public boolean isProcessing() {
-        return state == DialogState.LISTENING;
+        DialogState s = state;
+        return s == DialogState.LISTENING || s == DialogState.INTERPRETING || s == DialogState.SPEAKING;
     }
 
     private synchronized void invalidateCurrentSession() {

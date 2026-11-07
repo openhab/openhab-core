@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.dialog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -493,5 +494,66 @@ public class DialogProcessorTest {
 
         verify(audioDriver, never()).startRecognition(any(STTListener.class));
         verifyNoInteractions(speechSynthesizer);
+    }
+
+    @Test
+    public void isProcessingReturnsTrueDuringListeningInterpretingAndSpeaking()
+            throws STTException, InterruptedException, InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        CountDownLatch enterInterpretLatch = new CountDownLatch(1);
+        CountDownLatch finishInterpretLatch = new CountDownLatch(1);
+        when(hli.interpret(any(Locale.class), any(InterpreterContext.class))).thenAnswer(invocation -> {
+            enterInterpretLatch.countDown();
+            finishInterpretLatch.await(5, TimeUnit.SECONDS);
+            return "Answer";
+        });
+
+        CountDownLatch enterSpeakLatch = new CountDownLatch(1);
+        CountDownLatch finishSpeakLatch = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            enterSpeakLatch.countDown();
+            finishSpeakLatch.await(5, TimeUnit.SECONDS);
+            return null;
+        }).when(speechSynthesizer).say(any(), any(), any(), any(), any());
+
+        DialogContext context = createTestContext(List.of(hli));
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        // IDLE
+        assertFalse(processor.isProcessing());
+
+        // WAITING_FOR_TRIGGER
+        processor.start();
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        assertFalse(processor.isProcessing());
+
+        // LISTENING
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+        assertTrue(processor.isProcessing());
+
+        // INTERPRETING
+        Thread thread = new Thread(() -> {
+            sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+        });
+        thread.start();
+
+        assertTrue(enterInterpretLatch.await(5, TimeUnit.SECONDS));
+        assertEquals(DialogProcessor.DialogState.INTERPRETING, processor.getState());
+        assertTrue(processor.isProcessing());
+
+        // SPEAKING
+        finishInterpretLatch.countDown();
+        assertTrue(enterSpeakLatch.await(5, TimeUnit.SECONDS));
+        assertEquals(DialogProcessor.DialogState.SPEAKING, processor.getState());
+        assertTrue(processor.isProcessing());
+
+        // Finish back to IDLE / WAITING_FOR_TRIGGER
+        finishSpeakLatch.countDown();
+        thread.join(5000);
+        assertFalse(processor.isProcessing());
     }
 }
