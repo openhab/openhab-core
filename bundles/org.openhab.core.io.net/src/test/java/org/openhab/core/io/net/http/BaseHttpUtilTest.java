@@ -14,19 +14,24 @@ package org.openhab.core.io.net.http;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -60,11 +65,30 @@ public abstract class BaseHttpUtilTest {
         when(httpClientMock.newRequest(URI.create(URL))).thenReturn(requestMock);
         when(requestMock.method(any(HttpMethod.class))).thenReturn(requestMock);
         when(requestMock.timeout(anyLong(), any(TimeUnit.class))).thenReturn(requestMock);
+        when(requestMock.body(any(Request.Content.class))).thenReturn(requestMock);
+        when(requestMock.headers(any(Consumer.class))).thenReturn(requestMock);
         when(requestMock.send()).thenReturn(contentResponseMock);
     }
 
     void mockResponse(int httpStatus) {
         when(contentResponseMock.getStatus()).thenReturn(httpStatus);
         when(contentResponseMock.getContent()).thenReturn("Some content".getBytes());
+    }
+
+    /**
+     * Collects the headers that would be sent with the request. Jetty 12 no longer takes the header name and value as
+     * arguments, but a consumer modifying the header fields, so the captured consumers have to be applied to be able to
+     * assert on the resulting headers.
+     *
+     * @return the header fields as they would be sent
+     */
+    @SuppressWarnings("unchecked")
+    HttpFields capturedHeaders() {
+        ArgumentCaptor<Consumer<HttpFields.Mutable>> captor = ArgumentCaptor.forClass(Consumer.class);
+        verify(requestMock, atLeastOnce()).headers(captor.capture());
+
+        HttpFields.Mutable fields = HttpFields.build();
+        captor.getAllValues().forEach(consumer -> consumer.accept(fields));
+        return fields;
     }
 }

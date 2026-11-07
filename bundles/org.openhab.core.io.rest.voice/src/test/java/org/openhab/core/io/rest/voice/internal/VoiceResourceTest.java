@@ -18,8 +18,6 @@ import static org.mockito.Mockito.*;
 import java.time.Instant;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
@@ -29,6 +27,8 @@ import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * Test class for {@link VoiceResource}.
