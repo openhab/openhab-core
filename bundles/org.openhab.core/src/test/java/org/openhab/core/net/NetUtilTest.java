@@ -159,29 +159,67 @@ public class NetUtilTest {
     }
 
     @Test
-    public void primaryAddressResolvedOnceAnIpv4AddressAppears() {
+    public void primaryAndBroadcastAddressResolvedOnceAnIpv4AddressAppears() {
         SafeCallerImpl safeCaller = new SafeCallerImpl(null);
-        var netUtil = new NetUtil(safeCaller) {
-            volatile @Nullable String localAddress;
-
-            @Override
-            @Nullable
-            String getFirstLocalIPv4Address() {
-                return localAddress;
-            }
-        };
+        LateAddressNetUtil netUtil = new LateAddressNetUtil(safeCaller);
         NetworkAddressChangeListener listener = mock(NetworkAddressChangeListener.class);
         netUtil.addNetworkAddressChangeListener(listener);
+        doAnswer(invocation -> {
+            netUtil.broadcastSeenByListener = netUtil.getConfiguredBroadcastAddress();
+            return null;
+        }).when(listener).onPrimaryAddressChanged(any(), any());
         try {
             netUtil.activate(Map.of());
             assertNull(netUtil.getPrimaryIpv4HostAddress());
+            assertNull(netUtil.getConfiguredBroadcastAddress());
 
             netUtil.localAddress = "192.168.1.18";
             verify(listener, timeout(5000)).onPrimaryAddressChanged(null, "192.168.1.18");
             assertEquals("192.168.1.18", netUtil.getPrimaryIpv4HostAddress());
+            assertEquals("192.168.1.255", netUtil.getConfiguredBroadcastAddress());
+            assertEquals("192.168.1.255", netUtil.broadcastSeenByListener);
         } finally {
             netUtil.deactivate();
             safeCaller.deactivate();
+        }
+    }
+
+    @Test
+    public void configuredBroadcastAddressKeptWhenPrimaryAddressAppears() {
+        SafeCallerImpl safeCaller = new SafeCallerImpl(null);
+        LateAddressNetUtil netUtil = new LateAddressNetUtil(safeCaller);
+        NetworkAddressChangeListener listener = mock(NetworkAddressChangeListener.class);
+        netUtil.addNetworkAddressChangeListener(listener);
+        try {
+            netUtil.activate(Map.of("broadcastAddress", "10.0.0.255"));
+
+            netUtil.localAddress = "192.168.1.18";
+            verify(listener, timeout(5000)).onPrimaryAddressChanged(null, "192.168.1.18");
+            assertEquals("10.0.0.255", netUtil.getConfiguredBroadcastAddress());
+        } finally {
+            netUtil.deactivate();
+            safeCaller.deactivate();
+        }
+    }
+
+    private static class LateAddressNetUtil extends NetUtil {
+        volatile @Nullable String localAddress;
+        volatile @Nullable String broadcastSeenByListener;
+
+        LateAddressNetUtil(SafeCallerImpl safeCaller) {
+            super(safeCaller);
+        }
+
+        @Override
+        @Nullable
+        String getFirstLocalIPv4Address() {
+            return localAddress;
+        }
+
+        @Override
+        @Nullable
+        String getPrimaryBroadcastAddress() {
+            return localAddress == null ? null : "192.168.1.255";
         }
     }
 }
