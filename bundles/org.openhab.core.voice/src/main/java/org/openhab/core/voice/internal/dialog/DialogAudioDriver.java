@@ -13,6 +13,8 @@
 package org.openhab.core.voice.internal.dialog;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,10 +51,12 @@ public class DialogAudioDriver {
     private final @Nullable AudioFormat ksFormat;
     private final @Nullable AudioFormat sttFormat;
 
-    private @Nullable AudioStream streamKS;
-    private @Nullable AudioStream streamSTT;
-    private @Nullable DTServiceHandle dtServiceHandle;
-    private @Nullable STTServiceHandle sttServiceHandle;
+    private final AtomicReference<@Nullable AudioStream> streamKS = new AtomicReference<>();
+    private final AtomicReference<@Nullable AudioStream> streamSTT = new AtomicReference<>();
+    private final AtomicReference<@Nullable DTServiceHandle> dtServiceHandle = new AtomicReference<>();
+    private final AtomicReference<@Nullable STTServiceHandle> sttServiceHandle = new AtomicReference<>();
+    private final AtomicLong triggerEpoch = new AtomicLong();
+    private final AtomicLong recognitionEpoch = new AtomicLong();
 
     public DialogAudioDriver(DialogContext dialogContext) {
         this.dialogContext = dialogContext;
@@ -68,11 +72,11 @@ public class DialogAudioDriver {
      * Starts listening for the keyword/trigger.
      *
      * @param listener the listener receiving trigger events
-     * @return {@link DTServiceHandle} or null if starting failed
+     * @return {@link DTServiceHandle} or null if starting failed or was canceled
      * @throws IllegalStateException if the dialog trigger is not configured
      * @throws DTException if the DT service failed to start listening
      */
-    public DTServiceHandle startTrigger(KSListener listener) throws IllegalStateException, DTException {
+    public @Nullable DTServiceHandle startTrigger(KSListener listener) throws IllegalStateException, DTException {
         DTService dtService = dialogContext.dt();
         String keyword = dialogContext.keyword();
         if (dtService == null || keyword == null) {
@@ -80,6 +84,7 @@ public class DialogAudioDriver {
         }
 
         stopTrigger();
+        long epoch = triggerEpoch.incrementAndGet();
 
         AudioFormat fmt = null;
         if (dtService instanceof KSService ksService) {
@@ -93,10 +98,28 @@ public class DialogAudioDriver {
         try {
             if (dtService instanceof KSService ksService) {
                 AudioStream stream = dialogContext.source().getInputStream(fmt);
-                streamKS = stream;
-                return dtServiceHandle = ksService.spot(listener, stream, dialogContext.locale(), keyword);
+                streamKS.set(stream);
+                if (triggerEpoch.get() != epoch) {
+                    closeStreamKS();
+                    return null;
+                }
+
+                DTServiceHandle handle = ksService.spot(listener, stream, dialogContext.locale(), keyword);
+                if (triggerEpoch.get() == epoch && dtServiceHandle.compareAndSet(null, handle)) {
+                    return handle;
+                }
+
+                handle.abort();
+                closeStreamKS();
+                return null;
             } else if (dtService instanceof BasicDTService basicDTService) {
-                return dtServiceHandle = basicDTService.registerListener(listener);
+                DTServiceHandle handle = basicDTService.registerListener(listener);
+                if (triggerEpoch.get() == epoch && dtServiceHandle.compareAndSet(null, handle)) {
+                    return handle;
+                }
+
+                handle.abort();
+                return null;
             }
             throw new DTException("DialogAudioDriver is not able to handle this DTService implementation '"
                     + dtService.getClass().getName() + "'");
@@ -112,20 +135,35 @@ public class DialogAudioDriver {
      * Starts speech recognition stream.
      *
      * @param listener the listener receiving speech-to-text events
-     * @return {@link STTServiceHandle} or null if starting failed
+     * @return {@link STTServiceHandle} or null if starting failed or was cancelled
      * @throws STTException if the STT service failed to start recognition
      */
-    public STTServiceHandle startRecognition(STTListener listener) throws STTException {
+    public @Nullable STTServiceHandle startRecognition(STTListener listener) throws STTException {
         stopRecognition();
+        long epoch = recognitionEpoch.incrementAndGet();
+
         AudioFormat fmt = sttFormat;
         if (fmt == null) {
             throw new STTException("No compatible audio format found for STT '" + dialogContext.stt().getId()
                     + "' and source '" + dialogContext.source().getId() + "'");
         }
+
         try {
             AudioStream stream = dialogContext.source().getInputStream(fmt);
-            streamSTT = stream;
-            return sttServiceHandle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
+            streamSTT.set(stream);
+            if (recognitionEpoch.get() != epoch) {
+                closeStreamSTT();
+                return null;
+            }
+
+            STTServiceHandle handle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
+            if (recognitionEpoch.get() == epoch && sttServiceHandle.compareAndSet(null, handle)) {
+                return handle;
+            }
+
+            handle.abort();
+            closeStreamSTT();
+            return null;
         } catch (AudioException e) {
             throw new STTException("Error creating the audio stream: " + e.getMessage(), e);
         } catch (STTException e) {
@@ -138,10 +176,10 @@ public class DialogAudioDriver {
      * Aborts keyword spotting and closes the keyword spotting audio stream.
      */
     public void stopTrigger() {
-        DTServiceHandle handle = dtServiceHandle;
+        triggerEpoch.incrementAndGet();
+        DTServiceHandle handle = dtServiceHandle.getAndSet(null);
         if (handle != null) {
             handle.abort();
-            dtServiceHandle = null;
         }
         closeStreamKS();
     }
@@ -150,10 +188,10 @@ public class DialogAudioDriver {
      * Aborts speech recognition and closes the speech recognition audio stream.
      */
     public void stopRecognition() {
-        STTServiceHandle handle = sttServiceHandle;
+        recognitionEpoch.incrementAndGet();
+        STTServiceHandle handle = sttServiceHandle.getAndSet(null);
         if (handle != null) {
             handle.abort();
-            sttServiceHandle = null;
         }
         closeStreamSTT();
     }
@@ -167,26 +205,24 @@ public class DialogAudioDriver {
     }
 
     private void closeStreamKS() {
-        AudioStream stream = streamKS;
+        AudioStream stream = streamKS.getAndSet(null);
         if (stream != null) {
             try {
                 stream.close();
             } catch (IOException e) {
                 logger.debug("IOException closing KS audio stream: {}", e.getMessage(), e);
             }
-            streamKS = null;
         }
     }
 
     private void closeStreamSTT() {
-        AudioStream stream = streamSTT;
+        AudioStream stream = streamSTT.getAndSet(null);
         if (stream != null) {
             try {
                 stream.close();
             } catch (IOException e) {
                 logger.debug("IOException closing STT audio stream: {}", e.getMessage(), e);
             }
-            streamSTT = null;
         }
     }
 }

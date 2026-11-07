@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.dialog;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -82,6 +83,28 @@ public class DialogAudioDriverTest {
     }
 
     @Test
+    public void startTriggerAbortsHandleIfStoppedDuringSpot() throws AudioException, DTException, IOException {
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(ksService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(audioStream);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        when(ksService.spot(eq(ksListener), eq(audioStream), eq(Locale.ENGLISH), eq("keyword")))
+                .thenAnswer(invocation -> {
+                    driver.stopTrigger();
+                    return ksHandle;
+                });
+
+        DTServiceHandle handle = driver.startTrigger(ksListener);
+        assertNull(handle);
+        verify(ksHandle).abort();
+        verify(audioStream).close();
+    }
+
+    @Test
     public void startRecognitionAndStopRecognitionManagesStreamAndHandle()
             throws AudioException, STTException, IOException {
         when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
@@ -99,6 +122,28 @@ public class DialogAudioDriverTest {
         verify(sttService).recognize(eq(sttListener), eq(audioStream), eq(Locale.ENGLISH));
 
         driver.stopRecognition();
+        verify(sttHandle).abort();
+        verify(audioStream).close();
+    }
+
+    @Test
+    public void startRecognitionAbortsHandleIfStoppedDuringRecognize()
+            throws AudioException, STTException, IOException {
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(audioStream);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        when(sttService.recognize(eq(sttListener), eq(audioStream), eq(Locale.ENGLISH))).thenAnswer(invocation -> {
+            driver.stopRecognition();
+            return sttHandle;
+        });
+
+        STTServiceHandle handle = driver.startRecognition(sttListener);
+        assertNull(handle);
         verify(sttHandle).abort();
         verify(audioStream).close();
     }
