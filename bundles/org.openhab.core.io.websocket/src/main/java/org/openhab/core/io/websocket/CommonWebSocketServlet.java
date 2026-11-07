@@ -23,11 +23,14 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
+import org.eclipse.jetty.websocket.core.server.WebSocketServerComponents;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.auth.AuthFilter;
@@ -43,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
@@ -83,6 +87,16 @@ public class CommonWebSocketServlet extends JettyWebSocketServlet {
     @Activate
     public CommonWebSocketServlet(@Reference AuthFilter authFilter) {
         this.authFilter = authFilter;
+    }
+
+    @Override
+    public void init() throws ServletException {
+        // The OSGi Servlet Whiteboard does not run Jetty's JettyWebSocketServletContainerInitializer, so the
+        // WebSocket components and container JettyWebSocketServlet.init() relies on must be created here
+        ServletContextHandler context = ServletContextHandler.getServletContextHandler(getServletContext());
+        WebSocketServerComponents.ensureWebSocketComponents(context.getServer(), context);
+        JettyWebSocketServerContainer.ensureContainer(getServletContext());
+        super.init();
     }
 
     @Override
