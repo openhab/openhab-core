@@ -178,7 +178,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
             try {
                 return authFilter.getSecurityContext(bearerToken);
             } catch (AuthenticationException e) {
-                logger.warn("Error handling WebSocket authorization", e);
+                logger.debug("Error handling WebSocket authorization", e);
                 return null;
             }
         }
@@ -186,7 +186,10 @@ public class CommonWebSocketServlet extends WebSocketServlet {
         private @Nullable SecurityContext getSecurityContext(ServletUpgradeRequest servletUpgradeRequest) {
             try {
                 return authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(), true);
-            } catch (AuthenticationException | IOException e) {
+            } catch (AuthenticationException e) {
+                logger.debug("Error handling WebSocket authorization", e);
+                return null;
+            } catch (IOException e) {
                 logger.warn("Error handling WebSocket authorization", e);
                 return null;
             }
