@@ -10,7 +10,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>5.2.4-SNAPSHOT</version>
+  <version>5.2.4</version>
 
   <packaging>pom</packaging>
 
@@ -40,7 +40,7 @@
   <scm>
     <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
     <developerConnection>scm:git:https://github.com/openhab/openhab-core.git</developerConnection>
-    <tag>5.2.0</tag>
+    <tag>5.2.4</tag>
     <url>https://github.com/openhab/openhab-core</url>
   </scm>
 
