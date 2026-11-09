@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.net.http;
 
+import java.time.Duration;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -24,6 +26,13 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
  */
 @NonNullByDefault
 public interface WebSocketFactory {
+
+    /**
+     * The idle timeout of the web socket clients created by this factory.
+     * Jetty's own default of 30 seconds closes quiet connections to devices and services, so web socket clients and
+     * servlets that are not created by this factory should use this value as well.
+     */
+    Duration DEFAULT_IDLE_TIMEOUT = Duration.ofMinutes(5);
 
     /**
      * Creates a new Jetty web socket client.
