@@ -27,7 +27,7 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Tests for {@link IgnoreMarkerFileTreeVisitor}.
  *
- * @author miloit - Initial contribution
+ * @author Michael Loercher - Initial contribution
  */
 @NonNullByDefault
 public class IgnoreMarkerFileTreeVisitorTest {
@@ -37,15 +37,19 @@ public class IgnoreMarkerFileTreeVisitorTest {
         Files.writeString(path, "x");
     }
 
+    private static String normalize(Path path) {
+        return path.toString().replace(path.getFileSystem().getSeparator(), "/");
+    }
+
     private static Set<String> visit(Path base, Path start, boolean directories) throws IOException {
         Set<String> result = new TreeSet<>();
         new IgnoreMarkerFileTreeVisitor(base).recursiveVisitFiles(start, dir -> {
             if (directories) {
-                result.add(base.relativize(dir).toString());
+                result.add(normalize(base.relativize(dir)));
             }
         }, file -> {
             if (!directories) {
-                result.add(base.relativize(file).toString());
+                result.add(normalize(base.relativize(file)));
             }
         });
         return result;

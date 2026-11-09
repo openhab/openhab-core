@@ -28,12 +28,12 @@ import io.methvin.watcher.visitor.FileTreeVisitor;
  * A {@link FileTreeVisitor} that skips every directory (including its whole subtree) that contains a marker file
  * named {@link #IGNORE_MARKER_FILE}. Skipped directories are neither registered for watching nor hashed.
  *
- * @author miloit - Initial contribution
+ * @author Michael Loercher - Initial contribution
  */
 @NonNullByDefault
 public class IgnoreMarkerFileTreeVisitor implements FileTreeVisitor {
 
-    public static final String IGNORE_MARKER_FILE = ".openhab_ignorefilewatch";
+    public static final String IGNORE_MARKER_FILE = ".openhabignore";
 
     private final Path root;
 
@@ -66,6 +66,16 @@ public class IgnoreMarkerFileTreeVisitor implements FileTreeVisitor {
             @Override
             public FileVisitResult visitFile(Path path, @Nullable BasicFileAttributes attr) throws IOException {
                 fileCallback.call(path);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(@Nullable Path path, @Nullable IOException exc) {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(@Nullable Path dir, @Nullable IOException exc) {
                 return FileVisitResult.CONTINUE;
             }
         });
