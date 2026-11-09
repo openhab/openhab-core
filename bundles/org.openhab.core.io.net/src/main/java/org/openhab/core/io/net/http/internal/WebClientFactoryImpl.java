@@ -15,6 +15,7 @@ package org.openhab.core.io.net.http.internal;
 import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -344,6 +345,8 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             WebSocketClient webSocketClient = new WebSocketClient(httpClient);
+            // keep the Jetty 9 default, Jetty 12 lowered it to 30s which closes quiet device connections
+            webSocketClient.setIdleTimeout(Duration.ofMinutes(5));
 
             if (startClient) {
                 try {
