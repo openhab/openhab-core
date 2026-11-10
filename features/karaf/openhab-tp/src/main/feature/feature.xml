@@ -203,6 +203,11 @@
 		<bundle start-level="15" dependency="true">mvn:com.sun.istack/istack-commons-runtime/4.1.2</bundle>
 		<bundle start-level="15" dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.jaxb4.txw2/${project.version}</bundle>
 		<bundle start-level="20">mvn:org.glassfish.jaxb/jaxb-core/4.0.9</bundle>
+		<!-- jaxb-runtime has an optional import of org.jvnet.staxex [2.1,3) and DynamicImport-Package: *. Without a
+			matching exporter it wires dynamically to whatever stax-ex is present, e.g. 1.7.4 from openhab.tp-jaxws,
+			and uninstalling that refreshes jaxb-runtime and everything depending on JAXB, including Karaf and Jersey.
+			Not a dependency bundle, as Karaf does not install those to satisfy optional imports. -->
+		<bundle start-level="20">mvn:org.jvnet.staxex/stax-ex/2.1.0</bundle>
 		<bundle start-level="30">mvn:org.glassfish.jaxb/jaxb-runtime/4.0.9</bundle>
 	</feature>
 
