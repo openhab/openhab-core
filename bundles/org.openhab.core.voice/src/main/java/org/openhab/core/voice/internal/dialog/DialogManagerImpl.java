@@ -313,22 +313,20 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     public @Nullable DTServiceHandle startDialog(DialogContext context) throws IllegalStateException {
         validatePersistentDialogContext(context);
 
-        synchronized (dialogProcessors) {
-            if (dialogProcessors.containsKey(context.source().getId())) {
-                throw new IllegalStateException(
-                        String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
-                                context.source().getLabel(null)));
-            }
+        DialogAudioDriver audioDriver = new DialogAudioDriver(context);
+        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, this);
 
-            logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
-                    context.source().getId());
-            DialogAudioDriver audioDriver = new DialogAudioDriver(context);
-            DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
-            DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService,
-                    interpretationService, speechSynthesizer, i18nProvider, this);
-            dialogProcessors.put(context.source().getId(), processor);
-            return processor.start();
+        if (dialogProcessors.putIfAbsent(context.source().getId(), processor) != null) {
+            throw new IllegalStateException(
+                    String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
+                            context.source().getLabel(null)));
         }
+
+        logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
+                context.source().getId());
+        return processor.start();
     }
 
     @Override
@@ -338,10 +336,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             throw new IllegalStateException("Cannot stop dialog as audio source is missing.");
         }
 
-        DialogProcessor processor;
-        synchronized (dialogProcessors) {
-            processor = dialogProcessors.remove(audioSource.getId());
-        }
+        DialogProcessor processor = dialogProcessors.remove(audioSource.getId());
 
         singleDialogProcessors.values().removeIf(p -> !p.isProcessing());
         if (processor == null) {
@@ -490,23 +485,19 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     private void stopDialogs(Predicate<DialogProcessor> filter) {
-        List<DialogProcessor> persistentToStop;
-        synchronized (dialogProcessors) {
-            persistentToStop = dialogProcessors.values().stream().filter(filter).toList();
-            for (var dialog : persistentToStop) {
-                dialogProcessors.remove(dialog.getContext().source().getId(), dialog);
+        List<DialogProcessor> persistentToStop = dialogProcessors.values().stream().filter(filter).toList();
+        for (var dialog : persistentToStop) {
+            if (dialogProcessors.remove(dialog.getContext().source().getId(), dialog)) {
+                dialog.stop();
             }
         }
-        persistentToStop.forEach(DialogProcessor::stop);
 
-        List<DialogProcessor> singleToStop;
-        synchronized (singleDialogProcessors) {
-            singleToStop = singleDialogProcessors.values().stream().filter(filter).toList();
-            for (var dialog : singleToStop) {
-                singleDialogProcessors.remove(dialog.getContext().source().getId(), dialog);
+        List<DialogProcessor> singleToStop = singleDialogProcessors.values().stream().filter(filter).toList();
+        for (var dialog : singleToStop) {
+            if (singleDialogProcessors.remove(dialog.getContext().source().getId(), dialog)) {
+                dialog.stop();
             }
         }
-        singleToStop.forEach(DialogProcessor::stop);
     }
 
     private void scheduleDialogRegistrations() {
@@ -519,34 +510,47 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     private void buildDialogRegistrations() {
+        List<DialogRegistration> registrations;
         synchronized (dialogRegistrationStorage) {
-            dialogRegistrationStorage.getValues().forEach(dr -> {
-                if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
-                    try {
-                        Conversation conversation = conversationManager
-                                .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
-                        startDialog(getDialogContextBuilder() //
-                                .withSink(audioManager.getSink(dr.sinkId)) //
-                                .withSource(audioManager.getSource(dr.sourceId)) //
-                                .withKS(voiceServiceResolver.getKS(dr.ksId)) //
-                                .withKeyword(dr.keyword) //
-                                .withSTT(voiceServiceResolver.getSTT(dr.sttId)) //
-                                .withTTS(voiceServiceResolver.getTTS(dr.ttsId)) //
-                                .withVoice(voiceServiceResolver.getVoice(dr.voiceId)) //
-                                .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
-                                .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
-                                .withLocale(dr.locale) //
-                                .withDialogGroup(dr.dialogGroup) //
-                                .withConversation(conversation) //
-                                .withLocationItem(dr.locationItem) //
-                                .withListeningItem(dr.listeningItem) //
-                                .withMelody(dr.listeningMelody) //
-                                .build());
-                    } catch (IllegalStateException e) {
-                        logger.debug("Unable to start dialog registration: {}", e.getMessage());
+            registrations = dialogRegistrationStorage.getValues().stream().filter(Objects::nonNull).toList();
+        }
+        for (DialogRegistration dr : registrations) {
+            if (dialogProcessors.containsKey(dr.sourceId)) {
+                continue;
+            }
+            try {
+                Conversation conversation = conversationManager
+                        .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
+                startDialog(getDialogContextBuilder() //
+                        .withSink(audioManager.getSink(dr.sinkId)) //
+                        .withSource(audioManager.getSource(dr.sourceId)) //
+                        .withKS(voiceServiceResolver.getKS(dr.ksId)) //
+                        .withKeyword(dr.keyword) //
+                        .withSTT(voiceServiceResolver.getSTT(dr.sttId)) //
+                        .withTTS(voiceServiceResolver.getTTS(dr.ttsId)) //
+                        .withVoice(voiceServiceResolver.getVoice(dr.voiceId)) //
+                        .withHLIs(hliRegistry.getByIds(dr.hliIds)) //
+                        .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
+                        .withLocale(dr.locale) //
+                        .withDialogGroup(dr.dialogGroup) //
+                        .withConversation(conversation) //
+                        .withLocationItem(dr.locationItem) //
+                        .withListeningItem(dr.listeningItem) //
+                        .withMelody(dr.listeningMelody) //
+                        .build());
+                boolean stillRegistered;
+                synchronized (dialogRegistrationStorage) {
+                    stillRegistered = dialogRegistrationStorage.containsKey(dr.sourceId);
+                }
+                if (!stillRegistered) {
+                    var dialog = dialogProcessors.remove(dr.sourceId);
+                    if (dialog != null) {
+                        dialog.stop();
                     }
                 }
-            });
+            } catch (IllegalStateException e) {
+                logger.debug("Unable to start dialog registration: {}", e.getMessage());
+            }
         }
     }
 
