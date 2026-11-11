@@ -664,7 +664,7 @@ public class NetUtil implements NetworkAddressService {
      * @return A full list of IP {@link InetAddress} (except network and broadcast)
      */
     public static List<InetAddress> getFullRangeOfAddressesToScan() {
-        List<InetAddress> addressesToScan = List.of();
+        List<InetAddress> addressesToScan = new ArrayList<>();
         List<CidrAddress> ipV4InterfaceAddresses = NetUtil.getAllInterfaceAddresses().stream()
                 .filter(a -> a.getAddress() instanceof Inet4Address).collect(Collectors.toList());
 
@@ -723,15 +723,16 @@ public class NetUtil implements NetworkAddressService {
      * @return A list of all possible IP addresses in byte array form
      */
     private static List<byte[]> getAddressesInSubnet(byte[] address, int maskLength) {
+        // bits are counted from the most significant bit of the first byte, as in the CIDR prefix length
         byte[] lowestAddress = address.clone();
         for (int bit = maskLength; bit < 32; bit++) {
-            lowestAddress[bit / 8] &= ~(1 << (bit % 8));
+            lowestAddress[bit / 8] &= ~(1 << (7 - bit % 8));
         }
         int lowestAddressAsLong = ByteBuffer.wrap(lowestAddress).getInt(); // big-endian by default
 
         byte[] highestAddress = address.clone();
         for (int bit = maskLength; bit < 32; bit++) {
-            highestAddress[bit / 8] |= ~(1 << (bit % 8));
+            highestAddress[bit / 8] |= 1 << (7 - bit % 8);
         }
         int highestAddressAsLong = ByteBuffer.wrap(highestAddress).getInt();
 
