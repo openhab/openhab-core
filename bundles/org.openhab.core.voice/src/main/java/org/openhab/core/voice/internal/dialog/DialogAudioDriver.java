@@ -271,7 +271,7 @@ public class DialogAudioDriver {
     private void detachAndCloseStreamSTT(AudioStream stream) {
         boolean shouldClose = false;
         synchronized (recognitionLock) {
-            if (stream.equals(streamKS)) {
+            if (stream.equals(streamSTT)) {
                 streamSTT = null;
                 shouldClose = true;
             }
