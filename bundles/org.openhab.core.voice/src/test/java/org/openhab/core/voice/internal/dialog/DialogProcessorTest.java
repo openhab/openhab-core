@@ -345,6 +345,7 @@ public class DialogProcessorTest {
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
 
         sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionErrorEvent("error"));
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(speechSynthesizer);
