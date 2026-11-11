@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.library.types.PercentType;
 
 /**
@@ -30,7 +31,7 @@ import org.openhab.core.library.types.PercentType;
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  */
 @NonNullByDefault
-public interface AudioSink {
+public interface AudioSink extends Identifiable<String> {
 
     /**
      * Returns a simple string that uniquely identifies this service
@@ -38,6 +39,11 @@ public interface AudioSink {
      * @return an id that identifies this service
      */
     String getId();
+
+    @Override
+    default String getUID() {
+        return getId();
+    }
 
     /**
      * Returns a localized human readable label that can be used within UIs.
