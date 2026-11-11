@@ -29,7 +29,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -42,7 +41,9 @@ import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSinkRegistry;
 import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioSourceRegistry;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
@@ -62,8 +63,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +75,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort audio sink and source options
  * @author Miguel Álvarez - Add record from source
+ * @author Florian Hotze - Track audio sinks and sources using {@link AudioSinkRegistry} and {@link AudioSourceRegistry}
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.audio", //
@@ -90,15 +90,21 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     private final Logger logger = LoggerFactory.getLogger(AudioManagerImpl.class);
 
-    // service maps
-    private final Map<String, AudioSource> audioSources = new ConcurrentHashMap<>();
-    private final Map<String, AudioSink> audioSinks = new ConcurrentHashMap<>();
+    private final AudioSinkRegistry audioSinkRegistry;
+    private final AudioSourceRegistry audioSourceRegistry;
 
     /**
      * default settings filled through the service configuration
      */
     private @Nullable String defaultSource;
     private @Nullable String defaultSink;
+
+    @Activate
+    public AudioManagerImpl(final @Reference AudioSinkRegistry audioSinkRegistry,
+            final @Reference AudioSourceRegistry audioSourceRegistry) {
+        this.audioSinkRegistry = audioSinkRegistry;
+        this.audioSourceRegistry = audioSourceRegistry;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -333,28 +339,30 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Override
     public @Nullable AudioSource getSource() {
-        AudioSource source = null;
-        if (defaultSource != null) {
-            source = audioSources.get(defaultSource);
+        AudioSource source;
+        String sourceId = defaultSource;
+        if (sourceId != null) {
+            source = audioSourceRegistry.get(sourceId);
             if (source == null) {
-                logger.warn("Default AudioSource service '{}' not available!", defaultSource);
+                logger.warn("Default AudioSource service '{}' not available!", sourceId);
             }
-        } else if (!audioSources.isEmpty()) {
-            source = audioSources.values().iterator().next();
         } else {
-            logger.debug("No AudioSource service available!");
+            source = audioSourceRegistry.stream().findFirst().orElse(null);
+            if (source == null) {
+                logger.debug("No AudioSource service available!");
+            }
         }
         return source;
     }
 
     @Override
     public Set<AudioSource> getAllSources() {
-        return new HashSet<>(audioSources.values());
+        return new HashSet<>(audioSourceRegistry.getAll());
     }
 
     @Override
     public @Nullable AudioSource getSource(@Nullable String sourceId) {
-        return (sourceId == null) ? getSource() : audioSources.get(sourceId);
+        return (sourceId == null) ? getSource() : audioSourceRegistry.get(sourceId);
     }
 
     @Override
@@ -362,9 +370,9 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         String regex = pattern.replace("?", ".?").replace("*", ".*?");
         Set<String> matchedSources = new HashSet<>();
 
-        for (String aSource : audioSources.keySet()) {
-            if (aSource.matches(regex)) {
-                matchedSources.add(aSource);
+        for (AudioSource aSource : audioSourceRegistry.getAll()) {
+            if (aSource.getId().matches(regex)) {
+                matchedSources.add(aSource.getId());
             }
         }
 
@@ -378,28 +386,30 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Override
     public @Nullable AudioSink getSink() {
-        AudioSink sink = null;
-        if (defaultSink != null) {
-            sink = audioSinks.get(defaultSink);
+        AudioSink sink;
+        String sinkId = defaultSink;
+        if (sinkId != null) {
+            sink = audioSinkRegistry.get(sinkId);
             if (sink == null) {
-                logger.warn("Default AudioSink service '{}' not available!", defaultSink);
+                logger.warn("Default AudioSink service '{}' not available!", sinkId);
             }
-        } else if (!audioSinks.isEmpty()) {
-            sink = audioSinks.values().iterator().next();
         } else {
-            logger.debug("No AudioSink service available!");
+            sink = audioSinkRegistry.stream().findFirst().orElse(null);
+            if (sink == null) {
+                logger.debug("No AudioSink service available!");
+            }
         }
         return sink;
     }
 
     @Override
     public Set<AudioSink> getAllSinks() {
-        return new HashSet<>(audioSinks.values());
+        return new HashSet<>(audioSinkRegistry.getAll());
     }
 
     @Override
     public @Nullable AudioSink getSink(@Nullable String sinkId) {
-        return (sinkId == null) ? getSink() : audioSinks.get(sinkId);
+        return (sinkId == null) ? getSink() : audioSinkRegistry.get(sinkId);
     }
 
     @Override
@@ -407,9 +417,9 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         String regex = pattern.replace("?", ".?").replace("*", ".*?");
         Set<String> matchedSinkIds = new HashSet<>();
 
-        for (String sinkId : audioSinks.keySet()) {
-            if (sinkId.matches(regex)) {
-                matchedSinkIds.add(sinkId);
+        for (AudioSink sink : audioSinkRegistry.getAll()) {
+            if (sink.getId().matches(regex)) {
+                matchedSinkIds.add(sink.getId());
             }
         }
 
@@ -422,10 +432,10 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         if (CONFIG_URI.equals(uri.toString())) {
             final Locale safeLocale = locale != null ? locale : Locale.getDefault();
             if (CONFIG_DEFAULT_SOURCE.equals(param)) {
-                return audioSources.values().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
+                return audioSourceRegistry.stream().sorted(comparing(s -> s.getLabel(safeLocale)))
                         .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).toList();
             } else if (CONFIG_DEFAULT_SINK.equals(param)) {
-                return audioSinks.values().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
+                return audioSinkRegistry.stream().sorted(comparing(s -> s.getLabel(safeLocale)))
                         .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).toList();
             }
         }
@@ -477,24 +487,6 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         }
 
         return toRunWhenProcessFinished;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAudioSource(AudioSource audioSource) {
-        this.audioSources.put(audioSource.getId(), audioSource);
-    }
-
-    protected void removeAudioSource(AudioSource audioSource) {
-        this.audioSources.remove(audioSource.getId());
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAudioSink(AudioSink audioSink) {
-        this.audioSinks.put(audioSink.getId(), audioSink);
-    }
-
-    protected void removeAudioSink(AudioSink audioSink) {
-        this.audioSinks.remove(audioSink.getId());
     }
 
     private void closeQuietly(@Nullable Closeable closeable) {

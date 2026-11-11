@@ -36,7 +36,9 @@ import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSinkRegistry;
 import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioSourceRegistry;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -91,6 +93,8 @@ public class DialogManagerImplTest {
     private final STTServiceRegistry sttRegistry = mock(STTServiceRegistry.class);
     private final KSServiceRegistry ksRegistry = mock(KSServiceRegistry.class);
     private final HumanLanguageInterpreterRegistry hliRegistry = mock(HumanLanguageInterpreterRegistry.class);
+    private final AudioSinkRegistry audioSinkRegistry = mock(AudioSinkRegistry.class);
+    private final AudioSourceRegistry audioSourceRegistry = mock(AudioSourceRegistry.class);
     private final ConversationManager conversationManager = mock(ConversationManager.class);
     private final InterpretationService interpretationService = mock(InterpretationService.class);
     private final SpeechSynthesizer speechSynthesizer = mock(SpeechSynthesizer.class);
@@ -114,8 +118,9 @@ public class DialogManagerImplTest {
         sttHandles.clear();
 
         dialogManager = new DialogManagerImpl(localeProvider, audioManager, eventPublisher, storageService,
-                llmToolRegistry, ttsRegistry, sttRegistry, ksRegistry, hliRegistry, conversationManager,
-                interpretationService, speechSynthesizer, i18nProvider, voiceServiceResolver);
+                llmToolRegistry, ttsRegistry, sttRegistry, ksRegistry, hliRegistry, audioSinkRegistry,
+                audioSourceRegistry, conversationManager, interpretationService, speechSynthesizer, i18nProvider,
+                voiceServiceResolver);
     }
 
     private DialogContext createValidContext(String sourceId, String sinkId)
@@ -132,6 +137,7 @@ public class DialogManagerImplTest {
             String keyword) throws AudioException, STTException, KSException {
         AudioSource source = mock(AudioSource.class);
         when(source.getId()).thenReturn(sourceId);
+        when(source.getUID()).thenReturn(sourceId);
         when(source.getLabel(null)).thenReturn(sourceId);
         when(source.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
         AudioStream audioStream = mock(AudioStream.class);
@@ -140,6 +146,7 @@ public class DialogManagerImplTest {
 
         AudioSink sink = mock(AudioSink.class);
         when(sink.getId()).thenReturn(sinkId);
+        when(sink.getUID()).thenReturn(sinkId);
         when(sink.getLabel(null)).thenReturn(sinkId);
         when(sink.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
 
@@ -479,25 +486,37 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void removingAudioSinkStopsDependentDialog() throws AudioException, STTException, KSException, IOException {
+        ArgumentCaptor<RegistryChangeListener<AudioSink>> sinkCaptor = ArgumentCaptor
+                .forClass(RegistryChangeListener.class);
+        dialogManager.activate(Map.of());
+        verify(audioSinkRegistry).addRegistryChangeListener(sinkCaptor.capture());
+
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
-        dialogManager.removeAudioSink(context.sink());
+        sinkCaptor.getValue().removed(context.sink());
         assertEquals(0, dialogManager.getDialogsContexts().size());
         verify(getKSHandle("source-1")).abort();
         verify(getSourceStream("source-1")).close();
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void removingAudioSourceStopsDependentDialog()
             throws AudioException, STTException, KSException, IOException {
+        ArgumentCaptor<RegistryChangeListener<AudioSource>> sourceCaptor = ArgumentCaptor
+                .forClass(RegistryChangeListener.class);
+        dialogManager.activate(Map.of());
+        verify(audioSourceRegistry).addRegistryChangeListener(sourceCaptor.capture());
+
         DialogContext context = createValidContext("source-1", "sink-1");
         dialogManager.startDialog(context);
         assertEquals(1, dialogManager.getDialogsContexts().size());
 
-        dialogManager.removeAudioSource(context.source());
+        sourceCaptor.getValue().removed(context.source());
         assertEquals(0, dialogManager.getDialogsContexts().size());
         verify(getKSHandle("source-1")).abort();
         verify(getSourceStream("source-1")).close();
@@ -524,6 +543,8 @@ public class DialogManagerImplTest {
         verify(ksRegistry).addRegistryChangeListener(ksCaptor.capture());
         verify(hliRegistry).addRegistryChangeListener(hliCaptor.capture());
         verify(llmToolRegistry).addRegistryChangeListener(llmCaptor.capture());
+        verify(audioSinkRegistry).addRegistryChangeListener(any());
+        verify(audioSourceRegistry).addRegistryChangeListener(any());
 
         // Test TTS service removal
         DialogContext context1 = createValidContext("source-1", "sink-1");
@@ -579,19 +600,28 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void removingAudioSinkOrSourceStopsSingleDialog()
             throws AudioException, STTException, KSException, IOException {
+        ArgumentCaptor<RegistryChangeListener<AudioSink>> sinkCaptor = ArgumentCaptor
+                .forClass(RegistryChangeListener.class);
+        ArgumentCaptor<RegistryChangeListener<AudioSource>> sourceCaptor = ArgumentCaptor
+                .forClass(RegistryChangeListener.class);
+        dialogManager.activate(Map.of());
+        verify(audioSinkRegistry).addRegistryChangeListener(sinkCaptor.capture());
+        verify(audioSourceRegistry).addRegistryChangeListener(sourceCaptor.capture());
+
         DialogContext context1 = createValidContext("source-single-1", "sink-single-1");
         dialogManager.listenAndAnswer(context1);
 
-        dialogManager.removeAudioSink(context1.sink());
+        sinkCaptor.getValue().removed(context1.sink());
         verify(getSTTHandle("source-single-1")).abort();
         verify(getSourceStream("source-single-1")).close();
 
         DialogContext context2 = createValidContext("source-single-2", "sink-single-2");
         dialogManager.listenAndAnswer(context2);
 
-        dialogManager.removeAudioSource(context2.source());
+        sourceCaptor.getValue().removed(context2.source());
         verify(getSTTHandle("source-single-2")).abort();
         verify(getSourceStream("source-single-2")).close();
     }
@@ -659,6 +689,8 @@ public class DialogManagerImplTest {
 
         dialogManager.deactivate();
         assertEquals(0, dialogManager.getDialogsContexts().size());
+        verify(audioSinkRegistry).removeRegistryChangeListener(any());
+        verify(audioSourceRegistry).removeRegistryChangeListener(any());
         verify(getKSHandle("source-1")).abort();
         verify(getSourceStream("source-1")).close();
         verify(getKSHandle("source-2")).abort();

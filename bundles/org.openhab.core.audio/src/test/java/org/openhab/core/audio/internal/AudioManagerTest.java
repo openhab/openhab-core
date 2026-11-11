@@ -74,6 +74,8 @@ import org.openhab.core.library.types.PercentType;
 public class AudioManagerTest {
 
     private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkRegistryImpl audioSinkRegistry;
+    private @NonNullByDefault({}) AudioSourceRegistryImpl audioSourceRegistry;
     private @NonNullByDefault({}) AudioSinkFake audioSink;
     private @NonNullByDefault({}) AudioSource audioSource;
     private @NonNullByDefault({}) BundledSoundFileHandler fileHandler;
@@ -81,11 +83,14 @@ public class AudioManagerTest {
     @BeforeEach
     public void setup() throws IOException {
         fileHandler = new BundledSoundFileHandler();
-        audioManager = new AudioManagerImpl();
+        audioSinkRegistry = new AudioSinkRegistryImpl();
+        audioSourceRegistry = new AudioSourceRegistryImpl();
+        audioManager = new AudioManagerImpl(audioSinkRegistry, audioSourceRegistry);
         audioSink = new AudioSinkFake();
 
         audioSource = mock(AudioSource.class);
         when(audioSource.getId()).thenReturn("audioSourceId");
+        when(audioSource.getUID()).thenReturn("audioSourceId");
         when(audioSource.getLabel(any(Locale.class))).thenReturn("audioSourceLabel");
     }
 
@@ -96,7 +101,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysByteArrayAudioStream() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
                 AudioFormat.CODEC_PCM_SIGNED);
 
@@ -121,7 +126,7 @@ public class AudioManagerTest {
 
     @Test
     public void nullStreamsAreProcessed() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioManager.play(null, audioSink.getId());
 
         assertThat(audioSink.isStreamProcessed, is(true));
@@ -130,7 +135,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysStreamFromWavAudioFiles() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
         audioManager.play(audioStream, audioSink.getId());
@@ -140,7 +145,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysStreamFromMp3AudioFiles() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.mp3FilePath()));
 
         audioManager.play(audioStream, audioSink.getId());
@@ -150,7 +155,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysWavAudioFiles() throws AudioException, IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
         audioManager.playFile(fileHandler.wavFileName(), audioSink.getId());
 
@@ -160,7 +165,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysMp3AudioFiles() throws AudioException, IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.mp3FilePath()));
         audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
 
@@ -179,7 +184,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerHandlesUnsupportedAudioFormatException() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioFormatExceptionExpected = true;
         try {
             audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
@@ -190,7 +195,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerHandlesUnsupportedAudioStreamException() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioStreamExceptionExpected = true;
         try {
             audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
@@ -201,7 +206,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerSetsTheVolumeOfASink() throws IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         PercentType initialVolume = new PercentType(67);
         PercentType sinkMockVolume = getSinkMockVolume(initialVolume);
 
@@ -253,7 +258,7 @@ public class AudioManagerTest {
 
     @Test
     public void inCaseOfWrongUriNoParameterOptionsAreAdded() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
 
         Collection<ParameterOption> parameterOptions = audioManager.getParameterOptions(URI.create("wrong.uri"),
                 AudioManagerImpl.CONFIG_DEFAULT_SINK, null, Locale.US);
@@ -261,7 +266,7 @@ public class AudioManagerTest {
     }
 
     private void assertRegisteredSource(boolean isSourceDefault) {
-        audioManager.addAudioSource(audioSource);
+        audioSourceRegistry.addAudioSource(audioSource);
 
         if (isSourceDefault) {
             audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
@@ -279,7 +284,7 @@ public class AudioManagerTest {
     }
 
     private void assertRegisteredSink(boolean isSinkDefault) {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
 
         if (isSinkDefault) {
             audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SINK, audioSink.getId()));
@@ -313,12 +318,12 @@ public class AudioManagerTest {
 
         switch (param) {
             case AudioManagerImpl.CONFIG_DEFAULT_SINK:
-                audioManager.addAudioSink(audioSink);
+                audioSinkRegistry.addAudioSink(audioSink);
                 id = audioSink.getId();
                 label = Objects.requireNonNull(audioSink.getLabel(locale));
                 break;
             case AudioManagerImpl.CONFIG_DEFAULT_SOURCE:
-                audioManager.addAudioSource(audioSource);
+                audioSourceRegistry.addAudioSource(audioSource);
                 id = audioSource.getId();
                 label = Objects.requireNonNull(audioSource.getLabel(locale));
                 break;
@@ -339,7 +344,7 @@ public class AudioManagerTest {
 
     @Test
     public void disposableStreamIsDisposedOnSuccessfulPlayback() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AtomicBoolean disposed = new AtomicBoolean(false);
         DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
                 new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L, 1),
@@ -352,7 +357,7 @@ public class AudioManagerTest {
 
     @Test
     public void disposableStreamIsDisposedOnFailedPlayback() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioFormatExceptionExpected = true;
         AtomicBoolean disposed = new AtomicBoolean(false);
         DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
@@ -380,7 +385,7 @@ public class AudioManagerTest {
 
     @Test
     public void playWithSinkIdTranscodesAudioStreamWhenFormatNotDirectlySupportedBySink() throws IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.supportedAudioFormats = Set.of(AudioFormat.PCM_SIGNED);
         audioSink.supportedAudioStreams = Set.of(AudioStream.class);
         AudioStream audioStream = createWavAudioStream();
@@ -499,7 +504,7 @@ public class AudioManagerTest {
 
     @Test
     public void playWithSinkIdDoesNotSendStreamToSinkWhenTranscodingFails() throws IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.supportedAudioFormats = Set.of(AudioFormat.AAC);
         audioSink.supportedAudioStreams = Set.of(AudioStream.class);
         AudioStream audioStream = createWavAudioStream();

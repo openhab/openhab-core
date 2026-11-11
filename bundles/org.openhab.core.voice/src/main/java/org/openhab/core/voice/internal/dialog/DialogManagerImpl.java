@@ -29,7 +29,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSinkRegistry;
 import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioSourceRegistry;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
@@ -62,8 +64,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +91,8 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     private final STTServiceRegistry sttRegistry;
     private final KSServiceRegistry ksRegistry;
     private final HumanLanguageInterpreterRegistry hliRegistry;
+    private final AudioSinkRegistry audioSinkRegistry;
+    private final AudioSourceRegistry audioSourceRegistry;
     private final ConversationManager conversationManager;
     private final InterpretationService interpretationService;
     private final SpeechSynthesizer speechSynthesizer;
@@ -182,6 +184,38 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         }
     };
 
+    private final RegistryChangeListener<AudioSink> audioSinkListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(AudioSink audioSink) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(AudioSink audioSink) {
+            stopDialogs(dialog -> dialog.getContext().sink().getId().equals(audioSink.getId()));
+        }
+
+        @Override
+        public void updated(AudioSink oldElement, AudioSink element) {
+        }
+    };
+
+    private final RegistryChangeListener<AudioSource> audioSourceListener = new RegistryChangeListener<>() {
+        @Override
+        public void added(AudioSource audioSource) {
+            scheduleDialogRegistrations();
+        }
+
+        @Override
+        public void removed(AudioSource audioSource) {
+            stopDialogs(dialog -> dialog.getContext().source().getId().equals(audioSource.getId()));
+        }
+
+        @Override
+        public void updated(AudioSource oldElement, AudioSource element) {
+        }
+    };
+
     /**
      * Maps a dialog group to its active {@link DialogContext} (if any dialog active).
      * This is used to prevent concurrent dialogs from being started for the same dialog group.
@@ -207,6 +241,8 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
             final @Reference LLMToolRegistry llmToolRegistry, final @Reference TTSServiceRegistry ttsRegistry,
             final @Reference STTServiceRegistry sttRegistry, final @Reference KSServiceRegistry ksRegistry,
             final @Reference HumanLanguageInterpreterRegistry hliRegistry,
+            final @Reference AudioSinkRegistry audioSinkRegistry,
+            final @Reference AudioSourceRegistry audioSourceRegistry,
             final @Reference ConversationManager conversationManager,
             final @Reference InterpretationService interpretationService,
             final @Reference SpeechSynthesizer speechSynthesizer, final @Reference VoiceI18nProvider i18nProvider,
@@ -221,6 +257,8 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         this.sttRegistry = sttRegistry;
         this.ksRegistry = ksRegistry;
         this.hliRegistry = hliRegistry;
+        this.audioSinkRegistry = audioSinkRegistry;
+        this.audioSourceRegistry = audioSourceRegistry;
         this.conversationManager = conversationManager;
         this.interpretationService = interpretationService;
         this.speechSynthesizer = speechSynthesizer;
@@ -235,12 +273,16 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         llmToolRegistry.addRegistryChangeListener(llmToolListener);
         hliRegistry.addRegistryChangeListener(hliListener);
         ttsRegistry.addRegistryChangeListener(ttsListener);
+        audioSinkRegistry.addRegistryChangeListener(audioSinkListener);
+        audioSourceRegistry.addRegistryChangeListener(audioSourceListener);
         modified(config);
         scheduleDialogRegistrations();
     }
 
     @Deactivate
     protected void deactivate() {
+        audioSourceRegistry.removeRegistryChangeListener(audioSourceListener);
+        audioSinkRegistry.removeRegistryChangeListener(audioSinkListener);
         ttsRegistry.removeRegistryChangeListener(ttsListener);
         hliRegistry.removeRegistryChangeListener(hliListener);
         llmToolRegistry.removeRegistryChangeListener(llmToolListener);
@@ -261,24 +303,6 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     @Modified
     protected void modified(Map<String, Object> config) {
         scheduleDialogRegistrations();
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAudioSink(AudioSink audioSink) {
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeAudioSink(AudioSink audioSink) {
-        stopDialogs(dialog -> dialog.getContext().sink().getId().equals(audioSink.getId()));
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAudioSource(AudioSource audioSource) {
-        scheduleDialogRegistrations();
-    }
-
-    protected void removeAudioSource(AudioSource audioSource) {
-        stopDialogs(dialog -> dialog.getContext().source().getId().equals(audioSource.getId()));
     }
 
     @Override

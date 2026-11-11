@@ -49,6 +49,8 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
 
     private @NonNullByDefault({}) AudioConsoleCommandExtension audioConsoleCommandExtension;
     private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkRegistryImpl audioSinkRegistry;
+    private @NonNullByDefault({}) AudioSourceRegistryImpl audioSourceRegistry;
     private @NonNullByDefault({}) AudioSinkFake audioSink;
     private @NonNullByDefault({}) String consoleOutput;
     private @NonNullByDefault({}) BundledSoundFileHandler fileHandler;
@@ -76,8 +78,10 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
         fileHandler = new BundledSoundFileHandler();
         audioSink = new AudioSinkFake();
 
-        audioManager = new AudioManagerImpl();
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry = new AudioSinkRegistryImpl();
+        audioSourceRegistry = new AudioSourceRegistryImpl();
+        audioManager = new AudioManagerImpl(audioSinkRegistry, audioSourceRegistry);
+        audioSinkRegistry.addAudioSink(audioSink);
 
         LocaleProvider localeProvider = mock(LocaleProvider.class);
         when(localeProvider.getLocale()).thenReturn(Locale.getDefault());
@@ -183,7 +187,8 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
     public void audioConsoleListsSources() {
         AudioSource audioSource = mock(AudioSource.class);
         when(audioSource.getId()).thenReturn("sourceId");
-        audioManager.addAudioSource(audioSource);
+        when(audioSource.getUID()).thenReturn("sourceId");
+        audioSourceRegistry.addAudioSource(audioSource);
 
         String[] args = { AudioConsoleCommandExtension.SUBCMD_SOURCES };
         audioConsoleCommandExtension.execute(args, consoleMock);
