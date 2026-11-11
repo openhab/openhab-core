@@ -37,24 +37,26 @@ import org.openhab.core.audio.internal.fake.AudioSinkFake;
 public class AudioManagerServletTest extends AbstractAudioServletTest {
 
     private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkRegistryImpl audioSinkRegistry;
     private @NonNullByDefault({}) AudioSinkFake audioSink;
 
     @BeforeEach
     public void setup() {
-        audioManager = new AudioManagerImpl();
+        audioSinkRegistry = new AudioSinkRegistryImpl();
+        audioManager = new AudioManagerImpl(audioSinkRegistry, new AudioSourceRegistryImpl());
         audioSink = new AudioSinkFake();
     }
 
     @Test
     public void audioManagerProcessesMultitimeStreams() throws Exception {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         int streamTimeout = 10;
         assertServedStream(streamTimeout);
     }
 
     @Test
     public void audioManagerProcessesOneTimeStream() throws Exception {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         assertServedStream(null);
     }
 
