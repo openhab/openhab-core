@@ -155,6 +155,10 @@ public class DialogManagerImplTest {
         TTSService tts = mock(TTSService.class);
         when(tts.getId()).thenReturn("test-tts");
         when(tts.getUID()).thenReturn("test-tts");
+        Voice voice = mock(Voice.class);
+        when(voice.getUID()).thenReturn("test-tts:voice-en");
+        when(voice.getLocale()).thenReturn(Locale.ENGLISH);
+        when(tts.getAvailableVoices()).thenReturn(Set.of(voice));
 
         HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
         when(hli.getId()).thenReturn("test-hli");
