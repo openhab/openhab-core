@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.internal.dialog;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -199,7 +200,10 @@ public class DialogProcessor {
                     logger.debug("Text recognized: {}", question);
                     feedbackService.setListening(false);
                     audioDriver.stopRecognition();
-                    state = DialogState.INTERPRETING;
+                    if (!transitionSession(this, DialogState.INTERPRETING)) {
+                        logger.debug("Recognition session was cancelled before interpretation, discarding result");
+                        return;
+                    }
                     eventListener.onBeforeDialogInterpretation(dialogContext);
 
                     String answer;
@@ -211,21 +215,12 @@ public class DialogProcessor {
                         answer = e.getMessage() != null ? e.getMessage() : "Unexpected error";
                     }
 
-                    // If the processor was stopped while interpretation was running, discard the result to prevent
-                    // speaking to the sink or restoring WAITING_FOR_TRIGGER on a decommissioned processor.
-                    if (isCancelled()) {
+                    if (!transitionSession(this, DialogState.SPEAKING)) {
                         logger.debug("Recognition session was cancelled during interpretation, discarding result");
                         return;
                     }
-
-                    state = DialogState.SPEAKING;
-                    if (answer != null) {
-                        say(answer);
-                    }
-
-                    if (!isCancelled()) {
-                        finishDialog();
-                    }
+                    say(answer);
+                    finishDialog(this);
                 }
                 case RecognitionStartEvent recognitionStartEvent -> {
                     if (!terminalHandled.get()) {
@@ -247,21 +242,18 @@ public class DialogProcessor {
                     logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
                     audioDriver.stopRecognition();
                     feedbackService.setListening(false);
-                    if (isCancelled()) {
+                    if (!transitionSession(this, DialogState.SPEAKING)) {
                         return;
                     }
-                    if (!message.isEmpty()) {
-                        say(message);
-                    }
-                    if (!isCancelled()) {
-                        finishDialog();
-                    }
+                    say(message);
+                    finishDialog(this);
                 }
                 default -> logger.debug("Unknown STT event received: {}", sttEvent);
             }
         }
     }
 
+    private final Object stateLock = new Object();
     private volatile DialogState state = DialogState.IDLE;
     private volatile boolean stopped = false;
     private @Nullable RecognitionSession currentSession;
@@ -292,14 +284,22 @@ public class DialogProcessor {
      * @throws IllegalStateException if keyword spot service is misconfigured
      */
     public @Nullable DTServiceHandle start() throws IllegalStateException {
-        stopped = false;
-        state = DialogState.WAITING_FOR_TRIGGER;
+        synchronized (stateLock) {
+            if (stopped) {
+                return null;
+            }
+            state = DialogState.WAITING_FOR_TRIGGER;
+        }
         feedbackService.playStartSound();
         try {
             return audioDriver.startTrigger(ksListener);
         } catch (DTException e) {
             logger.warn("Failed to start persistent dialog: {}", e.getMessage(), e);
-            state = DialogState.IDLE;
+            synchronized (stateLock) {
+                if (state == DialogState.WAITING_FOR_TRIGGER) {
+                    state = DialogState.IDLE;
+                }
+            }
             return null;
         }
     }
@@ -308,28 +308,44 @@ public class DialogProcessor {
      * Starts a single dialog sequence (trigger spotted or direct listening).
      */
     public void startSimpleDialog() {
+        synchronized (stateLock) {
+            if (stopped) {
+                return;
+            }
+        }
         if (!eventListener.onAcquireGroup(dialogContext)) {
             logger.warn("Ignoring dialog start event, dialog group '{}' running", dialogContext.dialogGroup());
             return;
         }
-        stopped = false;
-        invalidateCurrentSession();
         RecognitionSession session = new RecognitionSession();
-        synchronized (this) {
-            this.currentSession = session;
+        synchronized (stateLock) {
+            if (stopped) {
+                session.invalidate();
+            } else {
+                if (currentSession != null) {
+                    currentSession.invalidate();
+                }
+                currentSession = session;
+                state = DialogState.LISTENING;
+            }
         }
-        state = DialogState.LISTENING;
+        if (session.isCancelled()) {
+            eventListener.onReleaseGroup(dialogContext);
+            return;
+        }
         try {
             audioDriver.startRecognition(session);
         } catch (STTException e) {
             logger.warn("Failed to start recognition, stopping dialog: {}", e.getMessage(), e);
-            invalidateCurrentSession();
-            String text = i18nProvider.getFormattedText("error.stt-exception", dialogContext.locale(), e.getMessage());
-            say(text);
-            finishDialog();
+            if (transitionSession(session, DialogState.SPEAKING)) {
+                String text = i18nProvider.getFormattedText("error.stt-exception", dialogContext.locale(),
+                        e.getMessage());
+                say(text);
+            }
+            finishDialog(session);
             return;
         }
-        if (state == DialogState.LISTENING) {
+        if (state == DialogState.LISTENING && !session.isCancelled()) {
             feedbackService.playListeningSound();
         }
     }
@@ -338,14 +354,19 @@ public class DialogProcessor {
      * Stops any dialog execution.
      */
     public void stop() {
-        stopped = true;
-        // Invalidate the active recognition session before aborting so any synchronous or asynchronous callbacks
-        // emitted during abort are rejected.
-        invalidateCurrentSession();
+        // Invalidate the active recognition session and commit IDLE state before aborting so any synchronous or
+        // asynchronous callbacks emitted during abort are rejected.
+        synchronized (stateLock) {
+            stopped = true;
+            if (currentSession != null) {
+                currentSession.invalidate();
+                currentSession = null;
+            }
+            state = DialogState.IDLE;
+        }
         audioDriver.stopAll();
         feedbackService.setListening(false);
         feedbackService.playStopSound();
-        state = DialogState.IDLE;
         eventListener.onReleaseGroup(dialogContext);
         eventListener.onDialogStopped(dialogContext);
     }
@@ -368,23 +389,33 @@ public class DialogProcessor {
         return s == DialogState.LISTENING || s == DialogState.INTERPRETING || s == DialogState.SPEAKING;
     }
 
-    private synchronized void invalidateCurrentSession() {
-        RecognitionSession session = this.currentSession;
-        if (session != null) {
-            session.invalidate();
-            this.currentSession = null;
+    private boolean transitionSession(RecognitionSession session, DialogState nextState) {
+        synchronized (stateLock) {
+            if (stopped || !session.equals(currentSession) || session.isCancelled()) {
+                return false;
+            }
+            state = nextState;
+            return true;
         }
     }
 
-    private void finishDialog() {
-        eventListener.onReleaseGroup(dialogContext);
-        if (stopped) {
-            return;
+    private void finishDialog(RecognitionSession session) {
+        boolean notifyStopped = false;
+        synchronized (stateLock) {
+            if (stopped || !session.equals(currentSession)) {
+                return;
+            }
+            session.invalidate();
+            currentSession = null;
+            if (dialogContext.dt() != null && dialogContext.keyword() != null) {
+                state = DialogState.WAITING_FOR_TRIGGER;
+            } else {
+                state = DialogState.IDLE;
+                notifyStopped = true;
+            }
         }
-        if (dialogContext.dt() != null && dialogContext.keyword() != null) {
-            state = DialogState.WAITING_FOR_TRIGGER;
-        } else {
-            state = DialogState.IDLE;
+        eventListener.onReleaseGroup(dialogContext);
+        if (notifyStopped) {
             eventListener.onDialogStopped(dialogContext);
         }
     }
@@ -428,7 +459,7 @@ public class DialogProcessor {
                 && dialogContext.tts().equals(dialogProcessor.dialogContext.tts())
                 && Objects.equals(dialogContext.voice(), dialogProcessor.dialogContext.voice())
                 && dialogContext.hlis().size() == dialogProcessor.dialogContext.hlis().size()
-                && dialogContext.hlis().containsAll(dialogProcessor.dialogContext.hlis())
+                && new HashSet<>(dialogContext.hlis()).containsAll(dialogProcessor.dialogContext.hlis())
                 && dialogContext.locale().equals(dialogProcessor.dialogContext.locale())
                 && Objects.equals(dialogContext.listeningItem(), dialogProcessor.dialogContext.listeningItem());
     }
