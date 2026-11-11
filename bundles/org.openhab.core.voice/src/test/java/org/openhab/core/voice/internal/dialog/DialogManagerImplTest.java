@@ -423,6 +423,42 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    public void stopDialogDoesNotBlockWhileStartDialogIsInFlightAndAbortsHandle()
+            throws AudioException, STTException, KSException, InterruptedException, IOException {
+        DialogContext context = createValidContext("source-inflight", "sink-inflight");
+        KSService ks = (KSService) Objects.requireNonNull(context.dt());
+        KSServiceHandle handle = getKSHandle("source-inflight");
+
+        CountDownLatch enterSpotLatch = new CountDownLatch(1);
+        CountDownLatch releaseSpotLatch = new CountDownLatch(1);
+        when(ks.spot(any(), any(), any(), any())).thenAnswer(inv -> {
+            enterSpotLatch.countDown();
+            assertTrue(releaseSpotLatch.await(5, TimeUnit.SECONDS));
+            return handle;
+        });
+
+        @Nullable
+        DTServiceHandle[] returnedHandle = new DTServiceHandle[1];
+        Thread startThread = new Thread(() -> {
+            returnedHandle[0] = dialogManager.startDialog(context);
+        });
+        startThread.start();
+
+        assertTrue(enterSpotLatch.await(5, TimeUnit.SECONDS));
+
+        // stopDialog must complete without blocking on startDialog
+        assertDoesNotThrow(() -> dialogManager.stopDialog(context.source()));
+        assertEquals(0, dialogManager.getDialogsContexts().size());
+
+        releaseSpotLatch.countDown();
+        startThread.join(5000);
+
+        assertNull(returnedHandle[0]);
+        verify(handle).abort();
+        verify(getSourceStream("source-inflight")).close();
+    }
+
+    @Test
     public void getDialogRegistrationsMarksRunningStateCorrectly() throws AudioException, STTException, KSException {
         DialogRegistration reg1 = new DialogRegistration("source-1", "sink-1");
         DialogRegistration reg2 = new DialogRegistration("source-2", "sink-2");

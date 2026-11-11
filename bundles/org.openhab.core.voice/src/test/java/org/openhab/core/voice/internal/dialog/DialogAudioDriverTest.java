@@ -29,6 +29,7 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.voice.dialog.DialogContext;
+import org.openhab.core.voice.dialog.trigger.BasicDTService;
 import org.openhab.core.voice.dialog.trigger.DTException;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
@@ -105,6 +106,25 @@ public class DialogAudioDriverTest {
     }
 
     @Test
+    public void startTriggerWithBasicDTAbortsHandleIfStoppedDuringRegisterListener() throws DTException {
+        BasicDTService basicDT = mock(BasicDTService.class);
+        DTServiceHandle dtHandle = mock(DTServiceHandle.class);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withDT(basicDT).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        when(basicDT.registerListener(eq(ksListener))).thenAnswer(invocation -> {
+            driver.stopTrigger();
+            return dtHandle;
+        });
+
+        DTServiceHandle handle = driver.startTrigger(ksListener);
+        assertNull(handle);
+        verify(dtHandle).abort();
+    }
+
+    @Test
     public void startRecognitionAndStopRecognitionManagesStreamAndHandle()
             throws AudioException, STTException, IOException {
         when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
@@ -146,6 +166,48 @@ public class DialogAudioDriverTest {
         assertNull(handle);
         verify(sttHandle).abort();
         verify(audioStream).close();
+    }
+
+    @Test
+    public void startRecognitionDoesNotCloseNewerStreamWhenSynchronousCallbackStartsNewSession()
+            throws AudioException, STTException, IOException {
+        AudioStream firstStream = mock(AudioStream.class);
+        AudioStream secondStream = mock(AudioStream.class);
+        STTServiceHandle firstHandle = mock(STTServiceHandle.class);
+        STTServiceHandle secondHandle = mock(STTServiceHandle.class);
+        STTListener secondListener = mock(STTListener.class);
+
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(firstStream, secondStream);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+
+        when(sttService.recognize(eq(secondListener), eq(secondStream), eq(Locale.ENGLISH))).thenReturn(secondHandle);
+        when(sttService.recognize(eq(sttListener), eq(firstStream), eq(Locale.ENGLISH))).thenAnswer(invocation -> {
+            // Simulate terminal callback stopping first recognition and starting a second session before first returns
+            driver.stopRecognition();
+            STTServiceHandle nestedHandle = driver.startRecognition(secondListener);
+            assertNotNull(nestedHandle);
+            return firstHandle;
+        });
+
+        STTServiceHandle outerResult = driver.startRecognition(sttListener);
+        assertNull(outerResult);
+
+        // First session's handle and stream are cleaned up, while second session's stream remains open
+        verify(firstHandle).abort();
+        verify(firstStream).close();
+        verify(secondHandle, never()).abort();
+        verify(secondStream, never()).close();
+
+        // Stopping recognition now aborts and closes the second session's handle and stream
+        driver.stopRecognition();
+        verify(secondHandle).abort();
+        verify(secondStream).close();
     }
 
     @Test

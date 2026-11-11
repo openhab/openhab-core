@@ -48,6 +48,7 @@ import org.openhab.core.voice.stt.RecognitionStopEvent;
 import org.openhab.core.voice.stt.STTException;
 import org.openhab.core.voice.stt.STTListener;
 import org.openhab.core.voice.stt.STTService;
+import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -306,6 +307,31 @@ public class DialogProcessorTest {
     }
 
     @Test
+    public void finishDialogCommitsStateBeforeReleasingGroupAndDoesNotOverwriteNewSession() throws STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        doAnswer(invocation -> {
+            // Resting state must already be committed when group is released
+            assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+            assertFalse(processor.isProcessing());
+            // Starting a new interaction immediately upon group release must stay in LISTENING
+            processor.startSimpleDialog();
+            return null;
+        }).when(eventListener).onReleaseGroup(context);
+
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+        assertTrue(processor.isProcessing());
+    }
+
+    @Test
     public void stopDuringListeningRejectsSpeechRecognitionEvents() throws STTException {
         DialogContext context = createTestContext(List.of());
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
@@ -336,6 +362,8 @@ public class DialogProcessorTest {
 
         processor.stop();
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionErrorEvent("recognition failed"));
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(speechSynthesizer);
@@ -434,6 +462,33 @@ public class DialogProcessorTest {
         thread.join(5000);
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        verifyNoInteractions(speechSynthesizer);
+    }
+
+    @Test
+    public void stopDuringStopRecognitionInCallbackDoesNotInterpretOrRestoreState()
+            throws STTException, InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        when(hli.getId()).thenReturn("hli");
+
+        DialogContext context = createTestContext(List.of(hli));
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        doAnswer(invocation -> {
+            processor.stop();
+            return null;
+        }).when(audioDriver).stopRecognition();
+
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
+
+        assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
+        assertFalse(processor.isProcessing());
+        verify(hli, never()).interpret(any(Locale.class), any(InterpreterContext.class));
         verifyNoInteractions(speechSynthesizer);
     }
 
