@@ -13,8 +13,6 @@
 package org.openhab.core.voice.internal.dialog;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -51,12 +49,15 @@ public class DialogAudioDriver {
     private final @Nullable AudioFormat ksFormat;
     private final @Nullable AudioFormat sttFormat;
 
-    private final AtomicReference<@Nullable AudioStream> streamKS = new AtomicReference<>();
-    private final AtomicReference<@Nullable AudioStream> streamSTT = new AtomicReference<>();
-    private final AtomicReference<@Nullable DTServiceHandle> dtServiceHandle = new AtomicReference<>();
-    private final AtomicReference<@Nullable STTServiceHandle> sttServiceHandle = new AtomicReference<>();
-    private final AtomicLong triggerEpoch = new AtomicLong();
-    private final AtomicLong recognitionEpoch = new AtomicLong();
+    private final Object triggerLock = new Object();
+    private volatile long triggerEpoch;
+    private @Nullable AudioStream streamKS;
+    private @Nullable DTServiceHandle dtServiceHandle;
+
+    private final Object recognitionLock = new Object();
+    private volatile long recognitionEpoch;
+    private @Nullable AudioStream streamSTT;
+    private @Nullable STTServiceHandle sttServiceHandle;
 
     public DialogAudioDriver(DialogContext dialogContext) {
         this.dialogContext = dialogContext;
@@ -76,59 +77,77 @@ public class DialogAudioDriver {
      * @throws IllegalStateException if the dialog trigger is not configured
      * @throws DTException if the DT service failed to start listening
      */
-    public @Nullable DTServiceHandle startTrigger(KSListener listener) throws IllegalStateException, DTException {
-        DTService dtService = dialogContext.dt();
-        String keyword = dialogContext.keyword();
+    public @Nullable DTServiceHandle startTrigger(final KSListener listener) throws IllegalStateException, DTException {
+        final DTService dtService = dialogContext.dt();
+        final String keyword = dialogContext.keyword();
         if (dtService == null || keyword == null) {
             throw new IllegalStateException("Unable to run persistent dialog: KS service is not configured");
         }
 
         stopTrigger();
-        long epoch = triggerEpoch.incrementAndGet();
+        final long epoch;
+        synchronized (triggerLock) {
+            epoch = ++triggerEpoch;
+        }
 
-        AudioFormat fmt = null;
         if (dtService instanceof KSService ksService) {
-            fmt = ksFormat;
+            final AudioFormat fmt = ksFormat;
             if (fmt == null) {
                 throw new KSException("No compatible audio format found for KS '" + ksService.getId() + "' and source '"
                         + dialogContext.source().getId() + "'");
             }
-        }
 
-        try {
-            if (dtService instanceof KSService ksService) {
-                AudioStream stream = dialogContext.source().getInputStream(fmt);
-                streamKS.set(stream);
-                if (triggerEpoch.get() != epoch) {
-                    closeStreamKS();
-                    return null;
+            final AudioStream stream;
+            try {
+                stream = dialogContext.source().getInputStream(fmt);
+            } catch (AudioException e) {
+                throw new KSException("Error creating the audio stream: " + e.getMessage(), e);
+            }
+
+            boolean installed = false;
+            synchronized (triggerLock) {
+                if (triggerEpoch == epoch) {
+                    streamKS = stream;
+                    installed = true;
                 }
-
-                DTServiceHandle handle = ksService.spot(listener, stream, dialogContext.locale(), keyword);
-                if (triggerEpoch.get() == epoch && dtServiceHandle.compareAndSet(null, handle)) {
-                    return handle;
-                }
-
-                handle.abort();
-                closeStreamKS();
-                return null;
-            } else if (dtService instanceof BasicDTService basicDTService) {
-                DTServiceHandle handle = basicDTService.registerListener(listener);
-                if (triggerEpoch.get() == epoch && dtServiceHandle.compareAndSet(null, handle)) {
-                    return handle;
-                }
-
-                handle.abort();
+            }
+            if (!installed) {
+                closeStream(stream, "KS");
                 return null;
             }
-            throw new DTException("DialogAudioDriver is not able to handle this DTService implementation '"
-                    + dtService.getClass().getName() + "'");
-        } catch (AudioException e) {
-            throw new KSException("Error creating the audio stream: " + e.getMessage(), e);
-        } catch (KSException e) {
-            closeStreamKS();
-            throw e;
+
+            final DTServiceHandle handle;
+            try {
+                handle = ksService.spot(listener, stream, dialogContext.locale(), keyword);
+            } catch (KSException e) {
+                detachAndCloseStreamKS(stream);
+                throw e;
+            }
+
+            synchronized (triggerLock) {
+                if (triggerEpoch == epoch) {
+                    dtServiceHandle = handle;
+                    return handle;
+                }
+            }
+
+            handle.abort();
+            detachAndCloseStreamKS(stream);
+            return null;
+        } else if (dtService instanceof BasicDTService basicDTService) {
+            DTServiceHandle handle = basicDTService.registerListener(listener);
+            synchronized (triggerLock) {
+                if (triggerEpoch == epoch) {
+                    dtServiceHandle = handle;
+                    return handle;
+                }
+            }
+
+            handle.abort();
+            return null;
         }
+        throw new DTException("DialogAudioDriver is not able to handle this DTService implementation '"
+                + dtService.getClass().getName() + "'");
     }
 
     /**
@@ -138,62 +157,94 @@ public class DialogAudioDriver {
      * @return {@link STTServiceHandle} or null if starting failed or was cancelled
      * @throws STTException if the STT service failed to start recognition
      */
-    public @Nullable STTServiceHandle startRecognition(STTListener listener) throws STTException {
+    public @Nullable STTServiceHandle startRecognition(final STTListener listener) throws STTException {
         stopRecognition();
-        long epoch = recognitionEpoch.incrementAndGet();
+        final long epoch;
+        synchronized (recognitionLock) {
+            epoch = ++recognitionEpoch;
+        }
 
-        AudioFormat fmt = sttFormat;
+        final AudioFormat fmt = sttFormat;
         if (fmt == null) {
             throw new STTException("No compatible audio format found for STT '" + dialogContext.stt().getId()
                     + "' and source '" + dialogContext.source().getId() + "'");
         }
 
+        final AudioStream stream;
         try {
-            AudioStream stream = dialogContext.source().getInputStream(fmt);
-            streamSTT.set(stream);
-            if (recognitionEpoch.get() != epoch) {
-                closeStreamSTT();
-                return null;
-            }
-
-            STTServiceHandle handle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
-            if (recognitionEpoch.get() == epoch && sttServiceHandle.compareAndSet(null, handle)) {
-                return handle;
-            }
-
-            handle.abort();
-            closeStreamSTT();
-            return null;
+            stream = dialogContext.source().getInputStream(fmt);
         } catch (AudioException e) {
             throw new STTException("Error creating the audio stream: " + e.getMessage(), e);
+        }
+
+        boolean installed = false;
+        synchronized (recognitionLock) {
+            if (recognitionEpoch == epoch) {
+                streamSTT = stream;
+                installed = true;
+            }
+        }
+        if (!installed) {
+            closeStream(stream, "STT");
+            return null;
+        }
+
+        final STTServiceHandle handle;
+        try {
+            handle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
         } catch (STTException e) {
-            closeStreamSTT();
+            detachAndCloseStreamSTT(stream);
             throw e;
         }
+
+        synchronized (recognitionLock) {
+            if (recognitionEpoch == epoch) {
+                sttServiceHandle = handle;
+                return handle;
+            }
+        }
+
+        handle.abort();
+        detachAndCloseStreamSTT(stream);
+        return null;
     }
 
     /**
      * Aborts keyword spotting and closes the keyword spotting audio stream.
      */
     public void stopTrigger() {
-        triggerEpoch.incrementAndGet();
-        DTServiceHandle handle = dtServiceHandle.getAndSet(null);
+        final DTServiceHandle handle;
+        final AudioStream stream;
+        synchronized (triggerLock) {
+            triggerEpoch++;
+            handle = dtServiceHandle;
+            dtServiceHandle = null;
+            stream = streamKS;
+            streamKS = null;
+        }
         if (handle != null) {
             handle.abort();
         }
-        closeStreamKS();
+        closeStream(stream, "KS");
     }
 
     /**
      * Aborts speech recognition and closes the speech recognition audio stream.
      */
     public void stopRecognition() {
-        recognitionEpoch.incrementAndGet();
-        STTServiceHandle handle = sttServiceHandle.getAndSet(null);
+        final STTServiceHandle handle;
+        final AudioStream stream;
+        synchronized (recognitionLock) {
+            recognitionEpoch++;
+            handle = sttServiceHandle;
+            sttServiceHandle = null;
+            stream = streamSTT;
+            streamSTT = null;
+        }
         if (handle != null) {
             handle.abort();
         }
-        closeStreamSTT();
+        closeStream(stream, "STT");
     }
 
     /**
@@ -204,24 +255,38 @@ public class DialogAudioDriver {
         stopTrigger();
     }
 
-    private void closeStreamKS() {
-        AudioStream stream = streamKS.getAndSet(null);
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                logger.debug("IOException closing KS audio stream: {}", e.getMessage(), e);
+    private void detachAndCloseStreamKS(AudioStream stream) {
+        boolean shouldClose = false;
+        synchronized (triggerLock) {
+            if (stream.equals(streamKS)) {
+                streamKS = null;
+                shouldClose = true;
             }
+        }
+        if (shouldClose) {
+            closeStream(stream, "KS");
         }
     }
 
-    private void closeStreamSTT() {
-        AudioStream stream = streamSTT.getAndSet(null);
+    private void detachAndCloseStreamSTT(AudioStream stream) {
+        boolean shouldClose = false;
+        synchronized (recognitionLock) {
+            if (stream.equals(streamKS)) {
+                streamSTT = null;
+                shouldClose = true;
+            }
+        }
+        if (shouldClose) {
+            closeStream(stream, "STT");
+        }
+    }
+
+    private void closeStream(@Nullable AudioStream stream, String type) {
         if (stream != null) {
             try {
                 stream.close();
             } catch (IOException e) {
-                logger.debug("IOException closing STT audio stream: {}", e.getMessage(), e);
+                logger.debug("IOException closing {} audio stream: {}", type, e.getMessage(), e);
             }
         }
     }
