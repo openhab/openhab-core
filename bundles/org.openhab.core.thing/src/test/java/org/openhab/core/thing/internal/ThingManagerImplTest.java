@@ -15,15 +15,20 @@ package org.openhab.core.thing.internal;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.common.SafeCaller;
+import org.openhab.core.common.SafeCallerBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.events.EventPublisher;
@@ -36,7 +41,9 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.internal.ThingTracker.ThingTrackerEvent;
@@ -95,6 +102,18 @@ public class ThingManagerImplTest extends JavaTest {
                 itemChannelLinkRegistryMock, readyServiceMock, safeCallerMock, storageServiceMock, thingRegistryMock,
                 thingStatusInfoI18nLocalizationService, thingTypeRegistryMock, thingUpdateInstructionReaderMock,
                 bundleResolverMock, translationProviderMock, bundleContextMock);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void stubSuccessfulInitialization(Thing thing, ThingHandler handler) {
+        SafeCallerBuilder<ThingHandler> safeCallerBuilderMock = mock(SafeCallerBuilder.class);
+        when(safeCallerBuilderMock.onTimeout(any())).thenReturn(safeCallerBuilderMock);
+        when(safeCallerBuilderMock.onException(any())).thenReturn(safeCallerBuilderMock);
+        when(safeCallerBuilderMock.build()).thenReturn(handler);
+        when(safeCallerMock.create(eq(handler), eq(ThingHandler.class))).thenReturn(safeCallerBuilderMock);
+        when(handler.getThing()).thenReturn(thing);
+        when(thing.getHandler()).thenReturn(handler);
+        when(thingTypeMock.getSupportedBridgeTypeUIDs()).thenReturn(List.of());
     }
 
     @Test
@@ -188,6 +207,131 @@ public class ThingManagerImplTest extends JavaTest {
         stopInterceptedLogger(ThingManagerImpl.class);
         assertLogMessage(ThingManagerImpl.class, LogLevel.ERROR,
                 "A thing with UID 'test::thing' is already tracked by ThingManager. This is a bug.");
+    }
+
+    @Test
+    public void handlerFactoryThrowingErrorDoesNotPropagate() {
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        ThingHandlerFactory brokenFactory = mock(ThingHandlerFactory.class);
+        when(brokenFactory.supportsThingType(any())).thenReturn(true);
+        when(brokenFactory.registerHandler(any())).thenThrow(new NoClassDefFoundError("javax/activation/CommandMap"));
+
+        thingManager.addThingHandlerFactory(brokenFactory);
+        assertDoesNotThrow(() -> thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED));
+
+        verify(brokenFactory, atLeastOnce()).registerHandler(any());
+        // the failure must be isolated to the thing's status instead of escaping
+        ArgumentCaptor<ThingStatusInfo> statusInfoCaptor = ArgumentCaptor.forClass(ThingStatusInfo.class);
+        verify(thingMock, atLeastOnce()).setStatusInfo(statusInfoCaptor.capture());
+        assertEquals(ThingStatusDetail.HANDLER_REGISTERING_ERROR, statusInfoCaptor.getValue().getStatusDetail());
+    }
+
+    @Test
+    public void factoryWithThrowingSupportsThingTypeIsSkipped() {
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        ThingHandlerFactory brokenFactory = mock(ThingHandlerFactory.class);
+        when(brokenFactory.supportsThingType(any())).thenThrow(new NoClassDefFoundError("javax/activation/CommandMap"));
+
+        ThingHandlerFactory goodFactory = mock(ThingHandlerFactory.class);
+        when(goodFactory.supportsThingType(any())).thenReturn(true);
+        ThingHandler handlerMock = mock(ThingHandler.class);
+        when(goodFactory.registerHandler(any())).thenReturn(handlerMock);
+        stubSuccessfulInitialization(thingMock, handlerMock);
+
+        thingManager.addThingHandlerFactory(brokenFactory);
+        thingManager.addThingHandlerFactory(goodFactory);
+
+        assertDoesNotThrow(() -> thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED));
+        verify(goodFactory, atLeastOnce()).registerHandler(any());
+    }
+
+    @Test
+    public void addThingHandlerFactoryContinuesAfterError() {
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        Thing thing2 = mock(Thing.class);
+        when(thing2.getUID()).thenReturn(new ThingUID("test", "thing2"));
+        when(thing2.getStatusInfo())
+                .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
+
+        ThingHandlerFactory factory = mock(ThingHandlerFactory.class);
+        when(factory.supportsThingType(any())).thenReturn(true);
+        ThingHandler handlerMock = mock(ThingHandler.class);
+        when(factory.registerHandler(any())).thenAnswer(invocation -> {
+            Thing thing = invocation.getArgument(0);
+            if (thing.getUID().equals(thing2.getUID())) {
+                return handlerMock;
+            }
+            throw new NoClassDefFoundError("javax/activation/CommandMap");
+        });
+        stubSuccessfulInitialization(thing2, handlerMock);
+
+        thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED);
+        thingManager.thingAdded(thing2, ThingTrackerEvent.THING_ADDED);
+
+        assertDoesNotThrow(() -> thingManager.addThingHandlerFactory(factory));
+        // both things were processed although the registration of the first one failed with an Error
+        verify(factory, atLeastOnce()).registerHandler(thingMock);
+        verify(factory, atLeastOnce()).registerHandler(thing2);
+    }
+
+    @Test
+    public void prerequisiteCheckSurvivesErrorFromBrokenHandlerFactory() throws Exception {
+        when(storageServiceMock.getStorage(any(), any())).thenReturn(storageMock);
+        when(storageMock.get(any())).thenReturn(null);
+
+        ThingTypeUID brokenTypeUID = new ThingTypeUID("test", "broken");
+        ThingTypeUID goodTypeUID = new ThingTypeUID("test", "good");
+        when(thingMock.getThingTypeUID()).thenReturn(brokenTypeUID);
+
+        // initially the thing types are not in the registry, so both things are not ready
+        when(thingTypeRegistryMock.getThingType(any())).thenReturn(null);
+
+        ThingManagerImpl thingManager = createThingManager();
+
+        ThingHandlerFactory brokenFactory = mock(ThingHandlerFactory.class);
+        when(brokenFactory.supportsThingType(eq(brokenTypeUID))).thenReturn(true);
+        when(brokenFactory.registerHandler(any())).thenThrow(new NoClassDefFoundError("javax/activation/CommandMap"));
+
+        Thing thing2 = mock(Thing.class);
+        when(thing2.getUID()).thenReturn(new ThingUID("test", "thing2"));
+        when(thing2.getThingTypeUID()).thenReturn(goodTypeUID);
+        when(thing2.getStatusInfo())
+                .thenReturn(new ThingStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE, null));
+
+        ThingHandlerFactory goodFactory = mock(ThingHandlerFactory.class);
+        when(goodFactory.supportsThingType(eq(goodTypeUID))).thenReturn(true);
+        ThingHandler handlerMock = mock(ThingHandler.class);
+        when(goodFactory.registerHandler(any())).thenReturn(handlerMock);
+        stubSuccessfulInitialization(thing2, handlerMock);
+
+        thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED);
+        thingManager.thingAdded(thing2, ThingTrackerEvent.THING_ADDED);
+        thingManager.addThingHandlerFactory(brokenFactory);
+        thingManager.addThingHandlerFactory(goodFactory);
+
+        // now the thing types arrive, so both things become ready
+        when(thingTypeRegistryMock.getThingType(any())).thenReturn(thingTypeMock);
+
+        Method checkMethod = ThingManagerImpl.class.getDeclaredMethod("checkMissingPrerequisites");
+        checkMethod.setAccessible(true);
+        // an escaping Error here would cancel the periodically executed prerequisite check permanently
+        checkMethod.invoke(thingManager);
+
+        verify(brokenFactory, atLeastOnce()).registerHandler(thingMock);
+        // the thing with the good factory was still processed although the broken one failed first
+        verify(goodFactory, atLeastOnce()).registerHandler(thing2);
     }
 
     @Test

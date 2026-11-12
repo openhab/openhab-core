@@ -502,8 +502,28 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
     }
 
     private @Nullable ThingHandlerFactory findThingHandlerFactory(ThingTypeUID thingTypeUID) {
-        return thingHandlerFactories.stream().filter(factory -> factory.supportsThingType(thingTypeUID)).findFirst()
-                .orElse(null);
+        for (ThingHandlerFactory factory : thingHandlerFactories) {
+            if (supportsThingType(factory, thingTypeUID)) {
+                return factory;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Asks whether a {@link ThingHandlerFactory} supports a {@link ThingTypeUID} without letting a broken binding
+     * break the lookup for other bindings. A binding with a missing OSGi import fails with a {@link LinkageError}
+     * (e.g. a {@link NoClassDefFoundError}) which is not an {@link Exception}; it must be isolated here so that one
+     * broken factory cannot prevent handlers from being found for unrelated thing types.
+     */
+    private boolean supportsThingType(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID) {
+        try {
+            return thingHandlerFactory.supportsThingType(thingTypeUID);
+        } catch (Throwable t) {
+            logger.error("Exception occurred while asking thing handler factory '{}' if it supports '{}': {}",
+                    thingHandlerFactory, thingTypeUID, t.getMessage(), t);
+            return false;
+        }
     }
 
     private void registerHandler(Thing thing, ThingHandlerFactory thingHandlerFactory) {
@@ -541,7 +561,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             thing.setHandler(thingHandler);
             thingHandlers.put(thing.getUID(), thingHandler);
             thingHandlersByFactory.computeIfAbsent(thingHandlerFactory, unused -> new HashSet<>()).add(thingHandler);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
+            // catch Throwable (not only Exception) so that Errors like a NoClassDefFoundError caused by a broken
+            // binding are isolated to this thing instead of escaping and aborting the caller, e.g. the
+            // prerequisite checker job which is cancelled permanently once its task throws
             ThingStatusInfo statusInfo = buildStatusInfo(ThingStatus.UNINITIALIZED,
                     ThingStatusDetail.HANDLER_REGISTERING_ERROR,
                     ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
@@ -557,7 +580,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             scheduler.execute(() -> {
                 try {
                     registerAndInitializeHandler(child, getThingHandlerFactory(child));
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     logger.error("Registration resp. initialization of child '{}' of bridge '{}' has been failed: {}",
                             child.getUID(), bridge.getUID(), ex.getMessage(), ex);
                 }
@@ -1143,7 +1166,9 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                                 prerequisites.thingUID);
                     }
                 }
-            } catch (RuntimeException e) {
+            } catch (Throwable e) {
+                // catch Throwable so that an Error thrown while initializing a thing does not kill this
+                // periodically executed method (a throwing periodic task is never executed again)
                 logger.error("Checking/initializing thing '{}' failed unexpectedly.", prerequisites.thingUID, e);
             }
         }
@@ -1154,16 +1179,21 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         logger.debug("Thing handler factory '{}' added", thingHandlerFactory.getClass().getSimpleName());
         updateInstructions.putAll(thingUpdateInstructionReader.readForFactory(thingHandlerFactory));
         thingHandlerFactories.add(thingHandlerFactory);
-        things.values().stream().filter(thing -> thingHandlerFactory.supportsThingType(thing.getThingTypeUID()))
+        things.values().stream().filter(thing -> supportsThingType(thingHandlerFactory, thing.getThingTypeUID()))
                 .forEach(thing -> {
-                    if (!isHandlerRegistered(thing)) {
-                        ThingPrerequisites thingPrerequisites = new ThingPrerequisites(thing);
-                        if (!thingPrerequisites.isReady()) {
-                            missingPrerequisites.put(thing.getUID(), thingPrerequisites);
+                    try {
+                        if (!isHandlerRegistered(thing)) {
+                            ThingPrerequisites thingPrerequisites = new ThingPrerequisites(thing);
+                            if (!thingPrerequisites.isReady()) {
+                                missingPrerequisites.put(thing.getUID(), thingPrerequisites);
+                            }
+                            registerAndInitializeHandler(thing, thingHandlerFactory);
+                        } else {
+                            logger.debug("Thing handler for thing '{}' already registered", thing.getUID());
                         }
-                        registerAndInitializeHandler(thing, thingHandlerFactory);
-                    } else {
-                        logger.debug("Thing handler for thing '{}' already registered", thing.getUID());
+                    } catch (Throwable t) {
+                        logger.error("Exception occurred while registering handler for thing '{}': {}", thing.getUID(),
+                                t.getMessage(), t);
                     }
                 });
     }
@@ -1214,17 +1244,29 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        // both jobs are scheduled with a fixed delay: an escaping exception or error cancels all future executions,
+        // therefore they must not let any throwable escape (see also the per-thing isolation in
+        // checkMissingPrerequisites)
         startLevelSetterJob = scheduler.scheduleWithFixedDelay(() -> {
-            if (allEnabledThingsAreInitialized()) {
-                readyService.markReady(READY_MARKER_THINGS_LOADED);
-                if (startLevelSetterJob != null) {
-                    startLevelSetterJob.cancel(false);
+            try {
+                if (allEnabledThingsAreInitialized()) {
+                    readyService.markReady(READY_MARKER_THINGS_LOADED);
+                    if (startLevelSetterJob != null) {
+                        startLevelSetterJob.cancel(false);
+                    }
+                    readyService.unregisterTracker(this);
                 }
-                readyService.unregisterTracker(this);
+            } catch (Throwable t) {
+                logger.error("Checking if all things are initialized failed unexpectedly.", t);
             }
         }, CHECK_INTERVAL, CHECK_INTERVAL, TimeUnit.SECONDS);
-        prerequisiteCheckerJob = scheduler.scheduleWithFixedDelay(this::checkMissingPrerequisites, CHECK_INTERVAL,
-                CHECK_INTERVAL, TimeUnit.SECONDS);
+        prerequisiteCheckerJob = scheduler.scheduleWithFixedDelay(() -> {
+            try {
+                checkMissingPrerequisites();
+            } catch (Throwable t) {
+                logger.error("Checking missing prerequisites failed unexpectedly.", t);
+            }
+        }, CHECK_INTERVAL, CHECK_INTERVAL, TimeUnit.SECONDS);
     }
 
     @Override
@@ -1271,7 +1313,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     if (configDescriptionUri != null) {
                         configDescriptionUris.add(configDescriptionUri);
                     }
-                } else if (thingHandlerFactories.stream().anyMatch(f -> f.supportsThingType(thingTypeUID))) {
+                } else if (thingHandlerFactories.stream().anyMatch(f -> supportsThingType(f, thingTypeUID))) {
                     timesChecked++;
                     if (timesChecked > MAX_CHECK_PREREQUISITE_TIME / CHECK_INTERVAL) {
                         logger.warn(
