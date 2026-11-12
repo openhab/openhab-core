@@ -45,6 +45,7 @@ public class ThingTypeBuilder {
     private final String thingTypeId;
     private String label;
     private @Nullable String semanticEquipmentTag;
+    private @Nullable String bundleSymbolicName;
 
     /**
      * Create and return a {@link ThingTypeBuilder} with the given {@code bindingId}, {@code thingTypeId} and
@@ -103,6 +104,7 @@ public class ThingTypeBuilder {
         listed = thingType.isListed();
         category = thingType.getCategory();
         semanticEquipmentTag = thingType.getSemanticEquipmentTag();
+        bundleSymbolicName = thingType.getBundleSymbolicName();
     }
 
     /**
@@ -124,7 +126,7 @@ public class ThingTypeBuilder {
 
         return new ThingType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
                 category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
-                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag);
+                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag, bundleSymbolicName);
     }
 
     /**
@@ -146,7 +148,12 @@ public class ThingTypeBuilder {
 
         return new BridgeType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
                 category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
-                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag);
+                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag, bundleSymbolicName);
+    }
+
+    public ThingTypeBuilder withBundleSymbolicName(@Nullable String bundleSymbolicName) {
+        this.bundleSymbolicName = bundleSymbolicName;
+        return this;
     }
 
     public ThingTypeBuilder withLabel(String label) {
