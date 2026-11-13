@@ -21,9 +21,7 @@
 		<label>My Channel</label>
 		<category>Other</category>
 		<tags>
-			<tag>
-				Test
-			</tag>
+			<point>Control</point>
 		</tags>
 		<config-description>
 			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1"/>

@@ -13,7 +13,7 @@
 		<label>HUE Lamp</label>
 		<description>My own great HUE Lamp.</description>
 
-		<semantic-equipment-tag>LightBulb</semantic-equipment-tag>
+		<semantic-equipment-tag>Lightbulb</semantic-equipment-tag>
 
 		<channel-groups>
 			<channel-group id="alarm_system" typeId="alarm_system"/>
@@ -30,8 +30,8 @@
 		</description>
 		<category>ColorLight</category>
 		<tags>
-			<tag>Control</tag>
-			<tag>Light</tag>
+			<point>Control</point>
+			<property>Light</property>
 		</tags>
 
 		<config-description>
@@ -49,8 +49,8 @@
 		</description>
 		<category>Light</category>
 		<tags>
-			<tag>Control</tag>
-			<tag>Light</tag>
+			<point>Control</point>
+			<property>Light</property>
 		</tags>
 
 		<config-description>
@@ -65,8 +65,8 @@
 		<description>The color temperature channel allows to set the color
 			temperature of a light from 0 (cold) to 100 (warm).</description>
 		<tags>
-			<tag>Control</tag>
-			<tag>ColorTemperature</tag>
+			<point>Control</point>
+			<property>ColorTemperature</property>
 		</tags>
 	</channel-type>
 
@@ -90,8 +90,8 @@
 		<description>The sensor detecting motion.</description>
 		<category>Motion</category>
 		<tags>
-			<tag>Status</tag>
-			<tag>Presence</tag>
+			<point>Status</point>
+			<property>Presence</property>
 		</tags>
 	</channel-type>
 

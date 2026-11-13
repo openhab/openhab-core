@@ -10,9 +10,7 @@
 		<label>My System Channel</label>
 		<category>Other</category>
 		<tags>
-			<tag>
-				Test
-			</tag>
+			<point>Measurement</point>
 		</tags>
 		<config-description>
 			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1"/>
