@@ -113,6 +113,14 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- Xtext requires ASM >= 9.10.1; pin it, otherwise an older ASM (e.g. 9.6 from osgitech.rest in the test BOM)
+      wins and MWE2 cannot read the JDK classes on newer Java versions -->
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>${asm.version}</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- Xbase -->
     <dependency>

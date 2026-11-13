@@ -14,14 +14,14 @@ package org.openhab.core.io.http.auth.internal;
 
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.HandlerContext;
 import org.openhab.core.io.http.HandlerPriorities;
 import org.osgi.service.component.annotations.Component;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Handler located after authentication which redirect client to page from which he started authentication process.

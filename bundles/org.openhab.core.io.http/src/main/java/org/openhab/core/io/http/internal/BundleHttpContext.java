@@ -15,7 +15,7 @@ package org.openhab.core.io.http.internal;
 import java.net.URL;
 
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
  * A bundle specific http context - delegates security and mime type handling to "parent" context.
@@ -26,7 +26,7 @@ class BundleHttpContext extends DelegatingHttpContext {
 
     private final Bundle bundle;
 
-    BundleHttpContext(HttpContext delegate, Bundle bundle) {
+    BundleHttpContext(ServletContextHelper delegate, Bundle bundle) {
         super(delegate);
         this.bundle = bundle;
     }

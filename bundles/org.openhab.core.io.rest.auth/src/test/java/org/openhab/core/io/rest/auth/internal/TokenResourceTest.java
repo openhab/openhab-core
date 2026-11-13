@@ -25,10 +25,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.base64url.Base64Url;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +39,10 @@ import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.Role;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UserSession;
+
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Tests for {@link TokenResource}.
