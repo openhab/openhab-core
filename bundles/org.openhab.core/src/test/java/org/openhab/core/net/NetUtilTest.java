@@ -16,8 +16,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.openhab.core.internal.common.SafeCallerImpl;
 
 /**
@@ -156,6 +159,48 @@ public class NetUtilTest {
                 .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 16), 24);
 
         assertEquals(0, addresses.size());
+    }
+
+    @Test
+    public void checkValidRangeForPrefixNotAlignedToByte() throws UnknownHostException {
+        InetAddress testableAddress = InetAddress.getByName("192.168.5.10");
+        List<InetAddress> addresses = NetUtil
+                .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 22), 22);
+
+        assertEquals(1022, addresses.size());
+        assertEquals("192.168.4.1", addresses.getFirst().getHostAddress());
+        assertEquals("192.168.7.254", addresses.getLast().getHostAddress());
+    }
+
+    @Test
+    public void checkValidRangeForSmallSubnet() throws UnknownHostException {
+        InetAddress testableAddress = InetAddress.getByName("10.0.0.6");
+        List<InetAddress> addresses = NetUtil
+                .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 30), 30);
+
+        assertEquals(2, addresses.size());
+        assertEquals("10.0.0.5", addresses.getFirst().getHostAddress());
+        assertEquals("10.0.0.6", addresses.getLast().getHostAddress());
+    }
+
+    @Test
+    public void fullRangeOfAddressesToScanCoversAllIPv4InterfaceAddresses() throws UnknownHostException {
+        List<CidrAddress> interfaceAddresses = List.of(
+                new CidrAddress(InetAddress.getByName("192.168.1.4"), (short) 24),
+                new CidrAddress(InetAddress.getByName("10.0.0.5"), (short) 30),
+                new CidrAddress(InetAddress.getByName("fe80::1"), (short) 64));
+
+        try (MockedStatic<NetUtil> netUtil = mockStatic(NetUtil.class, CALLS_REAL_METHODS)) {
+            netUtil.when(NetUtil::getAllInterfaceAddresses).thenReturn(interfaceAddresses);
+
+            List<InetAddress> addresses = NetUtil.getFullRangeOfAddressesToScan();
+
+            assertEquals(254 + 2, addresses.size());
+            assertTrue(addresses.stream().allMatch(Inet4Address.class::isInstance));
+            assertEquals("192.168.1.1", addresses.getFirst().getHostAddress());
+            assertEquals("10.0.0.5", addresses.get(254).getHostAddress());
+            assertEquals("10.0.0.6", addresses.getLast().getHostAddress());
+        }
     }
 
     @Test
