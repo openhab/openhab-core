@@ -84,6 +84,12 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- osgitech.rest pulls ASM 9.6, which would otherwise win over the version required by Xtext and newer Java versions -->
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>${asm.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
