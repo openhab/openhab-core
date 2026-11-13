@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.modbus.ModbusConstants.ValueType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.library.types.OpenClosedType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
@@ -605,7 +604,7 @@ public class ModbusBitUtilities {
     /**
      * Convert command to array of registers using a specific value type
      *
-     * @param command command to be converted. Either OnOffType, OpenClosedType, DecimalType or QuantityType that can be
+     * @param command command to be converted. Either OnOffType, DecimalType or QuantityType that can be
      *            converted to dimensionless unit.
      * @param type value type to use in conversion
      * @return array of registers
@@ -614,7 +613,7 @@ public class ModbusBitUtilities {
      */
     public static ModbusRegisterArray commandToRegisters(Command command, ModbusConstants.ValueType type) {
         Number numericCommand;
-        if (command instanceof OnOffType || command instanceof OpenClosedType) {
+        if (command instanceof OnOffType) {
             numericCommand = translateCommand2Boolean(command).get() ? new DecimalType(BigDecimal.ONE)
                     : DecimalType.ZERO;
         } else if (command instanceof DecimalType decimalType) {
@@ -629,7 +628,7 @@ public class ModbusBitUtilities {
             numericCommand = qtCommand;
         } else {
             throw new IllegalArgumentException(String.format(
-                    "Command '%s' of class '%s' cannot be converted to registers. Please use OnOffType, OpenClosedType, DecimalType or dimensionless QuantityType commands.",
+                    "Command '%s' of class '%s' cannot be converted to registers. Please use OnOffType, DecimalType or dimensionless QuantityType commands.",
                     command, command.getClass().getName()));
         }
         if (type.getBits() != 16 && type.getBits() != 32 && type.getBits() != 64) {
@@ -725,8 +724,8 @@ public class ModbusBitUtilities {
     /**
      * Converts command to a boolean
      *
-     * true value is represented by {@link OnOffType#ON}, {@link OpenClosedType#OPEN}.
-     * false value is represented by {@link OnOffType#OFF}, {@link OpenClosedType#CLOSED}.
+     * true value is represented by {@link OnOffType#ON}.
+     * false value is represented by {@link OnOffType#OFF}.
      * Furthermore, {@link DecimalType} are converted to boolean true if they are unequal to zero.
      *
      * @param command to convert to boolean
@@ -737,12 +736,6 @@ public class ModbusBitUtilities {
             return Optional.of(Boolean.TRUE);
         }
         if (command.equals(OnOffType.OFF)) {
-            return Optional.of(Boolean.FALSE);
-        }
-        if (command.equals(OpenClosedType.OPEN)) {
-            return Optional.of(Boolean.TRUE);
-        }
-        if (command.equals(OpenClosedType.CLOSED)) {
             return Optional.of(Boolean.FALSE);
         }
         if (command instanceof DecimalType) {
