@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -81,8 +82,9 @@ public class NetUtil implements NetworkAddressService {
     private static final Pattern IPV4_PATTERN = Pattern
             .compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
-    private @Nullable String primaryAddress;
-    private @Nullable String configuredBroadcastAddress;
+    private volatile @Nullable String primaryAddress;
+    private volatile @Nullable String configuredBroadcastAddress;
+    private volatile boolean broadcastAddressFromConfig;
     private boolean useOnlyOneAddress;
     private boolean useIPv6;
 
@@ -133,8 +135,10 @@ public class NetUtil implements NetworkAddressService {
         String broadcastAddressConf = (String) config.get(BROADCAST_ADDRESS);
         if (broadcastAddressConf == null || broadcastAddressConf.isEmpty() || !isValidIPConfig(broadcastAddressConf)) {
             // if none is specified we return the one matching the primary ip
+            broadcastAddressFromConfig = false;
             configuredBroadcastAddress = getPrimaryBroadcastAddress();
         } else {
+            broadcastAddressFromConfig = true;
             configuredBroadcastAddress = broadcastAddressConf;
         }
 
@@ -214,7 +218,8 @@ public class NetUtil implements NetworkAddressService {
         networkAddressChangeListeners.remove(listener);
     }
 
-    private @Nullable String getFirstLocalIPv4Address() {
+    @Nullable
+    String getFirstLocalIPv4Address() {
         try {
             String hostAddress = null;
             final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -344,15 +349,19 @@ public class NetUtil implements NetworkAddressService {
         return broadcastAddr;
     }
 
-    private @Nullable String getPrimaryBroadcastAddress() {
+    @Nullable
+    String getPrimaryBroadcastAddress() {
         String primaryIp = getPrimaryIpv4HostAddress();
         String broadcastAddress = null;
         if (primaryIp != null) {
             try {
-                Short prefix = getAllInterfaceAddresses().stream()
+                // the address can be gone again by now, and a throw would end the interface poll
+                Optional<Integer> prefix = getAllInterfaceAddresses().stream()
                         .filter(a -> a.getAddress().getHostAddress().equals(primaryIp)).map(CidrAddress::getPrefix)
-                        .findFirst().get().shortValue();
-                broadcastAddress = getIpv4NetBroadcastAddress(primaryIp, prefix);
+                        .findFirst();
+                if (prefix.isPresent()) {
+                    broadcastAddress = getIpv4NetBroadcastAddress(primaryIp, prefix.get().shortValue());
+                }
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Invalid IP address parameter: {}", ex.getMessage(), ex);
             }
@@ -584,6 +593,7 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private void pollAndNotifyNetworkInterfaceAddress() {
+        resolveMissingPrimaryAddress();
         Collection<CidrAddress> newInterfaceAddresses = getAllInterfaceAddresses();
         if (networkAddressChangeListeners.isEmpty()) {
             // no listeners listening, just update
@@ -625,6 +635,19 @@ public class NetUtil implements NetworkAddressService {
                     .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
                     .build();
             safeListener.onChanged(unmodifiableAddedList, unmodifiableRemovedList);
+        }
+    }
+
+    // null only when none is configured and there was no IPv4 address yet, e.g. at boot before DHCP
+    private synchronized void resolveMissingPrimaryAddress() {
+        if (primaryAddress == null) {
+            String address = getFirstLocalIPv4Address();
+            primaryAddress = address;
+            // before notifying, so listeners that rescan already see the broadcast address
+            if (address != null && !broadcastAddressFromConfig) {
+                configuredBroadcastAddress = getPrimaryBroadcastAddress();
+            }
+            notifyPrimaryAddressChange(null, address);
         }
     }
 
