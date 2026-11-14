@@ -338,7 +338,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         validatePersistentDialogContext(context);
 
         DialogAudioDriver audioDriver = new DialogAudioDriver(context);
-        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
+        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher, audioManager);
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, this);
 
@@ -401,7 +401,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         }
 
         DialogAudioDriver audioDriver = new DialogAudioDriver(context);
-        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher);
+        DialogFeedbackService feedbackService = new DialogFeedbackService(context, eventPublisher, audioManager);
         var processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, this);
 

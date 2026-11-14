@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
@@ -42,6 +43,7 @@ import org.openhab.core.voice.tts.TTSService;
 public class DialogFeedbackServiceTest {
 
     private final EventPublisher eventPublisher = mock(EventPublisher.class);
+    private final AudioManager audioManager = mock(AudioManager.class);
     private final AudioSink audioSink = mock(AudioSink.class);
     private final AudioSource audioSource = mock(AudioSource.class);
     private final STTService stt = mock(STTService.class);
@@ -56,7 +58,7 @@ public class DialogFeedbackServiceTest {
     @Test
     public void setListeningTogglesItemCommandEvent() {
         DialogContext context = createContext("TestItem", null);
-        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher);
+        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher, audioManager);
 
         feedback.setListening(true);
         verify(eventPublisher, times(1)).post(argThat(event -> event instanceof ItemCommandEvent ice
@@ -74,7 +76,7 @@ public class DialogFeedbackServiceTest {
     @Test
     public void setListeningWithoutItemDoesNotPostEvent() {
         DialogContext context = createContext(null, null);
-        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher);
+        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher, audioManager);
 
         feedback.setListening(true);
         verifyNoInteractions(eventPublisher);
@@ -86,12 +88,26 @@ public class DialogFeedbackServiceTest {
         when(audioSink.getSupportedStreams()).thenReturn(Set.of(AudioStream.class));
 
         DialogContext context = createContext(null, "A B C");
-        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher);
+        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher, audioManager);
 
         feedback.playStartSound();
         feedback.playListeningSound();
         feedback.playStopSound();
 
-        verify(audioSink, times(3)).process(any(AudioStream.class));
+        verify(audioManager, times(3)).play(any(AudioStream.class), eq(audioSink));
+    }
+
+    @Test
+    public void playSoundsForSinkThatNeedsTranscoding() {
+        when(audioSink.getSupportedFormats()).thenReturn(Set.of(AudioFormat.FLAC));
+        when(audioSink.getSupportedStreams()).thenReturn(Set.of(AudioStream.class));
+
+        DialogContext context = createContext(null, "A O:100 A':50");
+        DialogFeedbackService feedback = new DialogFeedbackService(context, eventPublisher, audioManager);
+
+        feedback.playListeningSound();
+
+        // the audio manager transcodes the sound for the sink
+        verify(audioManager, times(1)).play(any(AudioStream.class), eq(audioSink));
     }
 }
