@@ -12,12 +12,15 @@
  */
 package org.openhab.core.voice.internal.dialog;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.trigger.DTErrorEvent;
 import org.openhab.core.voice.dialog.trigger.DTEvent;
@@ -26,6 +29,7 @@ import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
+import org.openhab.core.voice.dialog.trigger.ks.KSpottedEvent;
 import org.openhab.core.voice.internal.VoiceI18nProvider;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.tts.SpeechSynthesizer;
@@ -102,6 +106,7 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Add sounds
  * @author Miguel Álvarez - Add dialog groups
  * @author Florian Hotze - Refactor into pure state machine
+ * @author Dan Cunningham - Start speech recognition where the keyword ended
  */
 @NonNullByDefault
 public class DialogProcessor {
@@ -126,6 +131,7 @@ public class DialogProcessor {
     private final SpeechSynthesizer speechSynthesizer;
     private final VoiceI18nProvider i18nProvider;
     private final DialogEventListener eventListener;
+    private final ExecutorService soundExecutor = ThreadPoolManager.getPool("voice-dialog");
 
     private final KSListener ksListener = new KSListener() {
         @Override
@@ -140,7 +146,7 @@ public class DialogProcessor {
             if (dtEvent instanceof DTTriggeredEvent) {
                 logger.debug("{} event received", dtEvent.getClass().getSimpleName());
                 try {
-                    startSimpleDialog();
+                    startSimpleDialog(dtEvent instanceof KSpottedEvent spotted ? spotted.getAudioAfterKeyword() : null);
                 } catch (IllegalStateException e) {
                     logger.warn("{}", e.getMessage());
                 }
@@ -308,6 +314,15 @@ public class DialogProcessor {
      * Starts a single dialog sequence (trigger spotted or direct listening).
      */
     public void startSimpleDialog() {
+        startSimpleDialog(null);
+    }
+
+    /**
+     * Starts a single dialog sequence.
+     *
+     * @param audioAfterKeyword how much audio the keyword spotter read after the keyword, or null when unknown
+     */
+    private void startSimpleDialog(@Nullable Duration audioAfterKeyword) {
         synchronized (stateLock) {
             if (stopped) {
                 return;
@@ -334,7 +349,11 @@ public class DialogProcessor {
             return;
         }
         try {
-            audioDriver.startRecognition(session);
+            if (audioAfterKeyword != null) {
+                audioDriver.startRecognition(session, audioAfterKeyword);
+            } else {
+                audioDriver.startRecognition(session);
+            }
         } catch (STTException e) {
             logger.warn("Failed to start recognition, stopping dialog: {}", e.getMessage(), e);
             if (transitionSession(session, DialogState.SPEAKING)) {
@@ -345,9 +364,12 @@ public class DialogProcessor {
             finishDialog(session);
             return;
         }
-        if (state == DialogState.LISTENING && !session.isCancelled()) {
-            feedbackService.playListeningSound();
-        }
+        // play in the background: a keyword spotter may call this from the thread that feeds the recognition
+        soundExecutor.execute(() -> {
+            if (state == DialogState.LISTENING && !session.isCancelled()) {
+                feedbackService.playListeningSound();
+            }
+        });
     }
 
     /**

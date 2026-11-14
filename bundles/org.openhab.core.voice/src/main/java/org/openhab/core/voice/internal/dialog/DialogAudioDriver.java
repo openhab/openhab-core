@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.dialog;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * service handles for a dialog.
  *
  * @author Florian Hotze - Initial contribution
+ * @author Dan Cunningham - Start speech recognition where the keyword ended
  */
 @NonNullByDefault
 public class DialogAudioDriver {
@@ -99,7 +101,10 @@ public class DialogAudioDriver {
 
             final AudioStream stream;
             try {
-                stream = dialogContext.source().getInputStream(fmt);
+                AudioStream sourceStream = dialogContext.source().getInputStream(fmt);
+                stream = fmt.equals(sttFormat) && KSAudioStream.isSupported(sourceStream.getFormat())
+                        ? new KSAudioStream(sourceStream)
+                        : sourceStream;
             } catch (AudioException e) {
                 throw new KSException("Error creating the audio stream: " + e.getMessage(), e);
             }
@@ -158,6 +163,19 @@ public class DialogAudioDriver {
      * @throws STTException if the STT service failed to start recognition
      */
     public @Nullable STTServiceHandle startRecognition(final STTListener listener) throws STTException {
+        return startRecognition(listener, null);
+    }
+
+    /**
+     * Starts speech recognition stream.
+     *
+     * @param listener the listener receiving speech-to-text events
+     * @param audioAfterKeyword how much audio the keyword spotter read after the keyword, or null when unknown
+     * @return {@link STTServiceHandle} or null if starting failed or was cancelled
+     * @throws STTException if the STT service failed to start recognition
+     */
+    public @Nullable STTServiceHandle startRecognition(final STTListener listener,
+            final @Nullable Duration audioAfterKeyword) throws STTException {
         stopRecognition();
         final long epoch;
         synchronized (recognitionLock) {
@@ -170,11 +188,21 @@ public class DialogAudioDriver {
                     + "' and source '" + dialogContext.source().getId() + "'");
         }
 
+        final AudioStream ksStream;
+        synchronized (triggerLock) {
+            ksStream = streamKS;
+        }
         final AudioStream stream;
-        try {
-            stream = dialogContext.source().getInputStream(fmt);
-        } catch (AudioException e) {
-            throw new STTException("Error creating the audio stream: " + e.getMessage(), e);
+        if (audioAfterKeyword != null && ksStream instanceof KSAudioStream spottedStream) {
+            logger.debug("Starting speech recognition {} ms before the keyword was spotted",
+                    audioAfterKeyword.toMillis());
+            stream = spottedStream.branch(audioAfterKeyword);
+        } else {
+            try {
+                stream = dialogContext.source().getInputStream(fmt);
+            } catch (AudioException e) {
+                throw new STTException("Error creating the audio stream: " + e.getMessage(), e);
+            }
         }
 
         boolean installed = false;

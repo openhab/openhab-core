@@ -14,11 +14,13 @@ package org.openhab.core.voice.internal.dialog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -39,6 +41,7 @@ import org.openhab.core.voice.dialog.trigger.DTException;
 import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
 import org.openhab.core.voice.dialog.trigger.ks.KSListener;
 import org.openhab.core.voice.dialog.trigger.ks.KSService;
+import org.openhab.core.voice.dialog.trigger.ks.KSpottedEvent;
 import org.openhab.core.voice.internal.VoiceI18nProvider;
 import org.openhab.core.voice.internal.text.InterpretationService;
 import org.openhab.core.voice.internal.text.SystemPromptEnricher;
@@ -202,7 +205,7 @@ public class DialogProcessorTest {
 
         assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
         assertTrue(processor.isProcessing());
-        verify(feedbackService).playListeningSound();
+        verify(feedbackService, timeout(5000)).playListeningSound();
         verify(audioDriver).startRecognition(any(STTListener.class));
     }
 
@@ -219,8 +222,51 @@ public class DialogProcessorTest {
         ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
 
         assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
-        verify(feedbackService).playListeningSound();
+        verify(feedbackService, timeout(5000)).playListeningSound();
         verify(audioDriver).startRecognition(any(STTListener.class));
+    }
+
+    @Test
+    public void keywordSpottedWithAudioAfterKeywordStartsRecognitionWhereTheKeywordEnded()
+            throws STTException, DTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<KSListener> ksListenerCaptor = ArgumentCaptor.forClass(KSListener.class);
+        processor.start();
+        verify(audioDriver).startTrigger(ksListenerCaptor.capture());
+
+        ksListenerCaptor.getValue().ksEventReceived(new KSpottedEvent(Duration.ofMillis(10)));
+
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+        verify(audioDriver).startRecognition(any(STTListener.class), eq(Duration.ofMillis(10)));
+    }
+
+    @Test
+    public void keywordSpottedDoesNotWaitForTheListeningSound() throws Exception {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+        CountDownLatch soundStarted = new CountDownLatch(1);
+        CountDownLatch soundFinished = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            soundStarted.countDown();
+            soundFinished.await(10, TimeUnit.SECONDS);
+            return null;
+        }).when(feedbackService).playListeningSound();
+
+        ArgumentCaptor<KSListener> ksListenerCaptor = ArgumentCaptor.forClass(KSListener.class);
+        processor.start();
+        verify(audioDriver).startTrigger(ksListenerCaptor.capture());
+
+        try {
+            assertTimeoutPreemptively(Duration.ofSeconds(5),
+                    () -> ksListenerCaptor.getValue().ksEventReceived(new KSpottedEvent(Duration.ofMillis(10))));
+            assertTrue(soundStarted.await(5, TimeUnit.SECONDS));
+        } finally {
+            soundFinished.countDown();
+        }
     }
 
     @Test
