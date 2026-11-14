@@ -16,8 +16,12 @@ import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -34,6 +38,7 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.ephemeris.EphemerisManager;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -58,6 +63,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     private static final String CITY_HOBARD_AREA_NAME = "Hobard Area";
 
     private @NonNullByDefault({}) EphemerisManagerImpl ephemerisManager;
+    private @TempDir @NonNullByDefault({}) Path tempDir;
 
     @BeforeEach
     public void setUp() {
@@ -327,5 +333,26 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
         String result = ephemerisManager.getBankHolidayName(theDay, url);
         assertEquals("Halloween", result);
+    }
+
+    @Test
+    public void testUserFileFromPathWithSpecialCharacters() throws IOException {
+        URL url = bundleContext.getBundle().getResource("events.xml");
+
+        ZonedDateTime today = ZonedDateTime.of(2019, 10, 28, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ZonedDateTime theDay = ZonedDateTime.of(2019, 10, 31, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+
+        for (String dirName : List.of("dir with space", "dir#with#hash")) {
+            Path file = Files.createDirectories(tempDir.resolve(dirName)).resolve("events.xml");
+            try (InputStream in = url.openStream()) {
+                Files.copy(in, file);
+            }
+            String filename = file.toString();
+
+            assertTrue(ephemerisManager.isBankHoliday(theDay, filename), filename);
+            assertEquals(3, ephemerisManager.getDaysUntil(today, "Halloween", filename), filename);
+            assertEquals("Halloween", ephemerisManager.getNextBankHoliday(today, filename), filename);
+            assertEquals("Halloween", ephemerisManager.getBankHolidayName(theDay, filename), filename);
+        }
     }
 }
