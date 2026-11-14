@@ -118,6 +118,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     private static final Set<String> CUSTOM_RULE_TOKENS = Set.of(NAME_TOKEN, CMD_TOKEN, DYN_CMD_TOKEN);
 
     private static final String LANGUAGE_SUPPORT = "LanguageSupport";
+    /**
+     * English is provided by the base bundle only (there is no LanguageSupport_en). Without this control, a request
+     * for English would load the bundle of the JVM default locale (e.g. German) instead of the base bundle.
+     */
+    private static final ResourceBundle.Control LANGUAGE_SUPPORT_CONTROL = ResourceBundle.Control
+            .getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES);
 
     private static final String SYNONYMS_NAMESPACE = "synonyms";
 
@@ -233,7 +239,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private String interpret(Locale locale, String text, @Nullable InterpreterContext interpreterContext)
             throws InterpretationException {
-        ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
+        ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale, LANGUAGE_SUPPORT_CONTROL);
         Rule[] rules = getRules(locale);
         if (rules.length == 0) {
             throw new InterpretationException(
@@ -1560,7 +1566,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (!JSGF.equals(format)) {
             return null;
         }
-        JSGFGenerator generator = new JSGFGenerator(ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale));
+        JSGFGenerator generator = new JSGFGenerator(
+                ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale, LANGUAGE_SUPPORT_CONTROL));
         return generator.getGrammar();
     }
 

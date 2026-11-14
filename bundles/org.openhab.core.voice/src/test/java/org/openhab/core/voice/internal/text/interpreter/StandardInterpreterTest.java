@@ -710,20 +710,26 @@ public class StandardInterpreterTest {
         verify(eventPublisherMock, never()).post(any());
     }
 
+    private ResourceBundle languageSupport(Locale locale) {
+        // same lookup as the interpreter: no fallback to the JVM default locale
+        return ResourceBundle.getBundle("LanguageSupport", locale,
+                ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES));
+    }
+
     private String commandsNotAllowedMessage(Locale locale) {
-        return ResourceBundle.getBundle("LanguageSupport", locale).getString("commands_not_allowed");
+        return languageSupport(locale).getString("commands_not_allowed");
     }
 
     private String noObjectsMessage(Locale locale) {
-        return ResourceBundle.getBundle("LanguageSupport", locale).getString("no_objects");
+        return languageSupport(locale).getString("no_objects");
     }
 
     private String readOnlyMessage(Locale locale) {
-        return ResourceBundle.getBundle("LanguageSupport", locale).getString("read_only");
+        return languageSupport(locale).getString("read_only");
     }
 
     private String stateAlreadySingleMessage(Locale locale, String state) {
-        return ResourceBundle.getBundle("LanguageSupport", locale).getString("state_already_singular")
-                .replace("<state>", state.toLowerCase(locale));
+        return languageSupport(locale).getString("state_already_singular").replace("<state>",
+                state.toLowerCase(locale));
     }
 }
