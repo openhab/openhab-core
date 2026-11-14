@@ -111,6 +111,20 @@ public class FindItemsLLMToolTest {
     }
 
     @Test
+    public void parentsWithoutAccessAreNotShownOrSearched() throws LLMToolException {
+        GroupItem room = add(new GroupItem("Secret_Room"), "Secret Room");
+        add(new SwitchItem("Desk_Lamp"), "Lamp", "Secret_Room");
+        when(itemPermissionResolver.getPermission(room)).thenReturn(ItemPermission.NO_ACCESS);
+
+        String result = tool.call(Map.of("query", "lamp"), Locale.ENGLISH);
+
+        assertTrue(result.startsWith("- Desk_Lamp (Switch) \"Lamp\":"), result);
+        assertFalse(result.contains("Secret"), result);
+        assertEquals("No accessible Items found matching 'secret'.",
+                tool.call(Map.of("query", "secret"), Locale.ENGLISH));
+    }
+
+    @Test
     public void readOnlyItemsAreMarked() throws LLMToolException {
         SwitchItem pump = add(new SwitchItem("Pool_Pump"), "Pool Pump");
         pump.setState(OnOffType.ON);

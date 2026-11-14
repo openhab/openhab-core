@@ -205,7 +205,7 @@ public class FindItemsLLMTool implements LLMTool {
                         continue;
                     }
                     Item parent = itemRegistry.get(parentName);
-                    if (parent == null) {
+                    if (parent == null || itemPermissionResolver.getPermission(parent) == ItemPermission.NO_ACCESS) {
                         continue;
                     }
                     String label = parent.getLabel();
