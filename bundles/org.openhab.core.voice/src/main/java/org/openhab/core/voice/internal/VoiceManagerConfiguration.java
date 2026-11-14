@@ -109,6 +109,10 @@ public class VoiceManagerConfiguration {
         return configurationDTO.systemPrompt;
     }
 
+    public boolean isPromptLimitedToSemanticModel() {
+        return VoiceConfigurationConstants.PROMPT_ITEMS_SEMANTIC.equalsIgnoreCase(configurationDTO.promptItems);
+    }
+
     public Map<String, String> getDefaultVoices() {
         return Map.copyOf(defaultVoices);
     }
@@ -124,6 +128,7 @@ public class VoiceManagerConfiguration {
         public String keyword = "Wakeup";
         public @Nullable String listeningItem;
         public @Nullable String listeningMelody;
+        public String promptItems = VoiceConfigurationConstants.PROMPT_ITEMS_ALL;
         public String systemPrompt = """
                 You are a smart home assistant managing an openHAB installation. Your job is to help users control devices, report their status, and answer general questions conversationally.
                 - For device control or status requests, use only the tools provided. Never infer or simulate a device action — if the right tool or device isn't available, say so briefly.

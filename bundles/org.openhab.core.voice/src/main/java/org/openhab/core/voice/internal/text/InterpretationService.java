@@ -80,9 +80,11 @@ public class InterpretationService {
         }
 
         Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
-        String enrichedPrompt = systemPromptEnricher.enrichSystemPrompt(baseSystemPrompt, nullSafeLocale);
+        SystemPromptEnricher.EnrichedPrompt enriched = systemPromptEnricher.enrich(baseSystemPrompt, tools,
+                nullSafeLocale);
 
-        InterpreterContext context = new InterpreterContext(conversation, tools, locationItem, enrichedPrompt);
+        InterpreterContext context = new InterpreterContext(conversation, enriched.tools(), locationItem,
+                enriched.systemPrompt());
         InterpretationException exception = null;
 
         for (var interpreter : interpreters) {
