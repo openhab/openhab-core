@@ -13,27 +13,36 @@
 package org.openhab.core.voice.internal;
 
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioDialogProvider;
+import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.dialog.trigger.BasicDTService;
 import org.openhab.core.voice.dialog.trigger.DTListener;
 import org.openhab.core.voice.dialog.trigger.DTService;
 import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
 import org.openhab.core.voice.dialog.trigger.DTTriggeredEvent;
+import org.openhab.core.voice.dialog.trigger.ks.KSException;
+import org.openhab.core.voice.dialog.trigger.ks.KSListener;
+import org.openhab.core.voice.dialog.trigger.ks.KSService;
+import org.openhab.core.voice.dialog.trigger.ks.KSServiceHandle;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Allows the audio bundle to register a dialog that can be triggered programmatically.
+ * Allows the audio bundle to register a dialog that can be triggered programmatically or by the default keyword
+ * spotter.
  *
  * @author Miguel Álvarez - Initial contribution
+ * @author Dan Cunningham - Keyword spotting dialogs
  */
 @Component(service = AudioDialogProvider.class)
 @NonNullByDefault
@@ -67,6 +76,22 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
         return triggerHandle::trigger;
     }
 
+    @Override
+    public boolean startKeywordSpottingDialog(AudioSink audioSink, AudioSource audioSource,
+            @Nullable String locationItem, @Nullable String listeningItem, @Nullable Runnable onAbort) {
+        KSService ks = voiceManager.getKS();
+        // the builder starts with the default magic word
+        return voiceManager.startDialog( //
+                voiceManager.getDialogContextBuilder() //
+                        .withSource(audioSource) //
+                        .withSink(audioSink) //
+                        .withLocationItem(locationItem) //
+                        .withListeningItem(listeningItem) //
+                        .withKS(ks != null ? new AbortNotifyingKSService(ks, onAbort) : null) //
+                        .build() //
+        ) != null;
+    }
+
     private static class TriggerService implements BasicDTService {
         @Nullable
         Runnable onAbort;
@@ -89,6 +114,53 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
         public String getLabel(@Nullable Locale locale) {
             // never shown
             return "Anonymous";
+        }
+    }
+
+    /**
+     * Wraps a keyword spotter and runs {@code onAbort} when spotting is aborted. That only happens when the dialog
+     * stops.
+     */
+    private static class AbortNotifyingKSService implements KSService {
+        private final KSService ks;
+        private final @Nullable Runnable onAbort;
+
+        AbortNotifyingKSService(KSService ks, @Nullable Runnable onAbort) {
+            this.ks = ks;
+            this.onAbort = onAbort;
+        }
+
+        @Override
+        public String getId() {
+            return ks.getId();
+        }
+
+        @Override
+        public String getLabel(@Nullable Locale locale) {
+            return ks.getLabel(locale);
+        }
+
+        @Override
+        public Set<Locale> getSupportedLocales() {
+            return ks.getSupportedLocales();
+        }
+
+        @Override
+        public Set<AudioFormat> getSupportedFormats() {
+            return ks.getSupportedFormats();
+        }
+
+        @Override
+        public KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
+                throws KSException {
+            KSServiceHandle handle = ks.spot(ksListener, audioStream, locale, keyword);
+            return () -> {
+                handle.abort();
+                Runnable onAbort = this.onAbort;
+                if (onAbort != null) {
+                    onAbort.run();
+                }
+            };
         }
     }
 
