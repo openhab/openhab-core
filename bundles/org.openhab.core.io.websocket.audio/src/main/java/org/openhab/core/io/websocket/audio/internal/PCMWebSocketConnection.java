@@ -255,9 +255,18 @@ public class PCMWebSocketConnection implements WebSocketListener {
             if (dialogProvider == null) {
                 throw new IOException("Voice functionality is not ready");
             }
-            dialogTrigger = dialogProvider.startDialog(audioSink, audioSource,
-                    !clientOptions.locationItem.isBlank() ? clientOptions.locationItem : null,
-                    !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null, () -> disconnect());
+            String locationItem = !clientOptions.locationItem.isBlank() ? clientOptions.locationItem : null;
+            String listeningItem = !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null;
+            if (clientOptions.keywordSpotting) {
+                dialogTrigger = null;
+                if (!dialogProvider.startKeywordSpottingDialog(audioSink, audioSource, locationItem, listeningItem,
+                        () -> disconnect())) {
+                    throw new IOException("Unable to start the keyword spotting dialog");
+                }
+            } else {
+                dialogTrigger = dialogProvider.startDialog(audioSink, audioSource, locationItem, listeningItem,
+                        () -> disconnect());
+            }
         } else {
             dialogTrigger = null;
         }
@@ -360,6 +369,10 @@ public class PCMWebSocketConnection implements WebSocketListener {
          * Start a dialog processor using the registered audio components
          */
         public boolean startDialog = false;
+        /**
+         * Trigger the dialog with the default keyword spotter instead of ON_SPOT commands
+         */
+        public boolean keywordSpotting = false;
         /**
          * Listening item for the dialog
          */

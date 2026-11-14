@@ -36,4 +36,20 @@ public interface AudioDialogProvider {
     @Nullable
     Runnable startDialog(AudioSink audioSink, AudioSource audioSource, @Nullable String locationItem,
             @Nullable String listeningItem, @Nullable Runnable onAbort);
+
+    /**
+     * Starts a dialog that is triggered when the default keyword spotter spots the default magic word.
+     *
+     * @param audioSink the audio sink to play sound
+     * @param audioSource the audio source to capture sound
+     * @param locationItem an optional Item name to scope dialog commands
+     * @param listeningItem an optional Item name to toggle while dialog is listening, overwrites default
+     * @param onAbort an optional {@link Runnable} instance to call when the started dialog is stopped
+     * @return true if the dialog was started, false if it failed to start or is not supported by this provider
+     * @throws IllegalStateException if the voice settings don't allow starting the dialog
+     */
+    default boolean startKeywordSpottingDialog(AudioSink audioSink, AudioSource audioSource,
+            @Nullable String locationItem, @Nullable String listeningItem, @Nullable Runnable onAbort) {
+        return false;
+    }
 }

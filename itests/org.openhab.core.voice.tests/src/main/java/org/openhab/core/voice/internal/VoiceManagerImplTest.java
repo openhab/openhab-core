@@ -26,11 +26,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.audio.AudioDialogProvider;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.i18n.LocaleProvider;
@@ -520,6 +522,61 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertTrue(sink.getIsStreamProcessed());
 
         voiceManager.stopDialog(source);
+    }
+
+    @Test
+    public void startKeywordSpottingDialogWithTheDefaultServices() throws IOException {
+        sttService = new STTServiceStub();
+        ksService = new KSServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(sttService);
+        registerService(ksService);
+        registerService(ttsService);
+        registerService(hliStub);
+        Dictionary<String, Object> config = new Hashtable<>();
+        config.put(CONFIG_KEYWORD, "word");
+        config.put(CONFIG_DEFAULT_STT, sttService.getId());
+        config.put(CONFIG_DEFAULT_KS, ksService.getId());
+        config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
+        config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
+        ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+        configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID).update(config);
+        // seeing the keyword proves the configuration was applied, since it has no fallback value
+        waitForAssert(() -> {
+            try {
+                assertThat(voiceManager.getDialogContextBuilder().build().keyword(), is("word"));
+            } catch (IllegalStateException e) {
+                // the default services are missing until the configuration is applied
+                throw new AssertionError(e);
+            }
+        });
+        AudioDialogProvider dialogProvider = getService(AudioDialogProvider.class);
+        assertNotNull(dialogProvider);
+
+        AtomicBoolean onAbortCalled = new AtomicBoolean();
+        assertTrue(dialogProvider.startKeywordSpottingDialog(sink, source, null, null, () -> onAbortCalled.set(true)));
+
+        assertTrue(ksService.isWordSpotted());
+        assertTrue(sttService.isRecognized());
+        assertThat(hliStub.getAnswer(), is("Interpreted text"));
+        assertThat(ttsService.getSynthesized(), is("Interpreted text"));
+        assertFalse(onAbortCalled.get());
+        voiceManager.stopDialog(source);
+        assertTrue(ksService.isAborted());
+        assertTrue(onAbortCalled.get());
+    }
+
+    @Test
+    public void keywordSpottingDialogNeedsAKeywordSpotter() {
+        sttService = new STTServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(sttService);
+        registerService(hliStub);
+        AudioDialogProvider dialogProvider = getService(AudioDialogProvider.class);
+        assertNotNull(dialogProvider);
+
+        assertThrows(IllegalStateException.class,
+                () -> dialogProvider.startKeywordSpottingDialog(sink, source, null, null, null));
     }
 
     @Test
