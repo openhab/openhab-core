@@ -19,9 +19,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.UnsupportedAudioFormatException;
-import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.utils.AudioFormatMatcher;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.events.EventPublisher;
@@ -36,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * Handles audio tone synthesis and listening item feedback for a dialog.
  *
  * @author Florian Hotze - Initial contribution
+ * @author Dan Cunningham - Transcode sounds for sinks that need it
  */
 @NonNullByDefault
 public class DialogFeedbackService {
@@ -44,14 +43,17 @@ public class DialogFeedbackService {
 
     private final DialogContext dialogContext;
     private final EventPublisher eventPublisher;
+    private final AudioManager audioManager;
 
     private @Nullable ToneSynthesizer toneSynthesizer;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private boolean listening = false;
 
-    public DialogFeedbackService(DialogContext dialogContext, EventPublisher eventPublisher) {
+    public DialogFeedbackService(DialogContext dialogContext, EventPublisher eventPublisher,
+            AudioManager audioManager) {
         this.dialogContext = dialogContext;
         this.eventPublisher = eventPublisher;
+        this.audioManager = audioManager;
         initToneSynthesizer(dialogContext.listeningMelody());
     }
 
@@ -62,8 +64,8 @@ public class DialogFeedbackService {
         if (listeningMelodyText != null && !listeningMelodyText.isBlank()) {
             try {
                 listeningMelody = ToneSynthesizer.parseMelody(listeningMelodyText);
-                var synthesizerFormat = AudioFormatMatcher.getBestMatch(ToneSynthesizer.getSupportedFormats(),
-                        dialogContext.sink().getSupportedFormats());
+                var synthesizerFormat = AudioFormatMatcher.getBestMatchWithTranscoding(
+                        ToneSynthesizer.getSupportedFormats(), dialogContext.sink().getSupportedFormats());
                 if (synthesizerFormat != null) {
                     toneSynthesizer = new ToneSynthesizer(synthesizerFormat);
                     logger.debug("Sounds enabled");
@@ -107,14 +109,10 @@ public class DialogFeedbackService {
     private void playNotes(List<ToneSynthesizer.Tone> notes) {
         var synthesizer = this.toneSynthesizer;
         if (synthesizer != null) {
-            try (AudioStream stream = synthesizer.getStream(notes)) {
-                var sink = dialogContext.sink();
-                if (sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(stream))) {
-                    sink.process(stream);
-                } else {
-                    logger.warn("Failed playing synthesizer sound as audio sink doesn't support it.");
-                }
-            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException | IOException e) {
+            try {
+                // the audio manager transcodes the sound if the sink needs it and cleans up after playing
+                audioManager.play(synthesizer.getStream(notes), dialogContext.sink());
+            } catch (IOException e) {
                 logger.warn("{} playing synthesizer sound: {}", e.getClass().getName(), e.getMessage());
             }
         }
