@@ -159,7 +159,6 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
             tags.add(property);
         }
         for (String tag : xmlTags.getTag()) {
-            logger.warn("DEPRECATED 'tag' use 'point' or 'property' instead (tag value: '{}').", tag);
             tags.add(tag);
         }
         return tags;

@@ -123,9 +123,6 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
                 switch (name) {
                     case "point", "property", "tag" -> {
                         Object value = tagNode.getValue();
-                        if ("tag".equals(name)) {
-                            logger.warn("DEPRECATED 'tag' use 'point' or 'property' instead (tag value: '{}').", value);
-                        }
                         if (value instanceof String tag) {
                             tags.add(tag);
                         }
