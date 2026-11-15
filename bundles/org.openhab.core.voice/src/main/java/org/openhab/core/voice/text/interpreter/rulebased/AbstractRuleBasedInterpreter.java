@@ -1627,6 +1627,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             Set<String> itemSemantics) {
 
         private static final ItemFilter ALL_INSTANCE = new ItemFilter(Set.of(), Set.of(), Set.of(), Set.of());
+
         public boolean filterItem(Item item, MetadataRegistry metadataRegistry) {
             if (!itemNames.isEmpty() && !itemNames.contains(item.getName())) {
                 return false;
