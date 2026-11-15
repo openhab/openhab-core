@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
+import org.junit.jupiter.api.io.TempDir;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.test.java.JavaTest;
@@ -61,9 +63,11 @@ public class JsonStorageTest extends JavaTest {
     private @NonNullByDefault({}) File tmpFile;
 
     @BeforeEach
-    public void setUp() throws IOException {
-        tmpFile = Files.createTempFile("storage-debug", ".json").toFile();
-        tmpFile.deleteOnExit();
+    public void setUp(@TempDir Path tmpDir) throws IOException {
+        // JsonStorage writes a backup copy into a "backup" folder next to the database file and stays dirty (and
+        // thus rewrites the database file on every scheduled flush) if that fails
+        Files.createDirectory(tmpDir.resolve("backup"));
+        tmpFile = Files.createFile(tmpDir.resolve("storage-debug.json")).toFile();
         objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
     }
 
