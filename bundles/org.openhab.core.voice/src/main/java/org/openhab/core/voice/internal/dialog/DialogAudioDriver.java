@@ -194,7 +194,7 @@ public class DialogAudioDriver {
         }
         final AudioStream stream;
         if (audioAfterKeyword != null && ksStream instanceof KSAudioStream spottedStream) {
-            logger.debug("Starting speech recognition {} ms before the keyword was spotted",
+            logger.debug("Starting speech recognition {} ms before the current stream position",
                     audioAfterKeyword.toMillis());
             stream = spottedStream.branch(audioAfterKeyword);
         } else {

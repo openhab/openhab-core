@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.utils.AudioFormatMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 class KSAudioStream extends AudioStream {
-    private static final Set<String> PCM_CODECS = Set.of(AudioFormat.CODEC_PCM_SIGNED, AudioFormat.CODEC_PCM_UNSIGNED,
-            AudioFormat.CODEC_PCM_ALAW, AudioFormat.CODEC_PCM_ULAW);
     private static final long NANOS_PER_SECOND = Duration.ofSeconds(1).toNanos();
     private static final Duration KEPT_AUDIO = Duration.ofSeconds(1);
     // once a branch falls this far behind, nobody is reading it anymore
@@ -63,9 +61,9 @@ class KSAudioStream extends AudioStream {
             throw new IllegalArgumentException("Unsupported audio format " + format);
         }
         this.stream = stream;
-        this.frameSize = Objects.requireNonNull(format.getBitDepth()) / 8
-                * Objects.requireNonNull(format.getChannels());
-        this.bytesPerSecond = Objects.requireNonNull(format.getFrequency()) * frameSize;
+        this.frameSize = Objects.requireNonNull(format.getBitDepth(), "bit depth must not be null") / 8
+                * Objects.requireNonNull(format.getChannels(), "channels must not be null");
+        this.bytesPerSecond = Objects.requireNonNull(format.getFrequency(), "frequency must not be null") * frameSize;
         this.maxUnreadBytes = MAX_UNREAD_AUDIO.toSeconds() * bytesPerSecond;
         this.recent = new byte[(int) (KEPT_AUDIO.toSeconds() * bytesPerSecond)];
     }
@@ -81,9 +79,9 @@ class KSAudioStream extends AudioStream {
         Integer bitDepth = format.getBitDepth();
         Integer channels = format.getChannels();
         Long frequency = format.getFrequency();
-        return AudioFormat.CONTAINER_NONE.equals(format.getContainer()) && PCM_CODECS.contains(format.getCodec())
-                && bitDepth != null && bitDepth > 0 && bitDepth % 8 == 0 && channels != null && channels > 0
-                && frequency != null && frequency > 0;
+        return AudioFormat.CONTAINER_NONE.equals(format.getContainer())
+                && AudioFormatMatcher.isPcmCodec(format.getCodec()) && bitDepth != null && bitDepth > 0
+                && bitDepth % 8 == 0 && channels != null && channels > 0 && frequency != null && frequency > 0;
     }
 
     @Override
@@ -99,7 +97,7 @@ class KSAudioStream extends AudioStream {
 
     @Override
     public int read(byte @Nullable [] b, int off, int len) throws IOException {
-        byte[] buffer = Objects.requireNonNull(b);
+        byte[] buffer = Objects.requireNonNull(b, "buffer must not be null");
         int read;
         try {
             read = stream.read(buffer, off, len);
@@ -138,13 +136,14 @@ class KSAudioStream extends AudioStream {
      * @param audioBefore how much of the already read audio the new stream starts with
      */
     AudioStream branch(Duration audioBefore) {
+        Duration rewind = audioBefore.isNegative() ? Duration.ZERO
+                : audioBefore.compareTo(KEPT_AUDIO) > 0 ? KEPT_AUDIO : audioBefore;
+        long rewindBytes = rewind.toNanos() * bytesPerSecond / NANOS_PER_SECOND;
+        Branch branch = new Branch();
         synchronized (branches) {
-            Duration rewind = audioBefore.isNegative() ? Duration.ZERO
-                    : audioBefore.compareTo(KEPT_AUDIO) > 0 ? KEPT_AUDIO : audioBefore;
-            long start = position - Math.min(position, rewind.toNanos() * bytesPerSecond / NANOS_PER_SECOND);
+            long start = position - Math.min(position, rewindBytes);
             // start on a whole sample, and not past what's been read
             start = Math.min(start + Math.floorMod(-start, frameSize), position - Math.floorMod(position, frameSize));
-            Branch branch = new Branch();
             for (long next = start; next < position;) {
                 int offset = (int) (next % recent.length);
                 int len = (int) Math.min(position - next, recent.length - offset);
@@ -227,7 +226,7 @@ class KSAudioStream extends AudioStream {
 
         @Override
         public synchronized int read(byte @Nullable [] b, int off, int len) throws IOException {
-            Objects.checkFromIndexSize(off, len, Objects.requireNonNull(b).length);
+            Objects.checkFromIndexSize(off, len, Objects.requireNonNull(b, "buffer must not be null").length);
             if (len == 0) {
                 return 0;
             }

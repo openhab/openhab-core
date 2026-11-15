@@ -38,7 +38,7 @@ public class KSpottedEvent extends DTTriggeredEvent implements KSEvent {
     }
 
     /**
-     * Creates an event that says where the keyword ended. Speech recognition starts here, prevents users from have
+     * Creates an event that says where the keyword ended. Speech recognition starts here, preventing users from having
      * to pause after the keyword.
      *
      * @param audioAfterKeyword how much audio the spotter has read since the keyword ended
