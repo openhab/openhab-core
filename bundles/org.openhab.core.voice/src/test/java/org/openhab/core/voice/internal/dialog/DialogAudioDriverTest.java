@@ -12,22 +12,28 @@
  */
 package org.openhab.core.voice.internal.dialog;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.trigger.BasicDTService;
 import org.openhab.core.voice.dialog.trigger.DTException;
@@ -49,6 +55,10 @@ import org.openhab.core.voice.tts.TTSService;
  */
 @NonNullByDefault
 public class DialogAudioDriverTest {
+    private static final AudioFormat PCM = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED,
+            false, 16, null, 16000L, 1);
+    private static final AudioFormat WAVE = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED,
+            false, 16, null, 16000L, 1);
 
     private final AudioSource audioSource = mock(AudioSource.class);
     private final AudioSink audioSink = mock(AudioSink.class);
@@ -233,5 +243,75 @@ public class DialogAudioDriverTest {
         verify(streamKS).close();
         verify(sttHandle).abort();
         verify(streamSTT).close();
+    }
+
+    @Test
+    public void startRecognitionWithAudioAfterKeywordStartsWhereTheKeywordEnded() throws Exception {
+        byte[] audio = audio(3200);
+        DialogAudioDriver driver = new DialogAudioDriver(keywordContext(audio, PCM));
+
+        driver.startTrigger(ksListener);
+        AudioStream ksStream = spottedStream();
+        ksStream.readNBytes(1600);
+        driver.startRecognition(sttListener, Duration.ofMillis(10));
+        ksStream.readAllBytes();
+
+        assertArrayEquals(Arrays.copyOfRange(audio, 1280, 3200), recognizedStream().readAllBytes());
+        verify(audioSource, times(1)).getInputStream(any());
+    }
+
+    @Test
+    public void startRecognitionWithoutAudioAfterKeywordListensToTheSource() throws Exception {
+        DialogAudioDriver driver = new DialogAudioDriver(keywordContext(audio(3200), PCM));
+
+        driver.startTrigger(ksListener);
+        spottedStream().readNBytes(1600);
+        driver.startRecognition(sttListener);
+
+        verify(audioSource, times(2)).getInputStream(any());
+        assertEquals(3200, recognizedStream().readAllBytes().length);
+    }
+
+    @Test
+    public void startRecognitionWithAudioInAContainerListensToTheSource() throws Exception {
+        DialogAudioDriver driver = new DialogAudioDriver(keywordContext(audio(3200), WAVE));
+
+        driver.startTrigger(ksListener);
+        spottedStream().readNBytes(1600);
+        driver.startRecognition(sttListener, Duration.ofMillis(10));
+
+        verify(audioSource, times(2)).getInputStream(any());
+        assertEquals(3200, recognizedStream().readAllBytes().length);
+    }
+
+    private DialogContext keywordContext(byte[] audio, AudioFormat format) throws Exception {
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(format));
+        when(audioSource.getInputStream(any())).thenAnswer(invocation -> new ByteArrayAudioStream(audio, format));
+        when(ksService.getSupportedFormats()).thenReturn(Set.of(format));
+        when(ksService.spot(any(), any(), any(), any())).thenReturn(ksHandle);
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(format));
+        when(sttService.recognize(any(), any(), any())).thenReturn(sttHandle);
+        return new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource).withSink(audioSink)
+                .withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+    }
+
+    private AudioStream spottedStream() throws Exception {
+        ArgumentCaptor<AudioStream> stream = ArgumentCaptor.forClass(AudioStream.class);
+        verify(ksService).spot(any(), stream.capture(), any(), any());
+        return stream.getValue();
+    }
+
+    private AudioStream recognizedStream() throws Exception {
+        ArgumentCaptor<AudioStream> stream = ArgumentCaptor.forClass(AudioStream.class);
+        verify(sttService).recognize(any(), stream.capture(), any());
+        return stream.getValue();
+    }
+
+    private static byte[] audio(int length) {
+        byte[] audio = new byte[length];
+        for (int i = 0; i < length; i++) {
+            audio[i] = (byte) (i * 7);
+        }
+        return audio;
     }
 }
