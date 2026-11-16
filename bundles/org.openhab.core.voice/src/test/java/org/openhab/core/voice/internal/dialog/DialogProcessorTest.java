@@ -81,7 +81,9 @@ public class DialogProcessorTest {
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
 
         SystemPromptEnricher systemPromptEnricher = mock(SystemPromptEnricher.class);
-        when(systemPromptEnricher.enrichSystemPrompt(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(systemPromptEnricher.enrich(any(), any(), any()))
+                .thenAnswer(invocation -> new SystemPromptEnricher.EnrichedPrompt(invocation.getArgument(0),
+                        invocation.getArgument(1)));
 
         interpretationService = new InterpretationService(localeProvider, systemPromptEnricher);
         when(eventListener.onAcquireGroup(any())).thenReturn(true);

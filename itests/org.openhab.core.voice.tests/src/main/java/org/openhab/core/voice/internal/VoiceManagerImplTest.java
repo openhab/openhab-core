@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -38,16 +39,19 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.DialogRegistration;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceStub;
+import org.openhab.core.voice.internal.text.interpreter.llm.FindItemsLLMTool;
 import org.openhab.core.voice.stt.STTServiceStub;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.tts.TTSServiceStub;
@@ -720,8 +724,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertNotNull(itemRegistry);
 
         // Add a test item
-        org.openhab.core.library.items.SwitchItem testItem = new org.openhab.core.library.items.SwitchItem(
-                "TestSwitch");
+        SwitchItem testItem = new SwitchItem("TestSwitch");
         testItem.setLabel("Test Switch Label");
 
         // Setup a custom HumanLanguageInterpreter to capture InterpreterContext
@@ -743,7 +746,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
             }
 
             @Override
-            public String interpret(Locale locale, org.openhab.core.voice.text.InterpreterContext interpreterContext)
+            public String interpret(Locale locale, InterpreterContext interpreterContext)
                     throws InterpretationException {
                 capturedPrompt[0] = interpreterContext.systemPrompt();
                 return "Interpreted Context";
@@ -792,6 +795,106 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         } finally {
             // Clean up item and service
             itemRegistry.remove("TestSwitch");
+        }
+    }
+
+    @Test
+    public void testPromptListsOnlySemanticItemsAndOffersFindItems() throws Exception {
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        assertNotNull(itemRegistry);
+
+        SwitchItem semanticItem = new SwitchItem("SemanticLamp");
+        semanticItem.addTag("Switch");
+        SwitchItem helperItem = new SwitchItem("HelperSwitch");
+
+        final String[] capturedPrompt = new String[1];
+        final List<String> capturedTools = new ArrayList<>();
+        HumanLanguageInterpreter customHli = new HumanLanguageInterpreter() {
+            @Override
+            public String getId() {
+                return "promptHli";
+            }
+
+            @Override
+            public String getLabel(@Nullable Locale locale) {
+                return "Prompt HLI";
+            }
+
+            @Override
+            public String interpret(Locale locale, String text) throws InterpretationException {
+                return "Interpreted";
+            }
+
+            @Override
+            public String interpret(Locale locale, InterpreterContext interpreterContext)
+                    throws InterpretationException {
+                capturedPrompt[0] = interpreterContext.systemPrompt();
+                capturedTools.clear();
+                interpreterContext.tools().forEach(tool -> capturedTools.add(tool.getUID()));
+                return "Interpreted Context";
+            }
+
+            @Override
+            public @Nullable String getGrammar(Locale locale, String format) {
+                return null;
+            }
+
+            @Override
+            public Set<Locale> getSupportedLocales() {
+                return Set.of(Locale.ENGLISH);
+            }
+
+            @Override
+            public Set<String> getSupportedGrammarFormats() {
+                return Set.of();
+            }
+        };
+
+        try {
+            itemRegistry.add(semanticItem);
+            itemRegistry.add(helperItem);
+            registerService(customHli);
+            ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+            Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
+
+            Dictionary<String, Object> config = new Hashtable<>();
+            config.put("defaultHLI", "promptHli");
+            config.put("systemPrompt", "You are an assistant.");
+            config.put(VoiceConfigurationConstants.CONFIG_PROMPT_ITEMS,
+                    VoiceConfigurationConstants.PROMPT_ITEMS_SEMANTIC);
+            configuration.update(config);
+
+            waitForAssert(() -> {
+                interpretWithAllTools();
+                assertNotNull(capturedPrompt[0]);
+                assertTrue(capturedPrompt[0].contains("SemanticLamp"));
+                assertFalse(capturedPrompt[0].contains("HelperSwitch"));
+                assertTrue(capturedPrompt[0].contains(FindItemsLLMTool.ID));
+                assertTrue(capturedTools.contains(FindItemsLLMTool.ID));
+            });
+
+            config.put(VoiceConfigurationConstants.CONFIG_PROMPT_ITEMS, VoiceConfigurationConstants.PROMPT_ITEMS_ALL);
+            configuration.update(config);
+
+            waitForAssert(() -> {
+                interpretWithAllTools();
+                assertTrue(capturedPrompt[0].contains("SemanticLamp"));
+                assertTrue(capturedPrompt[0].contains("HelperSwitch"));
+                assertFalse(capturedPrompt[0].contains(FindItemsLLMTool.ID));
+                assertFalse(capturedTools.contains(FindItemsLLMTool.ID));
+                assertFalse(capturedTools.isEmpty());
+            });
+        } finally {
+            itemRegistry.remove("SemanticLamp");
+            itemRegistry.remove("HelperSwitch");
+        }
+    }
+
+    private void interpretWithAllTools() {
+        try {
+            voiceManager.interpret("hello", new InterpretationArguments("promptHli", "", "*", "", null));
+        } catch (InterpretationException e) {
+            throw new AssertionError(e);
         }
     }
 }

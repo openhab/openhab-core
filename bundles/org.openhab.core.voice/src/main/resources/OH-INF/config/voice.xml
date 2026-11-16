@@ -82,6 +82,16 @@
 				<option value="READ_WRITE">Read &amp; Write</option>
 			</options>
 		</parameter>
+		<parameter name="promptItems" type="text">
+			<label>Prompt Items</label>
+			<description>Which accessible Items to list in the system prompt. With SEMANTIC, only the locations, equipment and
+				points of the semantic model are listed, and the LLM can search for the rest.</description>
+			<default>ALL</default>
+			<options>
+				<option value="ALL">All Accessible Items</option>
+				<option value="SEMANTIC">Semantic Model Only</option>
+			</options>
+		</parameter>
 		<parameter name="systemPrompt" type="text">
 			<label>System Prompt</label>
 			<description>The system prompt to instruct the LLM about its persona and available features.</description>

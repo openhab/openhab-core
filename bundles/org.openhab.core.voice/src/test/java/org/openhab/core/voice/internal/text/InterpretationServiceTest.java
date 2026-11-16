@@ -53,7 +53,9 @@ public class InterpretationServiceTest {
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
 
         systemPromptEnricher = mock(SystemPromptEnricher.class);
-        when(systemPromptEnricher.enrichSystemPrompt(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(systemPromptEnricher.enrich(any(), any(), any()))
+                .thenAnswer(invocation -> new SystemPromptEnricher.EnrichedPrompt(invocation.getArgument(0),
+                        invocation.getArgument(1)));
 
         service = new InterpretationService(localeProvider, systemPromptEnricher);
 
@@ -118,13 +120,13 @@ public class InterpretationServiceTest {
 
     @Test
     public void interpretEnrichesSystemPromptAndPassesToContext() throws Exception {
-        when(systemPromptEnricher.enrichSystemPrompt(eq("base prompt"), eq(Locale.ENGLISH)))
-                .thenReturn("enriched prompt");
+        when(systemPromptEnricher.enrich(eq("base prompt"), any(), eq(Locale.ENGLISH)))
+                .thenReturn(new SystemPromptEnricher.EnrichedPrompt("enriched prompt", List.of()));
         when(hli1.interpret(eq(Locale.ENGLISH), any(InterpreterContext.class))).thenReturn("success answer");
 
         service.interpret("turn on light", List.of(hli1), conversation, List.of(), Locale.ENGLISH, null, "base prompt");
 
-        verify(systemPromptEnricher).enrichSystemPrompt("base prompt", Locale.ENGLISH);
+        verify(systemPromptEnricher).enrich("base prompt", List.of(), Locale.ENGLISH);
         verify(hli1).interpret(eq(Locale.ENGLISH),
                 argThat((InterpreterContext ctx) -> "enriched prompt".equals(ctx.systemPrompt())));
     }
