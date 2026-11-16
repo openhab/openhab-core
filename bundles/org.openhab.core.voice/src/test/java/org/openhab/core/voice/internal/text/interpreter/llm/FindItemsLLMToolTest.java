@@ -107,7 +107,7 @@ public class FindItemsLLMToolTest {
 
         String result = tool.call(Map.of("query", "alarm"), Locale.ENGLISH);
 
-        assertEquals("No accessible Items found matching 'alarm'.", result);
+        assertEquals("No Items found matching 'alarm'.", result);
     }
 
     @Test
@@ -120,8 +120,7 @@ public class FindItemsLLMToolTest {
 
         assertTrue(result.startsWith("- Desk_Lamp (Switch) \"Lamp\":"), result);
         assertFalse(result.contains("Secret"), result);
-        assertEquals("No accessible Items found matching 'secret'.",
-                tool.call(Map.of("query", "secret"), Locale.ENGLISH));
+        assertEquals("No Items found matching 'secret'.", tool.call(Map.of("query", "secret"), Locale.ENGLISH));
     }
 
     @Test

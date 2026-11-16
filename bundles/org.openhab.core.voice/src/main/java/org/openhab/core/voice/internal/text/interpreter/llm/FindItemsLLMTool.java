@@ -54,7 +54,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Dan Cunningham - Initial contribution
  */
 @NonNullByDefault
-@Component(service = LLMTool.class, immediate = true)
+@Component(immediate = true)
 public class FindItemsLLMTool implements LLMTool {
     public static final String ID = "item-find";
 
@@ -137,7 +137,7 @@ public class FindItemsLLMTool implements LLMTool {
             }
         }
         if (matches.isEmpty()) {
-            return "No accessible Items found matching '" + query + "'.";
+            return "No Items found matching '" + query + "'.";
         }
 
         matches.sort(Comparator.comparingInt(Match::matchedTerms).reversed()

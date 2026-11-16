@@ -37,6 +37,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.dialog.DialogContext;
@@ -48,6 +49,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.tts.TTSServiceStub;
@@ -665,8 +667,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertNotNull(itemRegistry);
 
         // Add a test item
-        org.openhab.core.library.items.SwitchItem testItem = new org.openhab.core.library.items.SwitchItem(
-                "TestSwitch");
+        SwitchItem testItem = new SwitchItem("TestSwitch");
         testItem.setLabel("Test Switch Label");
 
         // Setup a custom HumanLanguageInterpreter to capture InterpreterContext
@@ -688,7 +689,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
             }
 
             @Override
-            public String interpret(Locale locale, org.openhab.core.voice.text.InterpreterContext interpreterContext)
+            public String interpret(Locale locale, InterpreterContext interpreterContext)
                     throws InterpretationException {
                 capturedPrompt[0] = interpreterContext.systemPrompt();
                 return "Interpreted Context";
@@ -745,11 +746,9 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         assertNotNull(itemRegistry);
 
-        org.openhab.core.library.items.SwitchItem semanticItem = new org.openhab.core.library.items.SwitchItem(
-                "SemanticLamp");
+        SwitchItem semanticItem = new SwitchItem("SemanticLamp");
         semanticItem.addTag("Switch");
-        org.openhab.core.library.items.SwitchItem helperItem = new org.openhab.core.library.items.SwitchItem(
-                "HelperSwitch");
+        SwitchItem helperItem = new SwitchItem("HelperSwitch");
 
         final String[] capturedPrompt = new String[1];
         final List<String> capturedTools = new ArrayList<>();
@@ -770,7 +769,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
             }
 
             @Override
-            public String interpret(Locale locale, org.openhab.core.voice.text.InterpreterContext interpreterContext)
+            public String interpret(Locale locale, InterpreterContext interpreterContext)
                     throws InterpretationException {
                 capturedPrompt[0] = interpreterContext.systemPrompt();
                 capturedTools.clear();
