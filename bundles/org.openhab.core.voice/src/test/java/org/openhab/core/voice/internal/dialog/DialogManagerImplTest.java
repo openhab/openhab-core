@@ -271,6 +271,27 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    public void listenAndAnswerPreventsConcurrentExecutionOnSameSource()
+            throws AudioException, STTException, KSException {
+        DialogContext context1 = createValidContextBuilder("source-1", "sink-1").build();
+        DialogContext context2 = createValidContextBuilder("source-1", "sink-1").withSTT(context1.stt()).build();
+        STTService stt = context1.stt();
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        dialogManager.listenAndAnswer(context1);
+        verify(stt, times(1)).recognize(sttListenerCaptor.capture(), any(), any());
+
+        // Second simple dialog on the same source while the first is still active must fail
+        assertThrows(IllegalStateException.class, () -> dialogManager.listenAndAnswer(context2));
+        verify(stt, times(1)).recognize(any(), any(), any());
+
+        // Completing the first dialog frees the source for a subsequent dialog
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("text", 1.0f));
+        dialogManager.listenAndAnswer(context2);
+        verify(stt, times(2)).recognize(any(), any(), any());
+    }
+
+    @Test
     public void listenAndAnswerWithCompatibleActiveDialogDelegatesToActiveProcessor()
             throws AudioException, STTException, KSException {
         DialogContext.Builder builder = createValidContextBuilder("source-1", "sink-1");
@@ -790,6 +811,37 @@ public class DialogManagerImplTest {
         ksListenerCaptor2.getValue().dtEventReceived(new DTTriggeredEvent());
         verify(source2, times(2)).getInputStream(any());
         verify(stt2).recognize(any(), any(), any());
+    }
+
+    @Test
+    public void persistentDialogTriggerIgnoresRepeatedTriggerWhileActive()
+            throws AudioException, STTException, KSException {
+        DialogContext context = createValidContextBuilder("source-1", "sink-1").build();
+        AudioSource source = context.source();
+        KSService ks = (KSService) Objects.requireNonNull(context.dt());
+        STTService stt = context.stt();
+
+        dialogManager.startDialog(context);
+
+        ArgumentCaptor<KSListener> ksListenerCaptor = ArgumentCaptor.forClass(KSListener.class);
+        verify(ks).spot(ksListenerCaptor.capture(), any(), any(), any());
+
+        // First trigger starts recognition
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source, times(2)).getInputStream(any());
+        verify(stt, times(1)).recognize(sttListenerCaptor.capture(), any(), any());
+
+        // Second trigger on the same dialog while still active is ignored
+        ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source, times(2)).getInputStream(any());
+        verify(stt, times(1)).recognize(any(), any(), any());
+
+        // Completing the active session allows the next trigger to start recognition again
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("text", 1.0f));
+        ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source, times(3)).getInputStream(any());
+        verify(stt, times(2)).recognize(any(), any(), any());
     }
 
     private static class InMemoryStorage<T> implements Storage<T> {
