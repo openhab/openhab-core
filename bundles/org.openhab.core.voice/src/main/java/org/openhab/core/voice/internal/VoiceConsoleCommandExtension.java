@@ -446,11 +446,14 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (!registrations.isEmpty()) {
             registrations.stream().sorted(comparing(dr -> dr.sourceId)).forEach(dr -> {
                 String locationText = dr.locationItem != null ? String.format(" Location: %s", dr.locationItem) : "";
-                console.println(String.format(
-                        " Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s, KS: %s, Keyword: %s, Dialog Group: %s)%s",
-                        dr.sourceId, dr.sinkId, getOrDefault(dr.sttId), getOrDefault(dr.ttsId),
-                        dr.hliIds.isEmpty() ? getOrDefault(null) : String.join("->", dr.hliIds), getOrDefault(dr.ksId),
-                        getOrDefault(dr.keyword), getOrDefault(dr.dialogGroup), locationText));
+                String dialogGroupText = dr.dialogGroup != null && !dr.dialogGroup.isBlank()
+                        ? String.format(", Dialog Group: %s", dr.dialogGroup)
+                        : "";
+                console.println(
+                        String.format(" Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s, KS: %s, Keyword: %s%s)%s",
+                                dr.sourceId, dr.sinkId, getOrDefault(dr.sttId), getOrDefault(dr.ttsId),
+                                dr.hliIds.isEmpty() ? getOrDefault(null) : String.join("->", dr.hliIds),
+                                getOrDefault(dr.ksId), getOrDefault(dr.keyword), dialogGroupText, locationText));
             });
         } else {
             console.println("No dialog registrations.");
@@ -468,11 +471,15 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 var ks = c.dt();
                 String ksText = ks != null ? String.format(", KS: %s, Keyword: %s", ks.getId(), c.keyword()) : "";
                 String locationText = c.locationItem() != null ? String.format(" Location: %s", c.locationItem()) : "";
-                console.println(String.format(
-                        " Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s%s, Dialog Group: %s)%s", c.source().getId(),
-                        c.sink().getId(), c.stt().getId(), c.tts().getId(),
-                        c.hlis().stream().map(HumanLanguageInterpreter::getId).collect(Collectors.joining("->")),
-                        ksText, c.dialogGroup(), locationText));
+                String dialogGroup = c.dialogGroup();
+                String dialogGroupText = dialogGroup != null && !dialogGroup.isBlank()
+                        ? String.format(", Dialog Group: %s", dialogGroup)
+                        : "";
+                console.println(
+                        String.format(" Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s%s%s)%s", c.source().getId(),
+                                c.sink().getId(), c.stt().getId(), c.tts().getId(), c.hlis().stream()
+                                        .map(HumanLanguageInterpreter::getId).collect(Collectors.joining("->")),
+                                ksText, dialogGroupText, locationText));
             });
         } else {
             console.println("No running dialogs.");

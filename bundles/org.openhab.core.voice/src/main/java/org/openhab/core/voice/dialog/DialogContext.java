@@ -38,7 +38,7 @@ import org.openhab.core.voice.tts.Voice;
 @NonNullByDefault
 public record DialogContext(@Nullable DTService dt, @Nullable String keyword, STTService stt, TTSService tts,
         @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale,
-        String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
+        @Nullable String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
         @Nullable String listeningMelody, Conversation conversation, Collection<LLMTool> llmTools,
         @Nullable String systemPrompt) {
 
@@ -59,7 +59,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
         // state
         private Conversation conversation = new Conversation("");
         // options
-        private String dialogGroup = "default";
+        private @Nullable String dialogGroup;
         private @Nullable String locationItem;
         private @Nullable String listeningItem;
         private @Nullable String listeningMelody;
@@ -156,7 +156,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
 
         public Builder withDialogGroup(@Nullable String dialogGroup) {
             if (dialogGroup != null) {
-                this.dialogGroup = dialogGroup;
+                this.dialogGroup = dialogGroup.isBlank() ? null : dialogGroup;
             }
             return this;
         }

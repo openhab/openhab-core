@@ -297,6 +297,19 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    public void listenAndAnswerAllowsConcurrentExecutionWhenNoDialogGroupSet()
+            throws AudioException, STTException, KSException {
+        DialogContext context1 = createValidContextBuilder("source-1", "sink-1").build();
+        DialogContext context2 = createValidContextBuilder("source-2", "sink-2").build();
+
+        dialogManager.listenAndAnswer(context1);
+        verify(context1.source()).getInputStream(any());
+
+        dialogManager.listenAndAnswer(context2);
+        verify(context2.source()).getInputStream(any());
+    }
+
+    @Test
     public void startDialogSuccessfullyStartsAndTracksProcessor() throws AudioException, STTException, KSException {
         DialogContext context = createValidContext("source-1", "sink-1");
         DTServiceHandle handle = dialogManager.startDialog(context);
@@ -743,6 +756,37 @@ public class DialogManagerImplTest {
         dialogManager.onReleaseGroup(context1);
 
         // Now dialog 2 can trigger and start STT recognition
+        ksListenerCaptor2.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source2, times(2)).getInputStream(any());
+        verify(stt2).recognize(any(), any(), any());
+    }
+
+    @Test
+    public void persistentDialogTriggerAllowsConcurrentExecutionWhenNoDialogGroupSet()
+            throws AudioException, STTException, KSException {
+        DialogContext context1 = createValidContextBuilder("source-1", "sink-1").build();
+        AudioSource source1 = context1.source();
+        KSService ks1 = (KSService) Objects.requireNonNull(context1.dt());
+
+        DialogContext context2 = createValidContextBuilder("source-2", "sink-2").build();
+        AudioSource source2 = context2.source();
+        KSService ks2 = (KSService) Objects.requireNonNull(context2.dt());
+
+        dialogManager.startDialog(context1);
+        dialogManager.startDialog(context2);
+
+        ArgumentCaptor<KSListener> ksListenerCaptor1 = ArgumentCaptor.forClass(KSListener.class);
+        verify(ks1).spot(ksListenerCaptor1.capture(), any(), any(), any());
+        ArgumentCaptor<KSListener> ksListenerCaptor2 = ArgumentCaptor.forClass(KSListener.class);
+        verify(ks2).spot(ksListenerCaptor2.capture(), any(), any(), any());
+
+        STTService stt1 = context1.stt();
+        STTService stt2 = context2.stt();
+
+        ksListenerCaptor1.getValue().dtEventReceived(new DTTriggeredEvent());
+        verify(source1, times(2)).getInputStream(any());
+        verify(stt1).recognize(any(), any(), any());
+
         ksListenerCaptor2.getValue().dtEventReceived(new DTTriggeredEvent());
         verify(source2, times(2)).getInputStream(any());
         verify(stt2).recognize(any(), any(), any());

@@ -386,7 +386,7 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         validateLocaleCompatibility(context);
 
         String group = context.dialogGroup();
-        if (activeDialogGroups.containsKey(group)) {
+        if (group != null && !group.isBlank() && activeDialogGroups.containsKey(group)) {
             logger.warn("Ignoring listenAndAnswer, dialog group '{}' already running", group);
             return;
         }
@@ -476,6 +476,9 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     @Override
     public boolean onAcquireGroup(DialogContext context) {
         String group = context.dialogGroup();
+        if (group == null || group.isBlank()) {
+            return true;
+        }
         DialogContext existing = activeDialogGroups.putIfAbsent(group, context);
         if (existing == null) {
             logger.debug("Acquiring dialog group '{}'", group);
@@ -488,6 +491,9 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     @Override
     public void onReleaseGroup(DialogContext context) {
         String group = context.dialogGroup();
+        if (group == null || group.isBlank()) {
+            return;
+        }
         logger.debug("Releasing dialog group '{}'", group);
         activeDialogGroups.remove(group, context);
     }
