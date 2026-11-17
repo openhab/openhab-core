@@ -27,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.transform.TransformationException;
@@ -168,6 +170,86 @@ public class ItemDisplayStateUtilTest {
         String result = ItemDisplayStateUtil.formatState("item", "%d", List.of(option), state, zoneId);
 
         assertThat(result, is("Option Label"));
+    }
+
+    @Test
+    public void formatStateAppliesStateOptionLabelForDecimalTypeWithDifferentScale() {
+        State state = new DecimalType("0.0");
+        StateOption option = new StateOption("0", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", "%s", List.of(option), state, zoneId);
+
+        assertThat(result, is("Option Label"));
+    }
+
+    @Test
+    public void formatStateAppliesStateOptionLabelForIntegerStateAndDecimalOption() {
+        State state = new DecimalType("0");
+        StateOption option = new StateOption("0.0", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", null, List.of(option), state, zoneId);
+
+        assertThat(result, is("Option Label"));
+    }
+
+    @Test
+    public void formatStateAppliesStateOptionLabelForNegativeValues() {
+        State state = new DecimalType("-2.00");
+        StateOption option = new StateOption("-2", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", "%s", List.of(option), state, zoneId);
+
+        assertThat(result, is("Option Label"));
+    }
+
+    @Test
+    public void formatStateDoesNotApplyNumericOptionForDifferentValues() {
+        State state = new DecimalType("2");
+        StateOption option = new StateOption("-2", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", null, List.of(option), state, zoneId);
+
+        assertThat(result, is("2"));
+    }
+
+    @Test
+    public void formatStateDoesNotMatchNumericOptionOnStringState() {
+        State state = new StringType("0.0");
+        StateOption option = new StateOption("0", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", null, List.of(option), state, zoneId);
+
+        assertThat(result, is("0.0"));
+    }
+
+    @Test
+    public void formatStateDoesNotMatchUnitlessNumericOptionOnQuantityState() {
+        State state = new QuantityType<>("20.0 kWh");
+        StateOption option = new StateOption("20", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", null, List.of(option), state, zoneId);
+
+        assertThat(result, is("20 kWh"));
+    }
+
+    @Test
+    public void formatStateAppliesStateOptionLabelForPercentTypeWithDifferentScale() {
+        State state = new PercentType("50.0");
+        StateOption option = new StateOption("50", "Option Label");
+
+        String result = ItemDisplayStateUtil.formatState("item", "%s", List.of(option), state, zoneId);
+
+        assertThat(result, is("Option Label"));
+    }
+
+    @Test
+    public void formatStateAppliesFirstMatchingNumericOption() {
+        State state = new DecimalType("1.0");
+        List<StateOption> options = List.of(new StateOption("1", "one"), new StateOption("1.0", "one point zero"));
+
+        String result = ItemDisplayStateUtil.formatState("item", null, options, state, zoneId);
+
+        assertThat(result, is("one"));
     }
 
     @Test
