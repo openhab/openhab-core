@@ -193,7 +193,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/interpreters/{ids: [a-zA-Z_0-9,]+}")
+    @Path("/interpreters/{ids: [a-zA-Z_0-9]+((,|%2[cC])[a-zA-Z_0-9]+)*}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter(s).", responses = {
