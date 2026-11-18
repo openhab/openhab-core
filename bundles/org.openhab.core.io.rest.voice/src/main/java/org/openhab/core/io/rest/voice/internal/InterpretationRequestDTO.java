@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "InterpretationRequest")
 @NonNullByDefault
 public record InterpretationRequestDTO(
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Text to interpret", example = "Turn on the kitchen lights") @Nullable String text,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Text to interpret", example = "Turn on the kitchen lights") String text,
         @Schema(description = "Ordered list of interpreter IDs to try", example = "[\"standard\", \"gemini\"]") @Nullable List<String> interpreters,
         @Schema(description = "Conversation ID for multi-turn context") @Nullable String conversationId,
         @Schema(description = "List of LLM tool IDs, or [\"*\"] for all", defaultValue = "[\"*\"]") @Nullable List<String> llmTools,

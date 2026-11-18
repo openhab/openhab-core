@@ -256,7 +256,7 @@ public class VoiceResource implements RESTResource {
     @Path("/interpret")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "interpret", summary = "Sends a text to human language interpreter(s).", responses = {
+    @Operation(operationId = "interpretJson", summary = "Sends a text to human language interpreter(s).", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request or interpretation exception occurs"),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found.") })
@@ -269,7 +269,9 @@ public class VoiceResource implements RESTResource {
         }
 
         String hliIds;
-        List<String> interpreters = request.interpreters();
+        List<String> interpreters = request.interpreters() != null
+                ? request.interpreters().stream().filter(Objects::nonNull).map(String::trim).toList()
+                : null;
         if (interpreters == null || interpreters.isEmpty()) {
             if (voiceManager.getHLI() == null) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
@@ -286,7 +288,8 @@ public class VoiceResource implements RESTResource {
         List<String> llmTools = request.llmTools();
         InterpretationArguments args = new InterpretationArguments(hliIds,
                 Objects.requireNonNullElse(request.conversationId(), ""),
-                llmTools == null ? "*" : String.join(",", llmTools), request.locationItem(), locale);
+                llmTools == null || llmTools.isEmpty() ? "*" : String.join(",", llmTools), request.locationItem(),
+                locale);
         try {
             String answer = voiceManager.interpret(text, args);
             return Response.ok(answer, MediaType.TEXT_PLAIN).build();

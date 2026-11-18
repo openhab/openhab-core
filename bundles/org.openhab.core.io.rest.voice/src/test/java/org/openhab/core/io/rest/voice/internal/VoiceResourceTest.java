@@ -128,7 +128,7 @@ public class VoiceResourceTest {
     }
 
     @Test
-    public void testInterpretJsonDefaultInterpreter() throws InterpretationException {
+    public void testInterpretJsonDefaultInterpreterAndTools() throws InterpretationException {
         HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
         when(voiceManager.getHLI()).thenReturn(hli);
         when(localeService.getLocale(null)).thenReturn(Locale.ENGLISH);
@@ -137,8 +137,12 @@ public class VoiceResourceTest {
 
         InterpretationRequestDTO request = new InterpretationRequestDTO("Turn on the kitchen lights", null, null, null,
                 null);
-
         Response response = voiceResource.interpret(null, request);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("Done", response.getEntity());
+
+        request = new InterpretationRequestDTO("Turn on the kitchen lights", List.of(), null, List.of(), null);
+        response = voiceResource.interpret(null, request);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         assertEquals("Done", response.getEntity());
     }
@@ -149,7 +153,6 @@ public class VoiceResourceTest {
 
         InterpretationRequestDTO request = new InterpretationRequestDTO("Turn on the kitchen lights", null, null, null,
                 null);
-
         Response response = voiceResource.interpret(null, request);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
