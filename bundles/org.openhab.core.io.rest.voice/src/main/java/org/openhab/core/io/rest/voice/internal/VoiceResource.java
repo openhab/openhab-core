@@ -285,7 +285,9 @@ public class VoiceResource implements RESTResource {
         }
 
         final Locale locale = localeService.getLocale(language);
-        List<String> llmTools = request.llmTools();
+        List<String> llmTools = request.llmTools() != null
+                ? request.llmTools().stream().filter(Objects::nonNull).map(String::trim).toList()
+                : null;
         InterpretationArguments args = new InterpretationArguments(hliIds,
                 Objects.requireNonNullElse(request.conversationId(), ""),
                 llmTools == null || llmTools.isEmpty() ? "*" : String.join(",", llmTools), request.locationItem(),
