@@ -252,6 +252,49 @@ public class VoiceResource implements RESTResource {
         }
     }
 
+    @POST
+    @Path("/interpret")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "interpret", summary = "Sends a text to human language interpreter(s).", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request or interpretation exception occurs"),
+            @ApiResponse(responseCode = "404", description = "No human language interpreter was found.") })
+    public Response interpret(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @Parameter(description = "interpretation request", required = true) @Nullable InterpretationRequestDTO request) {
+        String text = request != null ? request.text() : null;
+        if (request == null || text == null || text.isBlank()) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Text must not be blank");
+        }
+
+        String hliIds;
+        List<String> interpreters = request.interpreters();
+        if (interpreters == null || interpreters.isEmpty()) {
+            if (voiceManager.getHLI() == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+            }
+            hliIds = "";
+        } else {
+            if (voiceManager.getHLIsByIds(interpreters).isEmpty()) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+            }
+            hliIds = String.join(",", interpreters);
+        }
+
+        final Locale locale = localeService.getLocale(language);
+        List<String> llmTools = request.llmTools();
+        InterpretationArguments args = new InterpretationArguments(hliIds,
+                Objects.requireNonNullElse(request.conversationId(), ""),
+                llmTools == null ? "*" : String.join(",", llmTools), request.locationItem(), locale);
+        try {
+            String answer = voiceManager.interpret(text, args);
+            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
+        } catch (InterpretationException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     @GET
     @Path("/llmtools")
     @Produces(MediaType.APPLICATION_JSON)
