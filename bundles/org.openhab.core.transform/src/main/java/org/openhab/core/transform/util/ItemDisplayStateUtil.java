@@ -12,6 +12,7 @@
  */
 package org.openhab.core.transform.util;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.IllegalFormatException;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
@@ -169,7 +171,8 @@ public class ItemDisplayStateUtil {
                 // Look for a state option with a value corresponding to the state
                 for (StateOption option : options) {
                     String label = option.getLabel();
-                    if (option.getValue().equals(state.toString()) && label != null) {
+                    if ((option.getValue().equals(state.toString()) || matchesNumericOption(option.getValue(), state))
+                            && label != null) {
                         optionMatched = true;
                         try {
                             displayState = pattern == null ? label : String.format(pattern, label);
@@ -220,5 +223,23 @@ public class ItemDisplayStateUtil {
         }
 
         return displayState;
+    }
+
+    /**
+     * Check whether a state option value is numerically equal to a decimal state, e.g., option "0" vs. state "0.0".
+     *
+     * @param optionValue the state option value
+     * @param state the current state
+     * @return true if the state is a {@link DecimalType} and the option value parses to the same number
+     */
+    private static boolean matchesNumericOption(String optionValue, State state) {
+        if (!(state instanceof DecimalType decimalState)) {
+            return false;
+        }
+        try {
+            return new BigDecimal(optionValue).compareTo(decimalState.toBigDecimal()) == 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
