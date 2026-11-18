@@ -193,7 +193,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/interpreters/{ids: [a-zA-Z_0-9,]+}")
+    @Path("/interpreters/{ids: [a-zA-Z_0-9]+((,|%2[cC])[a-zA-Z_0-9]+)*}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter(s).", responses = {
@@ -244,6 +244,54 @@ public class VoiceResource implements RESTResource {
 
         InterpretationArguments args = new InterpretationArguments("", Objects.requireNonNullElse(conversationId, ""),
                 llmToolIds == null ? "*" : String.join(",", llmToolIds), locationItem, locale);
+        try {
+            String answer = voiceManager.interpret(text, args);
+            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
+        } catch (InterpretationException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("/interpret")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "interpretJson", summary = "Sends a text to human language interpreter(s).", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request or interpretation exception occurs"),
+            @ApiResponse(responseCode = "404", description = "No human language interpreter was found.") })
+    public Response interpret(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @Parameter(description = "interpretation request", required = true) @Nullable InterpretationRequestDTO request) {
+        String text = request != null ? request.text() : null;
+        if (request == null || text == null || text.isBlank()) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Text must not be blank");
+        }
+
+        String hliIds;
+        List<String> interpreters = request.interpreters() != null
+                ? request.interpreters().stream().filter(Objects::nonNull).map(String::trim).toList()
+                : null;
+        if (interpreters == null || interpreters.isEmpty()) {
+            if (voiceManager.getHLI() == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+            }
+            hliIds = "";
+        } else {
+            if (voiceManager.getHLIsByIds(interpreters).isEmpty()) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+            }
+            hliIds = String.join(",", interpreters);
+        }
+
+        final Locale locale = localeService.getLocale(language);
+        List<String> llmTools = request.llmTools() != null
+                ? request.llmTools().stream().filter(Objects::nonNull).map(String::trim).toList()
+                : null;
+        InterpretationArguments args = new InterpretationArguments(hliIds,
+                Objects.requireNonNullElse(request.conversationId(), ""),
+                llmTools == null || llmTools.isEmpty() ? "*" : String.join(",", llmTools), request.locationItem(),
+                locale);
         try {
             String answer = voiceManager.interpret(text, args);
             return Response.ok(answer, MediaType.TEXT_PLAIN).build();
