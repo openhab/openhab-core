@@ -41,6 +41,10 @@ public enum OpenClosedType implements PrimitiveType, State {
         return super.toString();
     }
 
+    public OpenClosedType toggle() {
+        return this == OPEN ? CLOSED : OPEN;
+    }
+
     @Override
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == DecimalType.class) {

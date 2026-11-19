@@ -44,6 +44,10 @@ public enum UpDownType implements PrimitiveType, State, Command {
         return super.toString();
     }
 
+    public UpDownType toggle() {
+        return this == UP ? DOWN : UP;
+    }
+
     @Override
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == DecimalType.class) {
