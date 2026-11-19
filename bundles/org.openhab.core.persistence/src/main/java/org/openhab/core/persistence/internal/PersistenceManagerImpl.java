@@ -191,11 +191,15 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
     }
 
     private void storeItem(PersistenceServiceContainer container, Item item, PersistenceStrategy changeStrategy) {
+        ZonedDateTime now = ZonedDateTime.now();
+
         container.getMatchingConfigurations(changeStrategy).filter(itemConfig -> appliesToItem(itemConfig, item))
                 .filter(itemConfig -> itemConfig.filters().stream().allMatch(filter -> filter.apply(item)))
                 .forEach(itemConfig -> {
                     itemConfig.filters().forEach(filter -> filter.persisted(item));
-                    container.getPersistenceService().store(item, container.getAlias(item));
+                    PersistenceService persistenceService = container.getPersistenceService();
+                    persistenceService.store(item, Objects.requireNonNullElse(item.getLastStateUpdate(), now),
+                            item.getState(), container.getAlias(item));
                 });
     }
 
@@ -822,7 +826,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                     if (itemConfig.filters().stream().allMatch(filter -> filter.apply(item))) {
                         long startTime = System.nanoTime();
                         itemConfig.filters().forEach(filter -> filter.persisted(item));
-                        persistenceService.store(item, getAlias(item));
+                        persistenceService.store(item, ZonedDateTime.now(), item.getState(), getAlias(item));
                         logger.trace("Storing item '{}' with persistence service '{}' took {}ms", item.getName(),
                                 configuration.getUID(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
                     }
