@@ -91,7 +91,6 @@ public class SystemInfoResource implements RESTResource, ConfigurationListener {
     }
 
     @GET
-    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSystemInformation", summary = "Gets information about the system.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SystemInfoBean.class))) })
