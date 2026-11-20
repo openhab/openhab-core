@@ -171,7 +171,7 @@
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>stax2-api</artifactId>
-      <version>4.3.0</version>
+      <version>4.3.1</version>
     </dependency>
 
     <!-- JAX-RS 2.1 API with contract -->
