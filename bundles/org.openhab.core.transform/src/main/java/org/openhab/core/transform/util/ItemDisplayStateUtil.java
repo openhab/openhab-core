@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * Utility class for getting the display state of an Item from its {@link StateDescription}.
  *
  * @author Florian Hotze - Initial contribution (extracted from SseItemStatesEventBuilder)
+ * @author Kai Kreuzer - Linear-time transformation matching
  */
 @NonNullByDefault
 public class ItemDisplayStateUtil {
@@ -49,8 +50,11 @@ public class ItemDisplayStateUtil {
 
     /**
      * RegEx to extract and parse a transformation function call, e.g., <code>MAP(en.map):%s</code>
+     * Start at each line boundary so a failed match never retries overlapping suffixes of that line.
+     * The first opening parenthesis and the last closing delimiter determine the function argument.
      */
-    public static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
+    public static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern
+            .compile("(?m)^([^(\\r\\n\\x{85}\\x{2028}\\x{2029}]*+)\\((.*)\\):(.*)");
 
     /**
      * Transform an arbitrary value with a transformation service
