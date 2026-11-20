@@ -120,6 +120,17 @@ public class ItemDisplayStateUtilTest {
     }
 
     @Test
+    public void formatStateFindsTransformationOnLaterLineWithClosingDelimiterInArgument() throws Exception {
+        State state = new StringType("ON");
+        when(mapTransformationService.transform("nested(test):example", "ON")).thenReturn("Active");
+
+        String result = ItemDisplayStateUtil.formatState("item", "Header\r\nMAP(nested(test):example):%s",
+                Collections.emptyList(), state, zoneId);
+
+        assertThat(result, is("Active"));
+    }
+
+    @Test
     public void formatStateReturnsRawStateWhenTransformationReturnsNull() throws Exception {
         State state = new StringType("ON");
         when(mapTransformationService.transform("test.map", "ON")).thenReturn(null);
