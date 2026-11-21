@@ -17,7 +17,6 @@ import java.io.Serial;
 import java.util.Map;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,7 +57,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, String[]> params = req.getParameterMap();
 
         try {
@@ -75,7 +74,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, String[]> params = req.getParameterMap();
         try {
             if (!params.containsKey("username")) {
@@ -145,7 +144,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
         responseBody = responseBody.replace("{repeatPasswordFieldType}", "hidden");
         responseBody = responseBody.replace("{newPasswordFieldType}", "hidden");
         responseBody = responseBody.replace("{tokenNameFieldType}", "text");
-        responseBody = responseBody.replace("{tokenScopeFieldType}", "text");
+        // hide the token_scope field as we currently do not support token scopes
+        responseBody = responseBody.replace("{tokenScopeFieldType}", "hidden");
         responseBody = responseBody.replace("{buttonLabel}", buttonLabel);
         responseBody = responseBody.replace("{resultClass}", "");
         return responseBody;
@@ -159,7 +159,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
         responseBody = responseBody.replace("{repeatPasswordFieldType}", "hidden");
         responseBody = responseBody.replace("{newPasswordFieldType}", "hidden");
         responseBody = responseBody.replace("{tokenNameFieldType}", "text");
-        responseBody = responseBody.replace("{tokenScopeFieldType}", "text");
+        // hide the token_scope field as we currently do not support token scopes
+        responseBody = responseBody.replace("{tokenScopeFieldType}", "hidden");
         responseBody = responseBody.replace("{resultClass}", "Password");
         return responseBody;
     }
