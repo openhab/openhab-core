@@ -15,7 +15,11 @@ package org.openhab.core.voice.internal.dialog;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -41,6 +45,7 @@ import org.openhab.core.voice.stt.STTListener;
 import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.tts.TTSException;
 import org.openhab.core.voice.tts.Voice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +99,10 @@ import org.slf4j.LoggerFactory;
  *     +------------------------------------+         +--------------+
  * </pre>
  * 
+ * With follow-up listening, a persistent dialog listens again once the answer has played, unless the command
+ * couldn't be interpreted, and stops when nothing is heard. The trigger is ignored while the answer plays, and
+ * starts a new interaction during a follow-up.
+ * <p>
  * Any active state transitions immediately to {@link DialogState#IDLE} upon calling {@link #stop()}.
  *
  * @author Kai Kreuzer - Initial contribution
@@ -107,6 +116,7 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Add dialog groups
  * @author Florian Hotze - Refactor into pure state machine
  * @author Dan Cunningham - Start speech recognition where the keyword ended
+ * @author Dan Cunningham - Listen for a follow-up command after answering
  */
 @NonNullByDefault
 public class DialogProcessor {
@@ -122,6 +132,11 @@ public class DialogProcessor {
         SPEAKING
     }
 
+    // for sinks that never report the end of playback
+    static final long MAX_ANSWER_PLAYBACK_SECONDS = 60;
+    // for sources that send no audio, which would otherwise hold the dialog group
+    static final long MAX_FOLLOW_UP_SECONDS = 30;
+
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
 
     private final DialogContext dialogContext;
@@ -131,11 +146,16 @@ public class DialogProcessor {
     private final SpeechSynthesizer speechSynthesizer;
     private final VoiceI18nProvider i18nProvider;
     private final DialogEventListener eventListener;
-    private final ExecutorService soundExecutor = ThreadPoolManager.getPool("voice-dialog");
+    private final ScheduledExecutorService scheduler;
+    private final Executor dialogExecutor;
 
     private final KSListener ksListener = new KSListener() {
         @Override
         public void dtEventReceived(DTEvent dtEvent) {
+            // a trigger ends a follow-up, since some sources stop sending audio once the answer has played
+            if (dtEvent instanceof DTTriggeredEvent) {
+                endFollowUpOnTrigger();
+            }
             // Trigger and error events must only be processed when waiting for triggers so trailing callbacks from
             // aborted streams are discarded when stopped or during an ongoing dialog.
             if (stopped || state != DialogState.WAITING_FOR_TRIGGER) {
@@ -180,9 +200,34 @@ public class DialogProcessor {
     private class RecognitionSession implements STTListener {
         private final AtomicBoolean cancelled = new AtomicBoolean(false);
         private final AtomicBoolean terminalHandled = new AtomicBoolean(false);
+        private final boolean followUp;
+        private volatile @Nullable ScheduledFuture<?> timeout;
+
+        RecognitionSession(boolean followUp) {
+            this.followUp = followUp;
+        }
 
         void invalidate() {
             cancelled.set(true);
+            ScheduledFuture<?> timeout = this.timeout;
+            if (timeout != null) {
+                timeout.cancel(false);
+            }
+        }
+
+        /**
+         * Sets the timeout that ends this session, cancelling the previous one.
+         */
+        void setTimeout(ScheduledFuture<?> timeout) {
+            ScheduledFuture<?> previous = this.timeout;
+            this.timeout = timeout;
+            if (previous != null) {
+                previous.cancel(false);
+            }
+            // the session may have been invalidated before the timeout was stored
+            if (isCancelled()) {
+                timeout.cancel(false);
+            }
         }
 
         boolean isCancelled() {
@@ -205,7 +250,7 @@ public class DialogProcessor {
                     String question = sre.getTranscript();
                     logger.debug("Text recognized: {}", question);
                     feedbackService.setListening(false);
-                    audioDriver.stopRecognition();
+                    audioDriver.stopRecognition(this);
                     if (!transitionSession(this, DialogState.INTERPRETING)) {
                         logger.debug("Recognition session was cancelled before interpretation, discarding result");
                         return;
@@ -213,20 +258,27 @@ public class DialogProcessor {
                     eventListener.onBeforeDialogInterpretation(dialogContext);
 
                     String answer;
+                    boolean interpreted = true;
                     try {
                         answer = interpretationService.interpret(question, dialogContext.hlis(),
                                 dialogContext.conversation(), dialogContext.llmTools(), dialogContext.locale(),
                                 dialogContext.locationItem(), dialogContext.systemPrompt());
                     } catch (InterpretationException e) {
                         answer = e.getMessage() != null ? e.getMessage() : "Unexpected error";
+                        interpreted = false;
                     }
 
                     if (!transitionSession(this, DialogState.SPEAKING)) {
                         logger.debug("Recognition session was cancelled during interpretation, discarding result");
                         return;
                     }
-                    say(answer);
-                    finishDialog(this);
+                    // so background talk doesn't keep the follow-up going
+                    if (interpreted && triggerStarted && eventListener.shouldListenForFollowUp(dialogContext)) {
+                        sayThenListenForFollowUp(this, answer);
+                    } else {
+                        say(answer);
+                        finishDialog(this);
+                    }
                 }
                 case RecognitionStartEvent recognitionStartEvent -> {
                     if (!terminalHandled.get()) {
@@ -246,12 +298,15 @@ public class DialogProcessor {
                     }
                     String message = sre.getMessage();
                     logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
-                    audioDriver.stopRecognition();
+                    audioDriver.stopRecognition(this);
                     feedbackService.setListening(false);
-                    if (!transitionSession(this, DialogState.SPEAKING)) {
-                        return;
+                    // a follow-up normally ends by hearing nothing, so stay quiet
+                    if (!followUp && eventListener.shouldSpeakRecognitionErrors(dialogContext)) {
+                        if (!transitionSession(this, DialogState.SPEAKING)) {
+                            return;
+                        }
+                        say(message);
                     }
-                    say(message);
                     finishDialog(this);
                 }
                 default -> logger.debug("Unknown STT event received: {}", sttEvent);
@@ -262,11 +317,24 @@ public class DialogProcessor {
     private final Object stateLock = new Object();
     private volatile DialogState state = DialogState.IDLE;
     private volatile boolean stopped = false;
+    // a one-shot dialog can have a trigger in its context without waiting for it
+    private volatile boolean triggerStarted = false;
     private @Nullable RecognitionSession currentSession;
 
     public DialogProcessor(DialogContext context, DialogAudioDriver audioDriver, DialogFeedbackService feedbackService,
             InterpretationService interpretationService, SpeechSynthesizer speechSynthesizer,
             VoiceI18nProvider i18nProvider, DialogEventListener eventListener) {
+        this(context, audioDriver, feedbackService, interpretationService, speechSynthesizer, i18nProvider,
+                eventListener, ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON),
+                ThreadPoolManager.getPool("voice-dialog"));
+    }
+
+    DialogProcessor(DialogContext context, DialogAudioDriver audioDriver, DialogFeedbackService feedbackService,
+            InterpretationService interpretationService, SpeechSynthesizer speechSynthesizer,
+            VoiceI18nProvider i18nProvider, DialogEventListener eventListener, ScheduledExecutorService scheduler,
+            Executor dialogExecutor) {
+        this.scheduler = scheduler;
+        this.dialogExecutor = dialogExecutor;
         this.dialogContext = context;
         this.audioDriver = audioDriver;
         this.feedbackService = feedbackService;
@@ -295,6 +363,7 @@ public class DialogProcessor {
                 return null;
             }
             state = DialogState.WAITING_FOR_TRIGGER;
+            triggerStarted = true;
         }
         feedbackService.playStartSound();
         try {
@@ -302,6 +371,7 @@ public class DialogProcessor {
         } catch (DTException e) {
             logger.warn("Failed to start persistent dialog: {}", e.getMessage(), e);
             synchronized (stateLock) {
+                triggerStarted = false;
                 if (state == DialogState.WAITING_FOR_TRIGGER) {
                     state = DialogState.IDLE;
                 }
@@ -332,7 +402,7 @@ public class DialogProcessor {
             logger.warn("Ignoring dialog start event, dialog group '{}' running", dialogContext.dialogGroup());
             return;
         }
-        RecognitionSession session = new RecognitionSession();
+        RecognitionSession session = new RecognitionSession(false);
         synchronized (stateLock) {
             if (stopped) {
                 session.invalidate();
@@ -365,7 +435,7 @@ public class DialogProcessor {
             return;
         }
         // play in the background: a keyword spotter may call this from the thread that feeds the recognition
-        soundExecutor.execute(() -> {
+        dialogExecutor.execute(() -> {
             if (state == DialogState.LISTENING && !session.isCancelled()) {
                 feedbackService.playListeningSound();
             }
@@ -443,14 +513,96 @@ public class DialogProcessor {
     }
 
     /**
+     * Speaks the answer, then listens for a follow-up once it has played. Keeps the dialog group until the follow-up
+     * ends.
+     */
+    private void sayThenListenForFollowUp(RecognitionSession session, @Nullable String answer) {
+        session.setTimeout(scheduler.schedule(() -> {
+            logger.debug("Not listening for a follow-up, the answer didn't finish playing within {}s",
+                    MAX_ANSWER_PLAYBACK_SECONDS);
+            finishDialog(session);
+        }, MAX_ANSWER_PLAYBACK_SECONDS, TimeUnit.SECONDS));
+        say(answer).whenCompleteAsync((result, error) -> {
+            if (error != null) {
+                logger.debug("Not listening for a follow-up, playing the answer failed: {}", error.getMessage());
+                finishDialog(session);
+            } else {
+                listenForFollowUp(session);
+            }
+        }, dialogExecutor);
+    }
+
+    private void endFollowUpOnTrigger() {
+        RecognitionSession session;
+        synchronized (stateLock) {
+            session = currentSession;
+        }
+        if (session != null) {
+            endFollowUp(session, "Trigger received while listening for a follow-up");
+        }
+    }
+
+    /**
+     * Ends a follow-up that is still listening, without speaking.
+     */
+    private void endFollowUp(RecognitionSession session, String reason) {
+        synchronized (stateLock) {
+            if (stopped || !session.equals(currentSession) || !session.followUp) {
+                return;
+            }
+        }
+        // a result from the speech-to-text service may already be ending it
+        if (!session.terminalHandled.compareAndSet(false, true)) {
+            return;
+        }
+        logger.debug("{}, ending the follow-up", reason);
+        // cancel first, so a recognition that is still starting won't start
+        session.invalidate();
+        audioDriver.stopRecognition(session);
+        feedbackService.setListening(false);
+        finishDialog(session);
+    }
+
+    private void listenForFollowUp(RecognitionSession previous) {
+        RecognitionSession session = new RecognitionSession(true);
+        synchronized (stateLock) {
+            if (stopped || !previous.equals(currentSession) || previous.isCancelled()) {
+                return;
+            }
+            previous.invalidate();
+            currentSession = session;
+            state = DialogState.LISTENING;
+        }
+        logger.debug("Listening for a follow-up command");
+        session.setTimeout(scheduler.schedule(
+                () -> endFollowUp(session, "Nothing recognized within " + MAX_FOLLOW_UP_SECONDS + "s"),
+                MAX_FOLLOW_UP_SECONDS, TimeUnit.SECONDS));
+        try {
+            audioDriver.startRecognition(session, null, session::isCancelled);
+        } catch (STTException e) {
+            logger.debug("Failed to start follow-up recognition: {}", e.getMessage());
+            finishDialog(session);
+            return;
+        } catch (RuntimeException e) {
+            logger.debug("Unexpected error starting follow-up recognition: {}", e.getMessage(), e);
+            finishDialog(session);
+            return;
+        }
+        if (state == DialogState.LISTENING && !session.isCancelled()) {
+            feedbackService.playListeningSound();
+        }
+    }
+
+    /**
      * Speaks the passed text via {@link SpeechSynthesizer}.
      *
      * @param text The text to say
+     * @return a future that completes when playback has finished, or exceptionally if the text can't be spoken
      */
-    protected void say(@Nullable String text) {
+    protected CompletableFuture<@Nullable Void> say(@Nullable String text) {
         if (text == null || text.isEmpty()) {
             logger.debug("Empty value, nothing to say");
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         Voice voice = null;
         for (Voice currentVoice : dialogContext.tts().getAvailableVoices()) {
@@ -464,9 +616,10 @@ public class DialogProcessor {
         }
         if (voice == null) {
             logger.warn("Unable to find a suitable voice for language {}", dialogContext.locale().getLanguage());
-            return;
+            return CompletableFuture
+                    .failedFuture(new TTSException("No voice for language " + dialogContext.locale().getLanguage()));
         }
-        speechSynthesizer.say(text, dialogContext.tts(), voice, dialogContext.sink(), null);
+        return speechSynthesizer.say(text, dialogContext.tts(), voice, dialogContext.sink(), null);
     }
 
     /**
@@ -510,10 +663,26 @@ public class DialogProcessor {
         void onBeforeDialogInterpretation(DialogContext context);
 
         /**
+         * Tells whether to speak the speech-to-text error when recognition fails.
+         *
+         * @param context used by the dialog processor
+         * @return true to speak the error
+         */
+        boolean shouldSpeakRecognitionErrors(DialogContext context);
+
+        /**
          * Runs whenever the dialog is stopped.
          *
          * @param context used by the dialog processor
          */
         void onDialogStopped(DialogContext context);
+
+        /**
+         * Tells whether a persistent dialog should listen for a follow-up after answering.
+         *
+         * @param context used by the dialog processor
+         * @return true to listen for a follow-up
+         */
+        boolean shouldListenForFollowUp(DialogContext context);
     }
 }

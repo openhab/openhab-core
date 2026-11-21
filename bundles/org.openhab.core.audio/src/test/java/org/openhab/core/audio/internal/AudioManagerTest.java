@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -36,6 +38,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
@@ -50,6 +53,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
@@ -122,6 +126,38 @@ public class AudioManagerTest {
         AudioFormat expectedAudioFormat = audioStream.getFormat();
 
         assertThat(audioSink.audioFormat.isCompatible(expectedAudioFormat), is(true));
+    }
+
+    @Test
+    public void playAndCompleteCompletesWhenTheSinkHasPlayed() {
+        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
+        AudioSink sink = mock(AudioSink.class);
+        when(sink.getSupportedFormats()).thenReturn(Set.of(audioStream.getFormat()));
+        when(sink.getSupportedStreams()).thenReturn(Set.of(AudioStream.class));
+        CompletableFuture<@Nullable Void> sinkPlayback = new CompletableFuture<>();
+        when(sink.processAndComplete(audioStream)).thenReturn(sinkPlayback);
+
+        CompletableFuture<@Nullable Void> playback = audioManager.playAndComplete(audioStream, sink, null);
+
+        assertFalse(playback.isDone());
+        sinkPlayback.complete(null);
+        assertTrue(playback.isDone());
+        assertFalse(playback.isCompletedExceptionally());
+    }
+
+    @Test
+    public void playAndCompleteFailsWhenTheStreamCannotBeTranscoded() {
+        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
+        AudioSink sink = mock(AudioSink.class);
+        when(sink.getSupportedFormats()).thenReturn(Set.of(AudioFormat.MP3));
+        when(sink.getSupportedStreams()).thenReturn(Set.of(AudioStream.class));
+
+        CompletableFuture<@Nullable Void> playback = audioManager.playAndComplete(audioStream, sink, null);
+
+        assertTrue(playback.isCompletedExceptionally());
+        verify(sink, never()).processAndComplete(any());
     }
 
     @Test

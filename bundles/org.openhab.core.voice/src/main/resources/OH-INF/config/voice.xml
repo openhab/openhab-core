@@ -30,6 +30,12 @@
 			<description>The magic word to spot before initiating a dialog.</description>
 			<default>Wakeup</default>
 		</parameter>
+		<parameter name="followUpListening" type="boolean">
+			<label>Follow-Up Listening</label>
+			<description>After answering, listen again for a follow-up command without the magic word, until nothing is heard.
+				Not used when the command couldn't be interpreted. The magic word is ignored while the answer plays.</description>
+			<default>false</default>
+		</parameter>
 		<parameter name="listeningItem" type="text">
 			<context>item</context>
 			<filter>
@@ -49,6 +55,12 @@
 			<label>Listening Melody</label>
 			<description>A melody to be played to advertise the user the dialog processing is going to start, leave empty to
 				disable it. (Spaced separated list of notes. Example: "A O:100 A':50")</description>
+		</parameter>
+		<parameter name="speakRecognitionErrors" type="boolean">
+			<label>Speak Recognition Errors</label>
+			<description>Speak the error when speech recognition fails, for example when nothing was heard. Errors starting
+				recognition are always spoken, and errors during a follow-up never are.</description>
+			<default>true</default>
 		</parameter>
 		<parameter name="enableCacheTTS" type="boolean">
 			<label>Enable TTS caching</label>
