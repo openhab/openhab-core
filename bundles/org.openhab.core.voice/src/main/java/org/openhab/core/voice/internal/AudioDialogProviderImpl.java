@@ -199,8 +199,8 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
     }
 
     private static class TriggerServiceHandle implements DTServiceHandle {
-        public final DTListener dtListener;
-        public @Nullable Runnable abortCallback;
+        private final DTListener dtListener;
+        private @Nullable Runnable abortCallback;
         private volatile @Nullable Runnable idleCallback;
 
         public TriggerServiceHandle(DTListener dtListener, @Nullable Runnable abortCallback,

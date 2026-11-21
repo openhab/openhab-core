@@ -267,12 +267,12 @@ public class PCMWebSocketConnection implements WebSocketListener {
             if (clientOptions.keywordSpotting) {
                 dialogTrigger = null;
                 if (!dialogProvider.startKeywordSpottingDialog(audioSink, audioSource, locationItem, listeningItem,
-                        () -> disconnect(), this::sendDialogIdle)) {
+                        this::disconnect, this::sendDialogIdle)) {
                     throw new IOException("Unable to start the keyword spotting dialog");
                 }
             } else {
                 dialogTrigger = dialogProvider.startDialog(audioSink, audioSource, locationItem, listeningItem,
-                        () -> disconnect(), this::sendDialogIdle);
+                        this::disconnect, this::sendDialogIdle);
             }
         } else {
             dialogTrigger = null;
