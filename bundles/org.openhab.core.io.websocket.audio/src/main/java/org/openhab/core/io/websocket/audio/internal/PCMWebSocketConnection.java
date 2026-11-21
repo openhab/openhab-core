@@ -47,6 +47,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * The websocket supports only one line for the {@link PCMWebSocketAudioSource} (the audio is shared on the server),
  * the data transmission is instructed by the server (START_LISTENING and STOP_LISTENING commands).
  * <p>
+ * The server sends DIALOG_IDLE each time the dialog finishes an interaction, so the client knows when no reply is
+ * coming.
+ * <p>
  * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplish that, the outgoing data
  * chucks are prefixed with a 6 byte header to transmit the identity and format specification, check
  * {@link PCMWebSocketAudioSink.PCMWebSocketOutputStream})
@@ -95,6 +98,10 @@ public class PCMWebSocketConnection implements WebSocketListener {
     public void setListening(boolean listening) {
         sendClientCommand(new WebSocketCommand(listening ? WebSocketCommand.OutputCommands.START_LISTENING
                 : WebSocketCommand.OutputCommands.STOP_LISTENING));
+    }
+
+    private void sendDialogIdle() {
+        sendClientCommand(new WebSocketCommand(WebSocketCommand.OutputCommands.DIALOG_IDLE));
     }
 
     public void disconnect() {
@@ -260,12 +267,12 @@ public class PCMWebSocketConnection implements WebSocketListener {
             if (clientOptions.keywordSpotting) {
                 dialogTrigger = null;
                 if (!dialogProvider.startKeywordSpottingDialog(audioSink, audioSource, locationItem, listeningItem,
-                        () -> disconnect())) {
+                        this::disconnect, this::sendDialogIdle)) {
                     throw new IOException("Unable to start the keyword spotting dialog");
                 }
             } else {
                 dialogTrigger = dialogProvider.startDialog(audioSink, audioSource, locationItem, listeningItem,
-                        () -> disconnect());
+                        this::disconnect, this::sendDialogIdle);
             }
         } else {
             dialogTrigger = null;
@@ -335,6 +342,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
             INITIALIZED,
             START_LISTENING,
             STOP_LISTENING,
+            DIALOG_IDLE,
             SINK_VOLUME,
             SOURCE_VOLUME,
         }

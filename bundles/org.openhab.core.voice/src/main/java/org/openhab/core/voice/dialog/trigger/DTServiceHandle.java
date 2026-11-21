@@ -25,4 +25,12 @@ public interface DTServiceHandle {
      * Aborts execution in the associated {@link DTServiceHandle}
      */
     void abort();
+
+    /**
+     * Called each time the dialog finishes an interaction, even one without a reply, and when it ignores a trigger
+     * because its dialog group is busy. The reply may still be playing. It may run on the trigger's thread, so it must
+     * return quickly and must not trigger the dialog. It may still be called just after {@link #abort()}.
+     */
+    default void onDialogIdle() {
+    }
 }

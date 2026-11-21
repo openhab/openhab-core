@@ -330,6 +330,10 @@ public class DialogProcessor {
         }
         if (!eventListener.onAcquireGroup(dialogContext)) {
             logger.warn("Ignoring dialog start event, dialog group '{}' running", dialogContext.dialogGroup());
+            // the client that sent the trigger is waiting for a reply
+            if (!stopped && state == DialogState.WAITING_FOR_TRIGGER) {
+                audioDriver.notifyTriggerIdle();
+            }
             return;
         }
         RecognitionSession session = new RecognitionSession();
@@ -439,6 +443,9 @@ public class DialogProcessor {
         eventListener.onReleaseGroup(dialogContext);
         if (notifyStopped) {
             eventListener.onDialogStopped(dialogContext);
+        } else if (state == DialogState.WAITING_FOR_TRIGGER) {
+            // after releasing the group, so a trigger sent in response can start a new interaction
+            audioDriver.notifyTriggerIdle();
         }
     }
 
