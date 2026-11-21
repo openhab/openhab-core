@@ -94,6 +94,26 @@ public class DialogAudioDriverTest {
     }
 
     @Test
+    public void notifyTriggerIdleReachesTheActiveHandleOnly() throws AudioException, DTException {
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(ksService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(audioStream);
+        when(ksService.spot(eq(ksListener), eq(audioStream), eq(Locale.ENGLISH), eq("keyword"))).thenReturn(ksHandle);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        driver.startTrigger(ksListener);
+        driver.notifyTriggerIdle();
+        verify(ksHandle).onDialogIdle();
+
+        driver.stopTrigger();
+        driver.notifyTriggerIdle();
+        verify(ksHandle, times(1)).onDialogIdle();
+    }
+
+    @Test
     public void startTriggerAbortsHandleIfStoppedDuringSpot() throws AudioException, DTException, IOException {
         when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
         when(ksService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));

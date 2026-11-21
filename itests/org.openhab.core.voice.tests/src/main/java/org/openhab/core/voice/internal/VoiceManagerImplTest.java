@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -568,6 +569,49 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         voiceManager.stopDialog(source);
         assertTrue(ksService.isAborted());
         assertTrue(onAbortCalled.get());
+    }
+
+    @Test
+    public void triggeredDialogReportsIdleAfterEachInteraction() throws IOException {
+        sttService = new STTServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(sttService);
+        registerService(ttsService);
+        registerService(hliStub);
+        Dictionary<String, Object> config = new Hashtable<>();
+        config.put(CONFIG_KEYWORD, "word");
+        config.put(CONFIG_DEFAULT_STT, sttService.getId());
+        config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
+        config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
+        ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+        configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID).update(config);
+        // seeing the keyword proves the configuration was applied, since it has no fallback value
+        waitForAssert(() -> {
+            try {
+                assertThat(voiceManager.getDialogContextBuilder().build().keyword(), is("word"));
+            } catch (IllegalStateException e) {
+                // the default services are missing until the configuration is applied
+                throw new AssertionError(e);
+            }
+        });
+        AudioDialogProvider dialogProvider = getService(AudioDialogProvider.class);
+        assertNotNull(dialogProvider);
+
+        AtomicInteger idleCount = new AtomicInteger();
+        Runnable trigger = dialogProvider.startDialog(sink, source, null, null, null, idleCount::incrementAndGet);
+        assertNotNull(trigger);
+        assertThat(idleCount.get(), is(0));
+
+        trigger.run();
+        waitForAssert(() -> assertThat(idleCount.get(), is(1)));
+        assertTrue(sttService.isRecognized());
+        assertThat(ttsService.getSynthesized(), is("Interpreted text"));
+
+        trigger.run();
+        waitForAssert(() -> assertThat(idleCount.get(), is(2)));
+
+        voiceManager.stopDialog(source);
+        assertThat(idleCount.get(), is(2));
     }
 
     @Test

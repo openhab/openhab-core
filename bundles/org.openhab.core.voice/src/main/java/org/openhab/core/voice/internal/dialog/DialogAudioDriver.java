@@ -257,6 +257,19 @@ public class DialogAudioDriver {
     }
 
     /**
+     * Tells the trigger that the dialog is idle.
+     */
+    public void notifyTriggerIdle() {
+        final DTServiceHandle handle;
+        synchronized (triggerLock) {
+            handle = dtServiceHandle;
+        }
+        if (handle != null) {
+            handle.onDialogIdle();
+        }
+    }
+
+    /**
      * Aborts speech recognition and closes the speech recognition audio stream.
      */
     public void stopRecognition() {
