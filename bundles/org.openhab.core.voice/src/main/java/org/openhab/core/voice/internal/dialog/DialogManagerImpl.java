@@ -504,6 +504,11 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
     }
 
     @Override
+    public boolean shouldSpeakRecognitionErrors(DialogContext context) {
+        return voiceServiceResolver.getConfiguration().isSpeakRecognitionErrors();
+    }
+
+    @Override
     public void onDialogStopped(DialogContext context) {
         DialogRegistration registration;
         synchronized (dialogRegistrationStorage) {
@@ -512,6 +517,11 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         if (registration != null) {
             scheduleDialogRegistrations();
         }
+    }
+
+    @Override
+    public boolean shouldListenForFollowUp(DialogContext context) {
+        return voiceServiceResolver.getConfiguration().isFollowUpListening();
     }
 
     private void stopDialogs(Predicate<DialogProcessor> filter) {

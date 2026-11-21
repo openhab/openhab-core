@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -146,6 +147,12 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Override
     public void play(@Nullable AudioStream audioStream, AudioSink sink, @Nullable PercentType volume) {
+        playAndComplete(audioStream, sink, volume);
+    }
+
+    @Override
+    public CompletableFuture<@Nullable Void> playAndComplete(@Nullable AudioStream audioStream, AudioSink sink,
+            @Nullable PercentType volume) {
         AudioStream streamCandidate = audioStream;
         if (audioStream != null) {
             boolean isFormatSupported = sink.getSupportedFormats().stream()
@@ -161,13 +168,13 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
                     closeQuietly(audioStream);
                     logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
                             e.getMessage());
-                    return;
+                    return CompletableFuture.failedFuture(e);
                 }
             }
         }
         final AudioStream streamToPlay = streamCandidate;
         Runnable restoreVolume = handleVolumeCommand(volume, sink);
-        sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
+        return sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
             if (streamToPlay instanceof Disposable disposable) {
                 try {
                     disposable.dispose();

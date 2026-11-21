@@ -77,12 +77,20 @@ public class VoiceManagerConfiguration {
         return configurationDTO.keyword;
     }
 
+    public boolean isFollowUpListening() {
+        return configurationDTO.followUpListening;
+    }
+
     public @Nullable String getListeningItem() {
         return configurationDTO.listeningItem;
     }
 
     public @Nullable String getListeningMelody() {
         return configurationDTO.listeningMelody;
+    }
+
+    public boolean isSpeakRecognitionErrors() {
+        return configurationDTO.speakRecognitionErrors;
     }
 
     public @Nullable String getDefaultTTS() {
@@ -126,6 +134,7 @@ public class VoiceManagerConfiguration {
         public @Nullable String defaultHLI;
         public @Nullable String defaultKS;
         public String keyword = "Wakeup";
+        public boolean followUpListening = false;
         public @Nullable String listeningItem;
         public @Nullable String listeningMelody;
         public String promptItems = VoiceConfigurationConstants.PROMPT_ITEMS_ALL;
@@ -137,5 +146,6 @@ public class VoiceManagerConfiguration {
                 - Always respond in the same language the user used.
                 - Keep all responses short and natural, as they may be read aloud by a voice assistant.
                 """;
+        public boolean speakRecognitionErrors = true;
     }
 }
