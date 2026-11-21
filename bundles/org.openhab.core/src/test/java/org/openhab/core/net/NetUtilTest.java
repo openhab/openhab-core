@@ -15,18 +15,21 @@ package org.openhab.core.net;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.*;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.openhab.core.internal.common.SafeCallerImpl;
 
 /**
  * Tests for NetUtil class
@@ -197,6 +200,71 @@ public class NetUtilTest {
             assertEquals("192.168.1.1", addresses.getFirst().getHostAddress());
             assertEquals("10.0.0.5", addresses.get(254).getHostAddress());
             assertEquals("10.0.0.6", addresses.getLast().getHostAddress());
+        }
+    }
+
+    @Test
+    public void primaryAndBroadcastAddressResolvedOnceAnIpv4AddressAppears() {
+        SafeCallerImpl safeCaller = new SafeCallerImpl(null);
+        LateAddressNetUtil netUtil = new LateAddressNetUtil(safeCaller);
+        NetworkAddressChangeListener listener = mock(NetworkAddressChangeListener.class);
+        netUtil.addNetworkAddressChangeListener(listener);
+        doAnswer(invocation -> {
+            netUtil.broadcastSeenByListener = netUtil.getConfiguredBroadcastAddress();
+            return null;
+        }).when(listener).onPrimaryAddressChanged(any(), any());
+        try {
+            netUtil.activate(Map.of());
+            assertNull(netUtil.getPrimaryIpv4HostAddress());
+            assertNull(netUtil.getConfiguredBroadcastAddress());
+
+            netUtil.localAddress = "192.168.1.18";
+            verify(listener, timeout(5000)).onPrimaryAddressChanged(null, "192.168.1.18");
+            assertEquals("192.168.1.18", netUtil.getPrimaryIpv4HostAddress());
+            assertEquals("192.168.1.255", netUtil.getConfiguredBroadcastAddress());
+            assertEquals("192.168.1.255", netUtil.broadcastSeenByListener);
+        } finally {
+            netUtil.deactivate();
+            safeCaller.deactivate();
+        }
+    }
+
+    @Test
+    public void configuredBroadcastAddressKeptWhenPrimaryAddressAppears() {
+        SafeCallerImpl safeCaller = new SafeCallerImpl(null);
+        LateAddressNetUtil netUtil = new LateAddressNetUtil(safeCaller);
+        NetworkAddressChangeListener listener = mock(NetworkAddressChangeListener.class);
+        netUtil.addNetworkAddressChangeListener(listener);
+        try {
+            netUtil.activate(Map.of("broadcastAddress", "10.0.0.255"));
+
+            netUtil.localAddress = "192.168.1.18";
+            verify(listener, timeout(5000)).onPrimaryAddressChanged(null, "192.168.1.18");
+            assertEquals("10.0.0.255", netUtil.getConfiguredBroadcastAddress());
+        } finally {
+            netUtil.deactivate();
+            safeCaller.deactivate();
+        }
+    }
+
+    private static class LateAddressNetUtil extends NetUtil {
+        volatile @Nullable String localAddress;
+        volatile @Nullable String broadcastSeenByListener;
+
+        LateAddressNetUtil(SafeCallerImpl safeCaller) {
+            super(safeCaller);
+        }
+
+        @Override
+        @Nullable
+        String getFirstLocalIPv4Address() {
+            return localAddress;
+        }
+
+        @Override
+        @Nullable
+        String getPrimaryBroadcastAddress() {
+            return localAddress == null ? null : "192.168.1.255";
         }
     }
 }
