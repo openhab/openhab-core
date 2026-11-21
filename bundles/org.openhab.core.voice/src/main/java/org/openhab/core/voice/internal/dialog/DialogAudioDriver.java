@@ -14,6 +14,7 @@ package org.openhab.core.voice.internal.dialog;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -58,6 +59,7 @@ public class DialogAudioDriver {
 
     private final Object recognitionLock = new Object();
     private volatile long recognitionEpoch;
+    private @Nullable STTListener recognitionListener;
     private @Nullable AudioStream streamSTT;
     private @Nullable STTServiceHandle sttServiceHandle;
 
@@ -176,11 +178,35 @@ public class DialogAudioDriver {
      */
     public @Nullable STTServiceHandle startRecognition(final STTListener listener,
             final @Nullable Duration audioAfterKeyword) throws STTException {
-        stopRecognition();
+        return startRecognition(listener, audioAfterKeyword, () -> false);
+    }
+
+    /**
+     * Starts speech recognition stream, unless cancelled.
+     *
+     * @param listener the listener receiving speech-to-text events
+     * @param audioAfterKeyword how much audio the keyword spotter read after the keyword, or null when unknown
+     * @param cancelled checked before stopping the current recognition, so a cancelled start can't stop a newer one
+     * @return {@link STTServiceHandle} or null if starting failed or was cancelled
+     * @throws STTException if the STT service failed to start recognition
+     */
+    public @Nullable STTServiceHandle startRecognition(final STTListener listener,
+            final @Nullable Duration audioAfterKeyword, final BooleanSupplier cancelled) throws STTException {
         final long epoch;
+        final STTServiceHandle previousHandle;
+        final AudioStream previousStream;
         synchronized (recognitionLock) {
+            if (cancelled.getAsBoolean()) {
+                return null;
+            }
             epoch = ++recognitionEpoch;
+            recognitionListener = listener;
+            previousHandle = sttServiceHandle;
+            sttServiceHandle = null;
+            previousStream = streamSTT;
+            streamSTT = null;
         }
+        abortRecognition(previousHandle, previousStream);
 
         final AudioFormat fmt = sttFormat;
         if (fmt == null) {
@@ -273,15 +299,36 @@ public class DialogAudioDriver {
      * Aborts speech recognition and closes the speech recognition audio stream.
      */
     public void stopRecognition() {
+        stopRecognitionFor(null);
+    }
+
+    /**
+     * Same as {@link #stopRecognition()}, but only if the current recognition was started with this listener.
+     *
+     * @param listener the listener the recognition was started with
+     */
+    public void stopRecognition(STTListener listener) {
+        stopRecognitionFor(listener);
+    }
+
+    private void stopRecognitionFor(@Nullable STTListener listener) {
         final STTServiceHandle handle;
         final AudioStream stream;
         synchronized (recognitionLock) {
+            if (listener != null && !listener.equals(recognitionListener)) {
+                return;
+            }
             recognitionEpoch++;
+            recognitionListener = null;
             handle = sttServiceHandle;
             sttServiceHandle = null;
             stream = streamSTT;
             streamSTT = null;
         }
+        abortRecognition(handle, stream);
+    }
+
+    private void abortRecognition(@Nullable STTServiceHandle handle, @Nullable AudioStream stream) {
         if (handle != null) {
             handle.abort();
         }

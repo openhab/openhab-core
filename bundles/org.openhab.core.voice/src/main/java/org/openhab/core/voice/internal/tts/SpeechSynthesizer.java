@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.tts;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -58,16 +59,19 @@ public class SpeechSynthesizer {
      * @param voice voice to use
      * @param sink audio sink to play audio on
      * @param volume volume to set during playback, or null to keep the current volume
+     * @return a future that completes when playback has finished, or exceptionally if it failed
      */
-    public void say(String text, TTSService tts, Voice voice, AudioSink sink, @Nullable PercentType volume) {
+    public CompletableFuture<@Nullable Void> say(String text, TTSService tts, Voice voice, AudioSink sink,
+            @Nullable PercentType volume) {
         try {
-            synthesizeAndPlay(text, tts, voice, sink, volume);
+            return synthesizeAndPlay(text, tts, voice, sink, volume);
         } catch (TTSException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
             } else {
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
             }
+            return CompletableFuture.failedFuture(e);
         }
     }
 
@@ -79,10 +83,11 @@ public class SpeechSynthesizer {
      * @param voice voice to use
      * @param sink audio sink to play audio on
      * @param volume volume to set during playback, or null to keep the current volume
-     * @throws TTSException if synthesis or playback fails
+     * @return a future that completes when playback has finished, or exceptionally if playback fails
+     * @throws TTSException if synthesis fails
      */
-    void synthesizeAndPlay(String text, TTSService tts, Voice voice, AudioSink sink, @Nullable PercentType volume)
-            throws TTSException {
+    CompletableFuture<@Nullable Void> synthesizeAndPlay(String text, TTSService tts, Voice voice, AudioSink sink,
+            @Nullable PercentType volume) throws TTSException {
         Set<AudioFormat> ttsSupportedFormats = tts.getSupportedFormats();
         AudioFormat ttsAudioFormat = AudioFormatMatcher.getBestMatchWithTranscoding(ttsSupportedFormats,
                 sink.getSupportedFormats());
@@ -92,6 +97,6 @@ public class SpeechSynthesizer {
         }
 
         AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
-        audioManager.play(audioStream, sink, volume);
+        return audioManager.playAndComplete(audioStream, sink, volume);
     }
 }

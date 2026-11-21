@@ -250,6 +250,26 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    public void shouldSpeakRecognitionErrorsFollowsTheConfiguration() throws AudioException, STTException, KSException {
+        DialogContext context = createValidContext("source-1", "sink-1");
+        assertTrue(dialogManager.shouldSpeakRecognitionErrors(context));
+
+        voiceServiceResolver.getConfiguration().update(Map.of("speakRecognitionErrors", false));
+
+        assertFalse(dialogManager.shouldSpeakRecognitionErrors(context));
+    }
+
+    @Test
+    public void shouldListenForFollowUpFollowsTheConfiguration() throws AudioException, STTException, KSException {
+        DialogContext context = createValidContext("source-1", "sink-1");
+        assertFalse(dialogManager.shouldListenForFollowUp(context));
+
+        voiceServiceResolver.getConfiguration().update(Map.of("followUpListening", true));
+
+        assertTrue(dialogManager.shouldListenForFollowUp(context));
+    }
+
+    @Test
     public void listenAndAnswerPreventsDuplicateExecutionOnSameDialogGroup()
             throws AudioException, STTException, KSException {
         DialogContext context1 = createValidContextBuilder("source-1", "sink-1").withDialogGroup("group-A").build();

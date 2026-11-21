@@ -241,6 +241,80 @@ public class DialogAudioDriverTest {
     }
 
     @Test
+    public void stopRecognitionForAListenerLeavesALaterRecognitionRunning()
+            throws AudioException, STTException, IOException {
+        AudioStream firstStream = mock(AudioStream.class);
+        AudioStream secondStream = mock(AudioStream.class);
+        STTServiceHandle secondHandle = mock(STTServiceHandle.class);
+        STTListener secondListener = mock(STTListener.class);
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(firstStream, secondStream);
+        when(sttService.recognize(eq(sttListener), eq(firstStream), eq(Locale.ENGLISH))).thenReturn(sttHandle);
+        when(sttService.recognize(eq(secondListener), eq(secondStream), eq(Locale.ENGLISH))).thenReturn(secondHandle);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        driver.startRecognition(sttListener);
+        driver.startRecognition(secondListener);
+        verify(sttHandle).abort();
+        verify(firstStream).close();
+
+        driver.stopRecognition(sttListener);
+        verify(secondHandle, never()).abort();
+        verify(secondStream, never()).close();
+
+        driver.stopRecognition(secondListener);
+        verify(secondHandle).abort();
+        verify(secondStream).close();
+    }
+
+    @Test
+    public void stopRecognitionForAListenerAbortsItsRecognitionWhileItStarts()
+            throws AudioException, STTException, IOException {
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(audioStream);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        when(sttService.recognize(eq(sttListener), eq(audioStream), eq(Locale.ENGLISH))).thenAnswer(invocation -> {
+            driver.stopRecognition(sttListener);
+            return sttHandle;
+        });
+
+        assertNull(driver.startRecognition(sttListener));
+        verify(sttHandle).abort();
+        verify(audioStream).close();
+    }
+
+    @Test
+    public void cancelledStartRecognitionLeavesTheCurrentRecognitionRunning()
+            throws AudioException, STTException, IOException {
+        STTListener secondListener = mock(STTListener.class);
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(audioStream);
+        when(sttService.recognize(eq(sttListener), eq(audioStream), eq(Locale.ENGLISH))).thenReturn(sttHandle);
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        driver.startRecognition(sttListener);
+
+        assertNull(driver.startRecognition(secondListener, null, () -> true));
+        verify(sttHandle, never()).abort();
+        verify(audioStream, never()).close();
+        verify(audioSource, times(1)).getInputStream(any());
+        verify(sttService, never()).recognize(eq(secondListener), any(), any());
+    }
+
+    @Test
     public void stopAllAbortsTriggerAndRecognitionAndClosesStreams() throws Exception {
         AudioStream streamKS = mock(AudioStream.class);
         AudioStream streamSTT = mock(AudioStream.class);

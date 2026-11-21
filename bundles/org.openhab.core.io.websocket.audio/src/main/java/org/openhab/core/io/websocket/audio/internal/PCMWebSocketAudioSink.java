@@ -31,7 +31,6 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.PipedAudioStream;
-import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;
@@ -98,7 +97,6 @@ public class PCMWebSocketAudioSink implements AudioSink {
         }
         OutputStream outputStream = null;
         try {
-            long duration = -1;
             if (AudioFormat.CONTAINER_WAVE.equals(audioStream.getFormat().getContainer())) {
                 logger.debug("Removing wav container from data");
                 try {
@@ -108,15 +106,6 @@ public class PCMWebSocketAudioSink implements AudioSink {
                 }
             }
             var audioFormat = audioStream.getFormat();
-            if (audioStream instanceof SizeableAudioStream sizeableAudioStream) {
-                long byteLength = sizeableAudioStream.length();
-                long bytesPerSecond = (Objects.requireNonNull(audioFormat.getBitDepth()) / 8)
-                        * Objects.requireNonNull(audioFormat.getFrequency())
-                        * Objects.requireNonNull(audioFormat.getChannels());
-                float durationInSeconds = (float) byteLength / bytesPerSecond;
-                duration = Math.round(durationInSeconds * 1000);
-                logger.debug("Duration of input stream : {}", duration);
-            }
             AtomicBoolean transferenceAborted = new AtomicBoolean(false);
             if (audioStream instanceof PipedAudioStream pipedAudioStream) {
                 pipedAudioStream.onClose(() -> transferenceAborted.set(true));
@@ -141,8 +130,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
             } else {
                 finalAudioStream = audioStream;
             }
-            int bytesPer500ms = (targetSampleRate * (targetBitDepth / 8) * targetChannels) / 2;
-            transferAudio(finalAudioStream, outputStream, bytesPer500ms, duration, transferenceAborted);
+            int bytesPerSecond = targetSampleRate * (targetBitDepth / 8) * targetChannels;
+            transferAudio(finalAudioStream, outputStream, bytesPerSecond, transferenceAborted);
         } catch (InterruptedIOException ignored) {
         } catch (IOException e) {
             logger.warn("IOException: {}", e.getMessage());
@@ -164,10 +153,11 @@ public class PCMWebSocketAudioSink implements AudioSink {
         }
     }
 
-    private void transferAudio(InputStream inputStream, OutputStream outputStream, int chunkSize, long duration,
+    private void transferAudio(InputStream inputStream, OutputStream outputStream, int bytesPerSecond,
             AtomicBoolean aborted) throws IOException, InterruptedException {
         Instant start = Instant.now();
         long transferred = 0;
+        int chunkSize = bytesPerSecond / 2;
         try {
             byte[] buffer = new byte[chunkSize];
             int read;
@@ -184,14 +174,12 @@ public class PCMWebSocketAudioSink implements AudioSink {
             }
         }
         logger.debug("Sent {} bytes of audio", transferred);
-        if (duration != -1) {
-            Instant end = Instant.now();
-            long millisSecondTimedToSendAudioData = Duration.between(start, end).toMillis();
-            if (millisSecondTimedToSendAudioData < duration) {
-                long timeToSleep = duration - millisSecondTimedToSendAudioData;
-                logger.debug("Sleep time to let the system play sound : {}ms", timeToSleep);
-                Thread.sleep(timeToSleep);
-            }
+        // the stream length may be unknown, so wait for what was sent to play
+        long duration = transferred * 1000 / bytesPerSecond;
+        long timeToSleep = duration - Duration.between(start, Instant.now()).toMillis();
+        if (timeToSleep > 0) {
+            logger.debug("Sleep time to let the system play sound : {}ms", timeToSleep);
+            Thread.sleep(timeToSleep);
         }
     }
 
