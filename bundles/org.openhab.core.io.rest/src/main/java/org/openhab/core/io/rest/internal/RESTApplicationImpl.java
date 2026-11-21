@@ -12,25 +12,33 @@
  */
 package org.openhab.core.io.rest.internal;
 
-import javax.ws.rs.core.Application;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationBase;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+
+import jakarta.ws.rs.core.Application;
 
 /**
  * The JAX-RS application for the openHAB JAX-RS resources.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-@Component(service = Application.class, property = {
-        // https://lists.apache.org/thread.html/
-        // r1379789bd90c6b7e3971d5ffeedb2e0d1e1c9103fd2392cb95458596%40%3Cuser.aries.apache.org%3E
-        "servlet.init.hide-service-list-page=true" })
-@JaxrsName(RESTConstants.JAX_RS_NAME)
-@JaxrsApplicationBase("rest")
+@Component(service = Application.class)
+@JakartarsName(RESTConstants.JAX_RS_NAME)
+@JakartarsApplicationBase("rest")
 @NonNullByDefault
 public class RESTApplicationImpl extends Application {
+
+    @Override
+    @NonNullByDefault({})
+    public Map<String, Object> getProperties() {
+        // Do not let Jersey publish a WADL (application.wadl), the API is described by OpenAPI instead.
+        // Key of org.glassfish.jersey.server.ServerProperties.WADL_FEATURE_DISABLE, kept as a string to avoid a Jersey
+        // import.
+        return Map.of("jersey.config.server.wadl.disableWadl", true);
+    }
 }
