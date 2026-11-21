@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.i18n.LocaleProvider;
@@ -303,6 +304,7 @@ public class DialogProcessorTest {
         verify(feedbackService).playStopSound();
         verify(eventListener).onReleaseGroup(context);
         verify(eventListener).onDialogStopped(context);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -335,6 +337,7 @@ public class DialogProcessorTest {
         verifyNoInteractions(feedbackService);
         verify(eventListener).onReleaseGroup(context);
         verify(eventListener).onDialogStopped(context);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -350,8 +353,54 @@ public class DialogProcessorTest {
         sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionEvent("hello", 1.0f));
 
         assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
-        verify(eventListener).onReleaseGroup(context);
+        InOrder inOrder = inOrder(eventListener, audioDriver);
+        inOrder.verify(eventListener).onReleaseGroup(context);
+        inOrder.verify(audioDriver).notifyTriggerIdle();
         verify(eventListener, never()).onDialogStopped(context);
+    }
+
+    @Test
+    public void finishDialogNotifiesTriggerIdleWhenNothingWasRecognized() throws STTException {
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.startSimpleDialog();
+        verify(audioDriver).startRecognition(sttListenerCaptor.capture());
+
+        sttListenerCaptor.getValue().sttEventReceived(new SpeechRecognitionErrorEvent("nothing heard"));
+
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        verify(audioDriver).notifyTriggerIdle();
+    }
+
+    @Test
+    public void finishDialogNotifiesTriggerIdleWhenRecognitionFailsToStart() throws STTException {
+        when(audioDriver.startRecognition(any())).thenThrow(STTException.class);
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+
+        processor.startSimpleDialog();
+
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        verify(audioDriver).notifyTriggerIdle();
+    }
+
+    @Test
+    public void ignoredTriggerNotifiesTriggerIdle() throws DTException, STTException {
+        when(eventListener.onAcquireGroup(any())).thenReturn(false);
+        DialogContext context = createTestContext(List.of());
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener);
+        processor.start();
+
+        processor.startSimpleDialog();
+
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        verify(audioDriver, never()).startRecognition(any());
+        verify(audioDriver).notifyTriggerIdle();
     }
 
     @Test
@@ -377,6 +426,7 @@ public class DialogProcessorTest {
 
         assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
         assertTrue(processor.isProcessing());
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -397,6 +447,7 @@ public class DialogProcessorTest {
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(speechSynthesizer);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -416,6 +467,7 @@ public class DialogProcessorTest {
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(speechSynthesizer);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -435,6 +487,7 @@ public class DialogProcessorTest {
         sttListenerCaptor.getValue().sttEventReceived(new RecognitionStopEvent());
 
         verifyNoInteractions(feedbackService);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -473,6 +526,7 @@ public class DialogProcessorTest {
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(speechSynthesizer);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -512,6 +566,7 @@ public class DialogProcessorTest {
 
         assertEquals(DialogProcessor.DialogState.IDLE, processor.getState());
         verifyNoInteractions(speechSynthesizer);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -539,6 +594,7 @@ public class DialogProcessorTest {
         assertFalse(processor.isProcessing());
         verify(hli, never()).interpret(any(Locale.class), any(InterpreterContext.class));
         verifyNoInteractions(speechSynthesizer);
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
@@ -559,6 +615,7 @@ public class DialogProcessorTest {
         ksListenerCaptor.getValue().dtEventReceived(new DTTriggeredEvent());
         assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
         verify(audioDriver, times(1)).startRecognition(any(STTListener.class));
+        verify(audioDriver, never()).notifyTriggerIdle();
     }
 
     @Test
