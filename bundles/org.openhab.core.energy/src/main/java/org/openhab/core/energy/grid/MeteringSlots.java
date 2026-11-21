@@ -63,7 +63,7 @@ public record MeteringSlots(ZoneId zone, Duration slotLength) {
         }
     }
 
-    /** The quarter-hour geometry of the Belgian capacity tariff, and of every other 15-minute metered market. */
+    /** The quarter-hour geometry of the Flemish capacity tariff, and of every other 15-minute metered market. */
     public static MeteringSlots quarterHourly(ZoneId zone) {
         return new MeteringSlots(zone, Duration.ofMinutes(15));
     }

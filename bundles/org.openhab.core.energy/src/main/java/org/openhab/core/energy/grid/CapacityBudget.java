@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public record CapacityBudget(PeakFeeModel fee, double shedMarginW) {
 
-    /** What ships when a site configures nothing, seeded from the reference implementation's own value. */
+    /** The margin used when a site configures none. */
     public static final double DEFAULT_SHED_MARGIN_W = 300;
 
     /**

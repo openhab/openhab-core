@@ -17,14 +17,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * A grid fee that depends on demand peaks rather than on energy taken.
  * <p>
- * Two archetypes are documented in openhab-core issue #3478 and both are implemented here: the billed maximum of
- * fixed-size power buckets over a period - the Belgian 15-minute monthly peak - and a tiered fee on the average of
- * the N highest slots of a period, which is the Norwegian top-three-hours form. They differ in how a slot enters the
+ * Two forms are implemented: the billed maximum of fixed-size power buckets over a period - the Flemish 15-minute
+ * monthly peak - and a tiered fee on the average of the N highest slots of a period, which is the Norwegian
+ * top-three-hours form. They differ in how a slot enters the
  * bill, but a planner asks both the same two questions, which is why they share this type.
  * <p>
- * <strong>Everything here is an unsigned import magnitude in watts.</strong> The signed grid convention that
- * {@code energy-participants} fixes, where import is negative, is a convention about a measurement; a bill is not
- * signed. Mixing the two inverts comparisons silently - a {@code min} over negative watts selects the larger import -
+ * <strong>Everything here is an unsigned import magnitude in watts.</strong> openHAB's signed grid convention, where
+ * import is negative, is a convention about a measurement; a bill is not signed. Mixing the two inverts comparisons
+ * silently - a {@code min} over negative watts selects the larger import -
  * so the whole of this package works in magnitudes and converts at the edge.
  *
  * @author Stamate Viorel - Initial contribution

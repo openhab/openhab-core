@@ -15,7 +15,7 @@ package org.openhab.core.energy.grid;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The billed maximum of fixed-size power buckets over a period: the Belgian capacity tariff's archetype.
+ * The billed maximum of fixed-size power buckets over a period, the form of the Flemish capacity tariff.
  * <p>
  * Every closed metering slot is a candidate; the period is billed on the largest of them, floored by the tariff's
  * minimum billable demand. That floor is the half of this model that a naive reading misses, and it changes
@@ -34,7 +34,8 @@ public class BucketPeakFee implements PeakFeeModel {
 
     /**
      * @param minimumBillableDemandW the tariff's minimum billable demand as an unsigned magnitude in watts, below
-     *            which every peak is billed the same. Belgium's is 2.5 kW. Pass zero for a tariff that has none.
+     *            which every peak is billed the same. Flanders bills at least 2.5 kW. Pass zero for a tariff that has
+     *            none.
      * @throws IllegalArgumentException if the floor is negative or not finite
      */
     public BucketPeakFee(double minimumBillableDemandW) {

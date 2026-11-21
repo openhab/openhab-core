@@ -36,8 +36,8 @@ public class CapacityTariffTest {
 
     private static final ZoneId BRUSSELS = ZoneId.of("Europe/Brussels");
 
-    /** Belgium: quarter-hour buckets, 2.5 kW minimum billable demand. */
-    private static CapacityTracker belgianTracker(double minimumBillableW) {
+    /** Flanders: quarter-hour buckets, 2.5 kW minimum billable demand. */
+    private static CapacityTracker flemishTracker(double minimumBillableW) {
         return new CapacityTracker(MeteringSlots.quarterHourly(BRUSSELS), new BucketPeakFee(minimumBillableW));
     }
 
@@ -90,7 +90,7 @@ public class CapacityTariffTest {
      */
     @Test
     public void theSlotInProgressIsExtrapolatedToItsEnd() {
-        CapacityTracker tracker = belgianTracker(2500);
+        CapacityTracker tracker = flemishTracker(2500);
         tracker.observe(Instant.parse("2026-09-25T05:00:00Z"), 0);
         tracker.observe(Instant.parse("2026-09-25T05:04:00Z"), -6800);
 
@@ -105,7 +105,7 @@ public class CapacityTariffTest {
      */
     @Test
     public void onlyTheMeteredAverageIsEverCommitted() {
-        CapacityTracker tracker = belgianTracker(2500);
+        CapacityTracker tracker = flemishTracker(2500);
         tracker.observe(Instant.parse("2026-09-25T05:00:00Z"), -12000);
         assertThat(tracker.projectionW(), closeTo(12000, 0.5));
 
@@ -118,7 +118,7 @@ public class CapacityTariffTest {
     /** "Rollover at the supplier's boundary": the quarter commits and a fresh one starts. */
     @Test
     public void crossingTheBoundaryCommitsAndStartsAgain() {
-        CapacityTracker tracker = belgianTracker(0);
+        CapacityTracker tracker = flemishTracker(0);
         tracker.observe(Instant.parse("2026-09-25T05:00:00Z"), -8000);
         tracker.observe(Instant.parse("2026-09-25T05:16:00Z"), -1000);
 
@@ -130,7 +130,7 @@ public class CapacityTariffTest {
     /** A new billing month discards the old month's peak rather than carrying it. */
     @Test
     public void aNewMonthStartsItsOwnPeak() {
-        CapacityTracker tracker = belgianTracker(2500);
+        CapacityTracker tracker = flemishTracker(2500);
         tracker.observe(Instant.parse("2026-09-25T05:00:00Z"), -22600);
         tracker.observe(Instant.parse("2026-09-25T05:16:00Z"), -1000);
         assertThat(tracker.fee().billedPeakW(), closeTo(22600, 1.0));
@@ -199,10 +199,10 @@ public class CapacityTariffTest {
     /** The sign of a reading is discarded: a bill is not signed, and the grid convention is about measurement. */
     @Test
     public void theSignOfAReadingIsNotTheSignOfABill() {
-        CapacityTracker importNegative = belgianTracker(0);
+        CapacityTracker importNegative = flemishTracker(0);
         importNegative.observe(Instant.parse("2026-09-25T05:00:00Z"), -5000);
 
-        CapacityTracker importPositive = belgianTracker(0);
+        CapacityTracker importPositive = flemishTracker(0);
         importPositive.observe(Instant.parse("2026-09-25T05:00:00Z"), 5000);
 
         assertThat(importNegative.projectionW(), is(importPositive.projectionW()));
