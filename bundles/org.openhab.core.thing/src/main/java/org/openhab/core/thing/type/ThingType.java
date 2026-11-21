@@ -49,6 +49,7 @@ public class ThingType extends AbstractDescriptionType {
     private final boolean listed;
     private final @Nullable String category;
     private final @Nullable String semanticEquipmentTag;
+    private final @Nullable String bundleSymbolicName;
 
     /**
      * Creates a new instance of this class with the specified parameters.
@@ -71,6 +72,7 @@ public class ThingType extends AbstractDescriptionType {
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param extensibleChannelTypeIds the channel-type ids this thing-type is extensible with (could be null or empty).
      * @param semanticEquipmentTag the semantic (equipment) tag of the thing (could be null)
+     * @param bundleSymbolicName the symbolic name of the bundle that provides this Thing type (could be null)
      * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     ThingType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
@@ -78,7 +80,8 @@ public class ThingType extends AbstractDescriptionType {
             @Nullable String representationProperty, @Nullable List<ChannelDefinition> channelDefinitions,
             @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
             @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds,
-            @Nullable String semanticEquipmentTag) throws IllegalArgumentException {
+            @Nullable String semanticEquipmentTag, @Nullable String bundleSymbolicName)
+            throws IllegalArgumentException {
         super(uid, label, description, configDescriptionURI);
 
         this.category = category;
@@ -94,6 +97,16 @@ public class ThingType extends AbstractDescriptionType {
                 : Collections.unmodifiableList(extensibleChannelTypeIds);
         this.properties = properties == null ? Map.of() : Collections.unmodifiableMap(properties);
         this.semanticEquipmentTag = semanticEquipmentTag;
+        this.bundleSymbolicName = bundleSymbolicName;
+    }
+
+    /**
+     * Returns the symbolic name of the bundle that provides this {@link ThingType}.
+     *
+     * @return the symbolic name of the providing bundle (could be null)
+     */
+    public @Nullable String getBundleSymbolicName() {
+        return bundleSymbolicName;
     }
 
     /**

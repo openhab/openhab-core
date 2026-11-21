@@ -210,6 +210,24 @@ public class ThingTypeBuilderTest {
         assertThat(bridgeType.getLabel(), is(LABEL));
     }
 
+    @Test
+    public void bundleSymbolicNameIsKeptForThingTypeAndBridgeType() {
+        ThingType thingType = builder.withBundleSymbolicName("org.openhab.binding.test").build();
+        assertThat(thingType.getBundleSymbolicName(), is("org.openhab.binding.test"));
+
+        BridgeType bridgeType = builder.buildBridge();
+        assertThat(bridgeType.getBundleSymbolicName(), is("org.openhab.binding.test"));
+
+        // copying a thing type keeps the bundle symbolic name
+        assertThat(ThingTypeBuilder.instance(thingType).build().getBundleSymbolicName(),
+                is("org.openhab.binding.test"));
+    }
+
+    @Test
+    public void bundleSymbolicNameIsNullByDefault() {
+        assertNull(builder.build().getBundleSymbolicName());
+    }
+
     private Map<String, String> mockProperties() {
         return Map.of("key1", "value1", "key2", "value2");
     }
