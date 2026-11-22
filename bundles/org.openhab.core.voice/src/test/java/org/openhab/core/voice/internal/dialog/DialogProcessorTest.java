@@ -378,6 +378,7 @@ public class DialogProcessorTest {
                 speechSynthesizer, i18nProvider, eventListener);
 
         ArgumentCaptor<STTListener> sttListenerCaptor = ArgumentCaptor.forClass(STTListener.class);
+        processor.start();
         processor.startSimpleDialog();
         verify(audioDriver).startRecognition(sttListenerCaptor.capture());
 
@@ -394,6 +395,7 @@ public class DialogProcessorTest {
         DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
                 speechSynthesizer, i18nProvider, eventListener);
 
+        processor.start();
         processor.startSimpleDialog();
 
         assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
