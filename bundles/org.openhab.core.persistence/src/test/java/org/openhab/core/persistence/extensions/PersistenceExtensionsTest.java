@@ -34,7 +34,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -954,6 +957,26 @@ public class PersistenceExtensionsTest {
         assertNull(variance);
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = { -1, 1 })
+    public void testVarianceAndDeviationSinceWithoutHistory(int clockOffsetSeconds) {
+        ZonedDateTime now = ZonedDateTime.parse("2026-01-01T12:00:00Z");
+        ZonedDateTime adjustedTime = now.plusSeconds(clockOffsetSeconds);
+        ZonedDateTime start = now.minusHours(1);
+        String serviceId = TestCachedValuesPersistenceService.ID;
+        createTestCachedValuesPersistenceService(now, 0, 0);
+        numberItem.setState(new DecimalType(7));
+
+        try (MockedStatic<ZonedDateTime> clock = mockStatic(ZonedDateTime.class, CALLS_REAL_METHODS)) {
+            clock.when(ZonedDateTime::now).thenReturn(now, adjustedTime);
+            State variance = PersistenceExtensions.varianceSince(numberItem, start, serviceId);
+            clock.when(ZonedDateTime::now).thenReturn(now, adjustedTime);
+            State deviation = PersistenceExtensions.deviationSince(numberItem, start, serviceId);
+
+            assertAll(() -> assertNull(variance, "variance"), () -> assertNull(deviation, "deviation"));
+        }
+    }
+
     @Test
     public void testVarianceUntilDecimalType() {
         ZonedDateTime endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0,
@@ -1843,6 +1866,19 @@ public class PersistenceExtensionsTest {
         // default persistence service
         average = PersistenceExtensions.averageSince(numberItem, start);
         assertNull(average);
+    }
+
+    @Test
+    public void testAverageSinceWithoutHistory() {
+        ZonedDateTime now = ZonedDateTime.parse("2026-01-01T12:00:00Z");
+        ZonedDateTime later = now.plusSeconds(1);
+        createTestCachedValuesPersistenceService(now, 0, 0);
+
+        try (MockedStatic<ZonedDateTime> clock = mockStatic(ZonedDateTime.class, CALLS_REAL_METHODS)) {
+            clock.when(ZonedDateTime::now).thenReturn(now, later);
+            assertNull(PersistenceExtensions.averageSince(numberItem, now.minusHours(1),
+                    TestCachedValuesPersistenceService.ID));
+        }
     }
 
     @Test
