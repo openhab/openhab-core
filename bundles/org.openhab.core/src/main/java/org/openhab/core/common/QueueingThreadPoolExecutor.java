@@ -179,12 +179,11 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 
             @Override
             public void run() {
-                final QueueingThreadPoolExecutor tpe = QueueingThreadPoolExecutor.this;
                 final Consumer<Runnable> parentExecute = QueueingThreadPoolExecutor.super::execute;
 
                 while (true) {
                     // check if some thread from the pool is idle
-                    if (tpe.getActiveCount() < tpe.getMaximumPoolSize()) {
+                    if (getActiveCount() < getMaximumPoolSize()) {
                         try {
                             // keep waiting for max 2 seconds if further tasks are pushed to the queue
                             final Runnable runnable = taskQueue.poll(2, TimeUnit.SECONDS);

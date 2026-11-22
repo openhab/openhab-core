@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.unit;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -65,9 +66,8 @@ public class CurrencyUnitTest {
     @Test
     public void testSimpleConversion() {
         QuantityType<Currency> amount = new QuantityType<>("7.45 DKK");
-        QuantityType<Currency> convertedAmount = amount.toUnit("€");
+        QuantityType<Currency> convertedAmount = requireNonNull(amount.toUnit("€"), "Unit conversion failed");
 
-        assertThat(convertedAmount, is(notNullValue()));
         assertThat(convertedAmount.getUnit(), is(TestCurrencyProvider.EUR));
         assertThat(convertedAmount.doubleValue(), closeTo(1, 1e-4));
     }
@@ -75,9 +75,8 @@ public class CurrencyUnitTest {
     @Test
     public void testInverseConversion() {
         QuantityType<Currency> amount = new QuantityType<>("1.00 €");
-        QuantityType<Currency> convertedAmount = amount.toUnit("DKK");
+        QuantityType<Currency> convertedAmount = requireNonNull(amount.toUnit("DKK"), "Unit conversion failed");
 
-        assertThat(convertedAmount, is(notNullValue()));
         assertThat(convertedAmount.getUnit(), is(TestCurrencyProvider.DKK));
         assertThat(convertedAmount.doubleValue(), closeTo(7.45, 1e-4));
     }
@@ -85,9 +84,8 @@ public class CurrencyUnitTest {
     @Test
     public void testComplexConversion() {
         QuantityType<Currency> amount = new QuantityType<>("13 DKK");
-        QuantityType<Currency> convertedAmount = amount.toUnit("$");
+        QuantityType<Currency> convertedAmount = requireNonNull(amount.toUnit("$"), "Unit conversion failed");
 
-        assertThat(convertedAmount, is(notNullValue()));
         assertThat(convertedAmount.getUnit(), is(TestCurrencyProvider.USD));
         assertThat(convertedAmount.doubleValue(), closeTo(1.8845, 1e-4));
     }
@@ -106,9 +104,8 @@ public class CurrencyUnitTest {
     @Test
     public void testEnergyPriceConversion() {
         QuantityType<EnergyPrice> price = new QuantityType<>("0.25 EUR/kWh");
-        QuantityType<EnergyPrice> convertedPrice = price.toUnit("DKK/kWh");
+        QuantityType<EnergyPrice> convertedPrice = requireNonNull(price.toUnit("DKK/kWh"), "Unit conversion failed");
 
-        assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/kWh")));
         assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
     }
@@ -149,9 +146,8 @@ public class CurrencyUnitTest {
     @Test
     public void testPricePerLitreCurrencyConversion() {
         QuantityType<VolumePrice> price = new QuantityType<>("0.25 €/l");
-        QuantityType<VolumePrice> convertedPrice = price.toUnit("DKK/l");
+        QuantityType<VolumePrice> convertedPrice = requireNonNull(price.toUnit("DKK/l"), "Unit conversion failed");
 
-        assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/l")));
         assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
     }
@@ -159,9 +155,8 @@ public class CurrencyUnitTest {
     @Test
     public void testPricePerCubicMetreConversion() {
         QuantityType<VolumePrice> price = new QuantityType<>("0.25 EUR/m³");
-        QuantityType<VolumePrice> convertedPrice = price.toUnit("DKK/m³");
+        QuantityType<VolumePrice> convertedPrice = requireNonNull(price.toUnit("DKK/m³"), "Unit conversion failed");
 
-        assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/m³")));
         assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
     }
@@ -169,9 +164,8 @@ public class CurrencyUnitTest {
     @Test
     public void testPricePerGallonConversion() {
         QuantityType<VolumePrice> price = new QuantityType<>("0.25 $/gal");
-        QuantityType<VolumePrice> convertedPrice = price.toUnit("DKK/gal");
+        QuantityType<VolumePrice> convertedPrice = requireNonNull(price.toUnit("DKK/gal"), "Unit conversion failed");
 
-        assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/gal")));
         assertThat(convertedPrice.doubleValue(), closeTo(1.7245, 1e-4));
     }
@@ -179,9 +173,8 @@ public class CurrencyUnitTest {
     @Test
     public void testPricePerLitreUnitConversion() {
         QuantityType<VolumePrice> price = new QuantityType<>("0.25 €/l");
-        QuantityType<VolumePrice> convertedPrice = price.toUnit("€/m³");
+        QuantityType<VolumePrice> convertedPrice = requireNonNull(price.toUnit("€/m³"), "Unit conversion failed");
 
-        assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("€/m³")));
         assertThat(convertedPrice.doubleValue(), closeTo(250.0, 1e-4));
     }
@@ -189,9 +182,8 @@ public class CurrencyUnitTest {
     @Test
     public void testPricePerLitreComplexConversion() {
         QuantityType<VolumePrice> price = new QuantityType<>("0.25 EUR/l");
-        QuantityType<VolumePrice> convertedPrice = price.toUnit("USD/gal");
+        QuantityType<VolumePrice> convertedPrice = requireNonNull(price.toUnit("USD/gal"), "Unit conversion failed");
 
-        assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("USD/gal")));
         assertThat(convertedPrice.doubleValue(), closeTo(1.0220, 1e-4));
     }

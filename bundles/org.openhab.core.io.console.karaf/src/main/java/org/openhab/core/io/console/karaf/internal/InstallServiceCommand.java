@@ -26,6 +26,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -70,9 +71,9 @@ public class InstallServiceCommand implements Action {
 
     @Override
     public Object execute() throws Exception {
-        System.out.println("");
-        System.out.println("Starting openHAB system service installation...");
-        System.out.println("");
+        printLine("");
+        printLine("Starting openHAB system service installation...");
+        printLine("");
 
         // get current JVM arguments
         RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
@@ -101,13 +102,13 @@ public class InstallServiceCommand implements Action {
         String karafHome = System.getProperty("karaf.home");
 
         if (karafBase == null) {
-            System.out.println("System property karaf.base is not set. Install aborted.");
+            printLine("System property karaf.base is not set. Install aborted.");
             return null;
         } else if (karafHome == null) {
-            System.out.println("System property karaf.home is not set. Install aborted.");
+            printLine("System property karaf.home is not set. Install aborted.");
             return null;
         } else if (!new File(karafHome).canWrite()) {
-            System.out.println("Cannot write to " + karafHome + ". Install aborted.");
+            printLine("Cannot write to " + karafHome + ". Install aborted.");
             return null;
         }
 
@@ -124,7 +125,7 @@ public class InstallServiceCommand implements Action {
         System.setProperty("karaf.base", karafBase);
 
         // determine os
-        String os = System.getProperty("os.name", "Unknown");
+        String os = Objects.requireNonNullElse(System.getProperty("os.name"), "Unknown");
 
         // read contents of config file.
         List<String> content = new ArrayList<>();
@@ -194,7 +195,7 @@ public class InstallServiceCommand implements Action {
         }
 
         // print post installation steps to be done by user
-        System.out.println("");
+        printLine("");
         if (os.startsWith("Win")) {
             printPostInstallStepsWindows(serviceFile);
         } else if (os.startsWith("Mac OS X")) {
@@ -208,17 +209,21 @@ public class InstallServiceCommand implements Action {
                 printPostInstallStepsDebian(serviceFile);
             } else {
                 printPostInstallStepsRedHat(serviceFile);
-                System.out.println("");
+                printLine("");
                 printPostInstallStepsDebian(serviceFile);
             }
             if (systemdFile != null) {
-                System.out.println("");
+                printLine("");
                 printPostInstallStepsSystemd(systemdFile);
             }
         }
-        System.out.println("");
+        printLine("");
 
         return null;
+    }
+
+    private static void printLine(String message) {
+        Objects.requireNonNull(System.out, "Standard output is unavailable").println(message);
     }
 
     /**
@@ -229,26 +234,26 @@ public class InstallServiceCommand implements Action {
      *            wrapper service file
      */
     private void printPostInstallStepsRedHat(File serviceFile) {
-        System.out.println(INTENSITY_BOLD + "RedHat/Fedora/CentOS Linux system detected (SystemV):" + INTENSITY_NORMAL);
-        System.out.println("  To install the service:");
-        System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
-        System.out.println("    $ chkconfig " + serviceFile.getName() + " --add");
-        System.out.println("");
-        System.out.println("  To start the service when the machine is rebooted:");
-        System.out.println("    $ chkconfig " + serviceFile.getName() + " on");
-        System.out.println("");
-        System.out.println("  To disable starting the service when the machine is rebooted:");
-        System.out.println("    $ chkconfig " + serviceFile.getName() + " off");
-        System.out.println("");
-        System.out.println("  To start the service:");
-        System.out.println("    $ service " + serviceFile.getName() + " start");
-        System.out.println("");
-        System.out.println("  To stop the service:");
-        System.out.println("    $ service " + serviceFile.getName() + " stop");
-        System.out.println("");
-        System.out.println("  To uninstall the service:");
-        System.out.println("    $ chkconfig " + serviceFile.getName() + " --del");
-        System.out.println("    $ rm /etc/init.d/" + serviceFile.getPath());
+        printLine(INTENSITY_BOLD + "RedHat/Fedora/CentOS Linux system detected (SystemV):" + INTENSITY_NORMAL);
+        printLine("  To install the service:");
+        printLine("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
+        printLine("    $ chkconfig " + serviceFile.getName() + " --add");
+        printLine("");
+        printLine("  To start the service when the machine is rebooted:");
+        printLine("    $ chkconfig " + serviceFile.getName() + " on");
+        printLine("");
+        printLine("  To disable starting the service when the machine is rebooted:");
+        printLine("    $ chkconfig " + serviceFile.getName() + " off");
+        printLine("");
+        printLine("  To start the service:");
+        printLine("    $ service " + serviceFile.getName() + " start");
+        printLine("");
+        printLine("  To stop the service:");
+        printLine("    $ service " + serviceFile.getName() + " stop");
+        printLine("");
+        printLine("  To uninstall the service:");
+        printLine("    $ chkconfig " + serviceFile.getName() + " --del");
+        printLine("    $ rm /etc/init.d/" + serviceFile.getPath());
     }
 
     /**
@@ -259,24 +264,24 @@ public class InstallServiceCommand implements Action {
      *            wrapper service file
      */
     private void printPostInstallStepsDebian(File serviceFile) {
-        System.out.println(INTENSITY_BOLD + "Ubuntu/Debian Linux system detected (SystemV):" + INTENSITY_NORMAL);
-        System.out.println("  To install the service:");
-        System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
-        System.out.println("");
-        System.out.println("  To start the service when the machine is rebooted:");
-        System.out.println("    $ update-rc.d " + serviceFile.getName() + " defaults");
-        System.out.println("");
-        System.out.println("  To disable starting the service when the machine is rebooted:");
-        System.out.println("    $ update-rc.d -f " + serviceFile.getName() + " remove");
-        System.out.println("");
-        System.out.println("  To start the service:");
-        System.out.println("    $ /etc/init.d/" + serviceFile.getName() + " start");
-        System.out.println("");
-        System.out.println("  To stop the service:");
-        System.out.println("    $ /etc/init.d/" + serviceFile.getName() + " stop");
-        System.out.println("");
-        System.out.println("  To uninstall the service:");
-        System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
+        printLine(INTENSITY_BOLD + "Ubuntu/Debian Linux system detected (SystemV):" + INTENSITY_NORMAL);
+        printLine("  To install the service:");
+        printLine("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
+        printLine("");
+        printLine("  To start the service when the machine is rebooted:");
+        printLine("    $ update-rc.d " + serviceFile.getName() + " defaults");
+        printLine("");
+        printLine("  To disable starting the service when the machine is rebooted:");
+        printLine("    $ update-rc.d -f " + serviceFile.getName() + " remove");
+        printLine("");
+        printLine("  To start the service:");
+        printLine("    $ /etc/init.d/" + serviceFile.getName() + " start");
+        printLine("");
+        printLine("  To stop the service:");
+        printLine("    $ /etc/init.d/" + serviceFile.getName() + " stop");
+        printLine("");
+        printLine("  To uninstall the service:");
+        printLine("    $ rm /etc/init.d/" + serviceFile.getName());
     }
 
     /**
@@ -287,24 +292,24 @@ public class InstallServiceCommand implements Action {
      *            systemd file
      */
     private void printPostInstallStepsSystemd(File systemdFile) {
-        System.out.println(INTENSITY_BOLD + "For systemd compliant Linux: " + INTENSITY_NORMAL);
-        System.out.println("  To install the service (and enable at system boot):");
-        System.out.println("   $ systemctl enable " + systemdFile.getPath());
-        System.out.println("");
-        System.out.println("  To start the service:");
-        System.out.println("   $ systemctl start " + SERVICE_NAME);
-        System.out.println("");
-        System.out.println("  To stop the service:");
-        System.out.println("   $ systemctl stop " + SERVICE_NAME);
-        System.out.println("");
-        System.out.println("  To check the current service status:");
-        System.out.println("   $ systemctl status " + SERVICE_NAME);
-        System.out.println("");
-        System.out.println("  To see service activity journal:");
-        System.out.println("   $ journalctl -u " + SERVICE_NAME);
-        System.out.println("");
-        System.out.println("  To uninstall the service (and disable at system boot):");
-        System.out.println("   $ systemctl disable " + SERVICE_NAME);
+        printLine(INTENSITY_BOLD + "For systemd compliant Linux: " + INTENSITY_NORMAL);
+        printLine("  To install the service (and enable at system boot):");
+        printLine("   $ systemctl enable " + systemdFile.getPath());
+        printLine("");
+        printLine("  To start the service:");
+        printLine("   $ systemctl start " + SERVICE_NAME);
+        printLine("");
+        printLine("  To stop the service:");
+        printLine("   $ systemctl stop " + SERVICE_NAME);
+        printLine("");
+        printLine("  To check the current service status:");
+        printLine("   $ systemctl status " + SERVICE_NAME);
+        printLine("");
+        printLine("  To see service activity journal:");
+        printLine("   $ journalctl -u " + SERVICE_NAME);
+        printLine("");
+        printLine("  To uninstall the service (and disable at system boot):");
+        printLine("   $ systemctl disable " + SERVICE_NAME);
     }
 
     /**
@@ -315,18 +320,18 @@ public class InstallServiceCommand implements Action {
      *            wrapper service file
      */
     private void printPostInstallStepsWindows(File serviceFile) {
-        System.out.println(INTENSITY_BOLD + "MS Windows system detected:" + INTENSITY_NORMAL);
-        System.out.println("To install the service, run: ");
-        System.out.println("  C:> " + serviceFile.getPath() + " install");
-        System.out.println("");
-        System.out.println("Once installed, to start the service run: ");
-        System.out.println("  C:> net start \"" + SERVICE_NAME + "\"");
-        System.out.println("");
-        System.out.println("Once running, to stop the service run: ");
-        System.out.println("  C:> net stop \"" + SERVICE_NAME + "\"");
-        System.out.println("");
-        System.out.println("Once stopped, to remove the installed the service run: ");
-        System.out.println("  C:> " + serviceFile.getPath() + " remove");
+        printLine(INTENSITY_BOLD + "MS Windows system detected:" + INTENSITY_NORMAL);
+        printLine("To install the service, run: ");
+        printLine("  C:> " + serviceFile.getPath() + " install");
+        printLine("");
+        printLine("Once installed, to start the service run: ");
+        printLine("  C:> net start \"" + SERVICE_NAME + "\"");
+        printLine("");
+        printLine("Once running, to stop the service run: ");
+        printLine("  C:> net stop \"" + SERVICE_NAME + "\"");
+        printLine("");
+        printLine("Once stopped, to remove the installed the service run: ");
+        printLine("  C:> " + serviceFile.getPath() + " remove");
     }
 
     /**
@@ -337,28 +342,28 @@ public class InstallServiceCommand implements Action {
      *            openHAB pList file
      */
     private void printPostInstallStepsOsX(File serviceFile) {
-        System.out.println(INTENSITY_BOLD + "Mac OS X system detected:" + INTENSITY_NORMAL);
-        System.out.println("");
-        System.out.println("To configure openHAB as a " + INTENSITY_BOLD + "user service" + INTENSITY_NORMAL
+        printLine(INTENSITY_BOLD + "Mac OS X system detected:" + INTENSITY_NORMAL);
+        printLine("");
+        printLine("To configure openHAB as a " + INTENSITY_BOLD + "user service" + INTENSITY_NORMAL
                 + " execute the following file move:");
-        System.out.println("> mv " + serviceFile.getPath() + " ~/Library/LaunchAgents/");
-        System.out.println("");
-        System.out.println("To configure openHAB as a " + INTENSITY_BOLD + "system service" + INTENSITY_NORMAL
+        printLine("> mv " + serviceFile.getPath() + " ~/Library/LaunchAgents/");
+        printLine("");
+        printLine("To configure openHAB as a " + INTENSITY_BOLD + "system service" + INTENSITY_NORMAL
                 + " execute the following file move and authorisation changes:");
-        System.out.println("> sudo mv " + serviceFile.getPath() + " /Library/LaunchDaemons/");
-        System.out.println("> sudo chown root:wheel /Library/LaunchDaemons/" + serviceFile.getName());
-        System.out.println("> sudo chmod u=rw,g=r,o=r /Library/LaunchDaemons/" + serviceFile.getName());
-        System.out.println("");
-        System.out.println("To test your service: ");
-        System.out.println("> launchctl load ~/Library/LaunchAgents/" + serviceFile.getName());
-        System.out.println("> launchctl start openHAB");
-        System.out.println("> launchctl stop openHAB");
-        System.out.println("");
-        System.out.println(
+        printLine("> sudo mv " + serviceFile.getPath() + " /Library/LaunchDaemons/");
+        printLine("> sudo chown root:wheel /Library/LaunchDaemons/" + serviceFile.getName());
+        printLine("> sudo chmod u=rw,g=r,o=r /Library/LaunchDaemons/" + serviceFile.getName());
+        printLine("");
+        printLine("To test your service: ");
+        printLine("> launchctl load ~/Library/LaunchAgents/" + serviceFile.getName());
+        printLine("> launchctl start openHAB");
+        printLine("> launchctl stop openHAB");
+        printLine("");
+        printLine(
                 "After restart of your session or system you can use the launchctl command to start and stop your service");
-        System.out.println("");
-        System.out.println("For removing the service call:");
-        System.out.println("> launchctl remove openHAB");
+        printLine("");
+        printLine("For removing the service call:");
+        printLine("> launchctl remove openHAB");
     }
 
     /**

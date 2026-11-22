@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.unit;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -309,8 +310,7 @@ public class UnitsTest {
 
         QuantityType<Volume> litre = new QuantityType<>("5 l");
 
-        QuantityType<?> cubicMetre = litre.toUnit(SIUnits.CUBIC_METRE);
-        assertThat(cubicMetre, is(notNullValue()));
+        QuantityType<?> cubicMetre = requireNonNull(litre.toUnit(SIUnits.CUBIC_METRE), "Unit conversion failed");
         assertThat(cubicMetre.getUnit(), is(SIUnits.CUBIC_METRE));
         assertThat(cubicMetre.doubleValue(), closeTo(0.005, DEFAULT_ERROR));
     }
@@ -325,8 +325,7 @@ public class UnitsTest {
 
         QuantityType<Volume> cubicMetre = new QuantityType<>("5 m³");
 
-        QuantityType<?> litre = cubicMetre.toUnit(Units.LITRE);
-        assertThat(litre, is(notNullValue()));
+        QuantityType<?> litre = requireNonNull(cubicMetre.toUnit(Units.LITRE), "Unit conversion failed");
         assertThat(litre.getUnit(), is(Units.LITRE));
         assertThat(litre.doubleValue(), closeTo(5000, DEFAULT_ERROR));
     }
@@ -341,8 +340,7 @@ public class UnitsTest {
 
         QuantityType<Volume> litre = new QuantityType<>("5 l");
 
-        QuantityType<?> gallon = litre.toUnit(ImperialUnits.GALLON_LIQUID_US);
-        assertThat(gallon, is(notNullValue()));
+        QuantityType<?> gallon = requireNonNull(litre.toUnit(ImperialUnits.GALLON_LIQUID_US), "Unit conversion failed");
         assertThat(gallon.getUnit(), is(ImperialUnits.GALLON_LIQUID_US));
         assertThat(gallon.doubleValue(), closeTo(1.3208, 1e-4));
     }
@@ -357,8 +355,7 @@ public class UnitsTest {
 
         QuantityType<Volume> gallon = new QuantityType<>("5 gal");
 
-        QuantityType<?> litre = gallon.toUnit(Units.LITRE);
-        assertThat(litre, is(notNullValue()));
+        QuantityType<?> litre = requireNonNull(gallon.toUnit(Units.LITRE), "Unit conversion failed");
         assertThat(litre.getUnit(), is(Units.LITRE));
         assertThat(litre.doubleValue(), closeTo(18.9270, 1e-4));
     }
@@ -394,7 +391,7 @@ public class UnitsTest {
     @Test
     public void testPpm() {
         QuantityType<Dimensionless> ppm = new QuantityType<>("500 ppm");
-        assertEquals("0.05 %", ppm.toUnit(Units.PERCENT).toString());
+        assertEquals("0.05 %", requireNonNull(ppm.toUnit(Units.PERCENT), "Unit conversion failed").toString());
     }
 
     @Test
@@ -403,9 +400,10 @@ public class UnitsTest {
         QuantityType<Area> mm2 = new QuantityType<>("100 mm²");
         QuantityType<Area> km2 = new QuantityType<>("1 km²");
 
-        assertEquals(10000.0, m2.toUnit("cm²").doubleValue(), DEFAULT_ERROR);
-        assertEquals(1.0, mm2.toUnit("cm²").doubleValue(), DEFAULT_ERROR);
-        assertEquals(1000000.0, km2.toUnit("m²").doubleValue(), DEFAULT_ERROR);
+        assertEquals(10000.0, requireNonNull(m2.toUnit("cm²"), "Unit conversion failed").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, requireNonNull(mm2.toUnit("cm²"), "Unit conversion failed").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1000000.0, requireNonNull(km2.toUnit("m²"), "Unit conversion failed").doubleValue(),
+                DEFAULT_ERROR);
     }
 
     @Test
@@ -414,25 +412,27 @@ public class UnitsTest {
         QuantityType<Volume> cm3 = new QuantityType<>("1000 cm³");
         QuantityType<Volume> mm3 = new QuantityType<>("1000 mm³");
 
-        assertEquals(1.0, l.toUnit("dm³").doubleValue(), DEFAULT_ERROR);
-        assertEquals(1.0, cm3.toUnit("l").doubleValue(), DEFAULT_ERROR);
-        assertEquals(1.0, mm3.toUnit("cm³").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, requireNonNull(l.toUnit("dm³"), "Unit conversion failed").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, requireNonNull(cm3.toUnit("l"), "Unit conversion failed").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, requireNonNull(mm3.toUnit("cm³"), "Unit conversion failed").doubleValue(), DEFAULT_ERROR);
     }
 
     @Test
     public void testDb() {
         QuantityType<Dimensionless> ratio = new QuantityType<>("100");
-        assertEquals(20.0, ratio.toUnit("dB").doubleValue(), DEFAULT_ERROR);
+        assertEquals(20.0, requireNonNull(ratio.toUnit("dB"), "Unit conversion failed").doubleValue(), DEFAULT_ERROR);
     }
 
     @Test
     public void testDobsonUnits() {
         // https://en.wikipedia.org/wiki/Dobson_unit
         QuantityType<ArealDensity> oneDU = new QuantityType<>("1 DU");
-        QuantityType<ArealDensity> mmolpsq = oneDU
-                .toUnit(MetricPrefix.MILLI(Units.MOLE).multiply(tech.units.indriya.unit.Units.METRE.pow(-2)));
+        QuantityType<ArealDensity> mmolpsq = requireNonNull(
+                oneDU.toUnit(MetricPrefix.MILLI(Units.MOLE).multiply(tech.units.indriya.unit.Units.METRE.pow(-2))),
+                "Unit conversion failed");
         assertThat(mmolpsq.doubleValue(), is(closeTo(0.4462d, DEFAULT_ERROR)));
-        assertThat(mmolpsq.toUnit(Units.DOBSON_UNIT).doubleValue(), is(closeTo(1, DEFAULT_ERROR)));
+        assertThat(requireNonNull(mmolpsq.toUnit(Units.DOBSON_UNIT), "Unit conversion failed").doubleValue(),
+                is(closeTo(1, DEFAULT_ERROR)));
     }
 
     @Test
@@ -482,8 +482,8 @@ public class UnitsTest {
     @Test
     public void testElectricCharge() {
         QuantityType<?> oneAh = QuantityType.valueOf("3600 C");
-        QuantityType<?> converted = oneAh.toUnit(Units.AMPERE_HOUR);
-        QuantityType<?> converted2 = oneAh.toUnit(Units.MILLIAMPERE_HOUR);
+        QuantityType<?> converted = requireNonNull(oneAh.toUnit(Units.AMPERE_HOUR), "Unit conversion failed");
+        QuantityType<?> converted2 = requireNonNull(oneAh.toUnit(Units.MILLIAMPERE_HOUR), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
         assertEquals("1000 mAh", converted2.toString());
     }
@@ -491,35 +491,35 @@ public class UnitsTest {
     @Test
     public void testConductivity() {
         QuantityType<?> oneSM = QuantityType.valueOf("1 S/m");
-        QuantityType<?> converted = oneSM.toUnit("µS/cm");
+        QuantityType<?> converted = requireNonNull(oneSM.toUnit("µS/cm"), "Unit conversion failed");
         assertThat(converted.toString(), anyOf(is("10000 \u00B5S/cm"), is("10000 \u03BCS/cm")));
     }
 
     @Test
     public void testSpecificActivity() {
         QuantityType<?> radon = QuantityType.valueOf("37 kBq/m³");
-        QuantityType<?> converted = radon.toUnit("nCi/l");
+        QuantityType<?> converted = requireNonNull(radon.toUnit("nCi/l"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
     }
 
     @Test
     public void testRpm() {
         QuantityType<?> oneHertz = QuantityType.valueOf("60 rpm");
-        QuantityType<?> converted = oneHertz.toUnit("Hz");
+        QuantityType<?> converted = requireNonNull(oneHertz.toUnit("Hz"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
     }
 
     @Test
     public void testCalorie() {
         QuantityType<?> oneCalorie = QuantityType.valueOf("1 cal");
-        QuantityType<?> converted = oneCalorie.toUnit("J");
+        QuantityType<?> converted = requireNonNull(oneCalorie.toUnit("J"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(4.184, DEFAULT_ERROR)));
     }
 
     @Test
     public void testKiloCalorie() {
         QuantityType<?> oneKiloCalorie = QuantityType.valueOf("1 kcal");
-        QuantityType<?> converted = oneKiloCalorie.toUnit("J");
+        QuantityType<?> converted = requireNonNull(oneKiloCalorie.toUnit("J"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(4184.0, DEFAULT_ERROR)));
     }
 
@@ -527,9 +527,9 @@ public class UnitsTest {
     public void testYearMonthDay() {
         QuantityType<?> year = QuantityType.valueOf("1 y");
         assertThat(year.toString(), is("1 yr"));
-        QuantityType<?> converted = year.toUnit("d");
+        QuantityType<?> converted = requireNonNull(year.toUnit("d"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(365.2425, DEFAULT_ERROR)));
-        QuantityType<?> converted2 = year.toUnit("mo");
+        QuantityType<?> converted2 = requireNonNull(year.toUnit("mo"), "Unit conversion failed");
         assertThat(converted2.doubleValue(), is(closeTo(12.0, DEFAULT_ERROR)));
     }
 
@@ -547,18 +547,20 @@ public class UnitsTest {
     public void testGrains() {
         assertThat(ImperialUnits.GRAIN.getSymbol(), is("gr"));
         QuantityType<?> oneHundredGrains = QuantityType.valueOf("100 gr");
-        QuantityType<?> converted = oneHundredGrains.toUnit("g");
+        QuantityType<?> converted = requireNonNull(oneHundredGrains.toUnit("g"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(6.479891, DEFAULT_ERROR)));
         assertThat(ImperialUnits.GRAIN_PER_CUBICFOOT.toString(), is("gr/ft³"));
         QuantityType<?> grainDensity = QuantityType.valueOf("20 gr/ft³");
-        QuantityType<?> convertedDensity = grainDensity.toUnit(Units.MICROGRAM_PER_CUBICMETRE);
+        QuantityType<?> convertedDensity = requireNonNull(grainDensity.toUnit(Units.MICROGRAM_PER_CUBICMETRE),
+                "Unit conversion failed");
         assertThat(convertedDensity.doubleValue(), is(closeTo(45767038.211314686, DEFAULT_ERROR)));
     }
 
     @Test
     public void testArealDensity() {
         QuantityType<?> newspaper = QuantityType.valueOf("72 g/m²");
-        QuantityType<?> converted = newspaper.toUnit(Units.KILOGRAM_PER_SQUARE_METRE);
+        QuantityType<?> converted = requireNonNull(newspaper.toUnit(Units.KILOGRAM_PER_SQUARE_METRE),
+                "Unit conversion failed");
         assertEquals(converted.doubleValue(), 0.072);
     }
 
@@ -568,9 +570,9 @@ public class UnitsTest {
         String mmolplDimension = UnitUtils.getDimensionName(mmolpl.getUnit());
         QuantityType<?> dh = QuantityType.valueOf("1 °dH");
         String hDimension = UnitUtils.getDimensionName(dh.getUnit());
-        assertTrue(hDimension.equals(mmolplDimension));
+        assertEquals(mmolplDimension, hDimension);
         assertTrue("Dimensionless".equalsIgnoreCase(hDimension));
-        QuantityType<?> converted = dh.toUnit("mmol/l");
+        QuantityType<?> converted = requireNonNull(dh.toUnit("mmol/l"), "Unit conversion failed");
         assertThat(converted.doubleValue(), is(closeTo(mmolpl.doubleValue(), DEFAULT_ERROR)));
     }
 
@@ -592,7 +594,7 @@ public class UnitsTest {
 
         @Override
         public boolean matches(@Nullable Object actualValue) {
-            if (actualValue instanceof Quantity other) {
+            if (actualValue instanceof Quantity<?> other) {
                 if (!other.getUnit().isCompatible(quantity.getUnit())) {
                     return false;
                 }
