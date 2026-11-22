@@ -194,7 +194,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
         assertThat(notifiers.size(), is(1));
 
         when(thingHandlerFactoryMock.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
-        registerService(thingHandlerFactoryMock);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactoryMock));
 
         ThingManagerImpl thingManager = (ThingManagerImpl) getService(ThingManager.class);
         assertThat(thingManager, is(notNullValue()));

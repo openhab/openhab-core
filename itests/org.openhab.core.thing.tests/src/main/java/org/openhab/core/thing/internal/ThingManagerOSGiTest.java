@@ -192,7 +192,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         managedThingProvider.add(thing);
 
@@ -217,7 +217,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         managedThingProvider.add(thing);
 
@@ -285,7 +285,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         managedThingProvider.add(thing);
 
@@ -306,7 +306,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         managedThingProvider.add(thing);
 
@@ -366,7 +366,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         new Thread(() -> managedThingProvider.add(thing)).start();
         waitForAssert(() -> assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING)));
@@ -386,7 +386,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         registerThingTypeProvider();
         registerConfigDescriptionProvider(false);
 
@@ -404,7 +404,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         registerThingTypeProvider();
         registerConfigDescriptionProvider(false);
 
@@ -448,7 +448,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final ThingStatusInfo uninitializedNone = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -466,7 +466,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(thing.getStatusInfo(), is(onlineNone)));
 
         // remove handler factory - provokes handler deregistration & disposal
-        unregisterService(thingHandlerFactory);
+        unregisterService(ThingHandlerFactory.class.getName());
         waitForAssert(() -> verify(thingHandlerFactory, times(1)).unregisterHandler(thing));
         waitForAssert(() -> verify(thingHandler, times(1)).dispose());
         final ThingStatusInfo uninitializedHandlerMissing = ThingStatusInfoBuilder
@@ -474,7 +474,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(thing.getStatusInfo(), is(uninitializedHandlerMissing)));
 
         // add handler factory - provokes handler registration & initialization
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         waitForAssert(() -> verify(thingHandlerFactory, times(2)).registerHandler(thing));
         waitForAssert(() -> verify(thingHandler, times(2)).initialize());
         waitForAssert(() -> assertThat(thing.getStatusInfo(), is(onlineNone)));
@@ -530,7 +530,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final ThingStatusInfo uninitializedNone = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -683,7 +683,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
         }).when(thingHandlerFactory).registerHandler(any(Thing.class));
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final ThingStatusInfo uninitializedNone = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -774,7 +774,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         // unregister factory
         bridgeState.callbackWasNull = false;
         thingState.callbackWasNull = false;
-        unregisterService(thingHandlerFactory);
+        unregisterService(ThingHandlerFactory.class.getName());
         waitForAssert(() -> assertThat(thingState.disposedCalled, is(true)));
         waitForAssert(() -> assertThat(thingState.disposedCalledOrder, is(4)));
         waitForAssert(() -> assertThat(bridgeState.disposedCalled, is(true)));
@@ -828,7 +828,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         managedItemChannelLinkProvider.add(new ItemChannelLink(itemName, CHANNEL_UID));
         waitForAssert(() -> assertThat(itemChannelLinkRegistry.getLinks(itemName).size(), is(1)));
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         Item item = new StringItem(itemName);
         itemRegistry.add(item);
         waitForAssert(() -> assertThat(itemRegistry.get(itemName), is(notNullValue())));
@@ -885,7 +885,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         // Create item
         String itemName = "name";
@@ -976,7 +976,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         ThingStatusInfo statusInfo = ThingStatusInfoBuilder.create(ThingStatus.UNKNOWN, ThingStatusDetail.NONE).build();
         state.callback.statusUpdated(thing, statusInfo);
@@ -1044,7 +1044,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final ThingStatusInfo removingNone = ThingStatusInfoBuilder.create(ThingStatus.REMOVING, ThingStatusDetail.NONE)
                 .build();
@@ -1085,7 +1085,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final ThingStatusInfo uninitializedNone = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -1097,7 +1097,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 .create(ThingStatus.INITIALIZING, ThingStatusDetail.NONE).build();
         waitForAssert(() -> assertThat(thing.getStatusInfo(), is(initializingNone)));
 
-        unregisterService(thingHandlerFactory);
+        unregisterService(ThingHandlerFactory.class.getName());
 
         final ThingStatusInfo uninitializedHandlerMissing = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_MISSING_ERROR).build();
@@ -1116,7 +1116,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final ThingStatusInfo removingNone = ThingStatusInfoBuilder.create(ThingStatus.REMOVING, ThingStatusDetail.NONE)
                 .build();
@@ -1142,7 +1142,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             throw expectedFailure(new RuntimeException(exceptionMessage));
         });
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         registerThingTypeProvider();
         registerConfigDescriptionProvider(false);
 
@@ -1187,7 +1187,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
         RegistryChangeListener<Thing> registryChangeListener = mock(RegistryChangeListener.class);
@@ -1254,7 +1254,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final List<Event> receivedEvents = new ArrayList<>();
 
@@ -1309,7 +1309,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ThingStatusInfo uninitializedError = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_MISSING_ERROR).build();
         final Event uninitializedEvent = ThingEventFactory.createStatusInfoEvent(thing.getUID(), uninitializedError);
-        unregisterService(thingHandlerFactory);
+        unregisterService(ThingHandlerFactory.class.getName());
 
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(2));
@@ -1342,7 +1342,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         final List<ThingStatusInfoChangedEvent> infoChangedEvents = new ArrayList<>();
 
@@ -1415,7 +1415,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         BundleResolver bundleResolver = mock(BundleResolver.class);
         when(bundleResolver.resolveBundle(any())).thenReturn(bundleContext.getBundle());
@@ -1580,7 +1580,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         ThingStatusInfo uninitializedNone = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -1699,7 +1699,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
         }).when(thingHandlerFactory).registerHandler(any(Thing.class));
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         registerThingTypeProvider();
         registerConfigDescriptionProvider(false);
 
@@ -1844,7 +1844,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         registerThingTypeProvider();
         registerConfigDescriptionProvider(false);
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         managedThingProvider.add(bridge);
 
@@ -1972,7 +1972,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         registerThingTypeProvider();
         registerConfigDescriptionProvider(false);
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
 
         managedThingProvider.add(bridge);
 
@@ -2034,7 +2034,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
-        registerService(thingHandlerFactory);
+        registerService(new BundleBackedThingHandlerFactory(thingHandlerFactory));
         String itemName = "testItem";
         Item item = new StringItem(itemName);
         itemRegistry.add(item);
