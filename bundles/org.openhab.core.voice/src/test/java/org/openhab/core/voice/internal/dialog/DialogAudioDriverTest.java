@@ -178,7 +178,7 @@ public class DialogAudioDriverTest {
     }
 
     @Test
-    public void startRecognitionClosesTheStreamWhenRecognitionFailsUnexpectedly()
+    public void startRecognitionClosesTheStreamWhenRecognitionFailsToStart()
             throws AudioException, STTException, IOException {
         when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
         when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));

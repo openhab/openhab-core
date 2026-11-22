@@ -97,6 +97,7 @@ public class DialogProcessorTest {
         interpretationService = new InterpretationService(localeProvider, systemPromptEnricher);
         when(eventListener.onAcquireGroup(any())).thenReturn(true);
         when(eventListener.shouldSpeakRecognitionErrors(any())).thenReturn(true);
+        when(eventListener.getFollowUpLimit(any())).thenReturn(1);
         doAnswer(invocation -> mock(ScheduledFuture.class)).when(scheduler).schedule(any(Runnable.class), anyLong(),
                 any(TimeUnit.class));
     }
@@ -606,6 +607,7 @@ public class DialogProcessorTest {
 
         followUpListener.sttEventReceived(new SpeechRecognitionErrorEvent("no results"));
 
+        verify(audioDriver).stopRecognition(followUpListener);
         verify(speechSynthesizer, never()).say(eq("no results"), any(), any(), any(), any());
         assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
         verify(eventListener).onReleaseGroup(context);
@@ -810,6 +812,7 @@ public class DialogProcessorTest {
     @Test
     public void followUpHearsAnotherCommandAndListensAgain() throws STTException, InterpretationException {
         when(eventListener.shouldListenForFollowUp(any())).thenReturn(true);
+        when(eventListener.getFollowUpLimit(any())).thenReturn(2);
         HumanLanguageInterpreter hli = answeringInterpreter();
         DialogContext context = createTestContext(List.of(hli));
         when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
@@ -910,16 +913,13 @@ public class DialogProcessorTest {
         DialogContext context = createTestContext(List.of(answeringInterpreter()));
         when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
+        when(audioDriver.startRecognition(any(), isNull(), any())).thenThrow(new IllegalStateException("bug"));
         DialogProcessor processor = createFollowUpProcessor(context);
         processor.start();
 
         processor.startSimpleDialog();
         recognitionListener().sttEventReceived(new SpeechRecognitionEvent("turn on the light", 1.0f));
-        STTListener followUpListener = followUpListener();
 
-        followUpListener.sttEventReceived(new SpeechRecognitionErrorEvent("unexpected failure"));
-
-        verify(audioDriver).stopRecognition(followUpListener);
         verify(eventListener).onReleaseGroup(context);
         assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
     }
