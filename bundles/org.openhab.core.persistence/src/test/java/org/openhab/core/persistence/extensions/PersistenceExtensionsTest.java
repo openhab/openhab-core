@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -1843,6 +1844,19 @@ public class PersistenceExtensionsTest {
         // default persistence service
         average = PersistenceExtensions.averageSince(numberItem, start);
         assertNull(average);
+    }
+
+    @Test
+    public void testAverageSinceWithoutHistory() {
+        ZonedDateTime now = ZonedDateTime.parse("2026-01-01T12:00:00Z");
+        ZonedDateTime later = now.plusSeconds(1);
+        createTestCachedValuesPersistenceService(now, 0, 0);
+
+        try (MockedStatic<ZonedDateTime> clock = mockStatic(ZonedDateTime.class, CALLS_REAL_METHODS)) {
+            clock.when(ZonedDateTime::now).thenReturn(now, later);
+            assertNull(PersistenceExtensions.averageSince(numberItem, now.minusHours(1),
+                    TestCachedValuesPersistenceService.ID));
+        }
     }
 
     @Test
