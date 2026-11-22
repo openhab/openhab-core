@@ -28,6 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -43,6 +45,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemProvider;
@@ -52,10 +57,12 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.MetadataDTO;
+import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 import com.google.gson.JsonArray;
@@ -68,12 +75,14 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.StreamingOutput;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 
 /**
  * @author Henning Treu - Initial contribution
+ * @author Kai Kreuzer - Verify state and command routing through the event bus
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -144,6 +153,56 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         Response response = itemResource.getItemByName(uriInfoMock, httpHeadersMock, null, null, true, false,
                 ITEM_NAME4);
         assertThat(readItemLabelsFromResponse(response), hasItems(ITEM_LABEL4));
+    }
+
+    @Test
+    public void shouldRejectInvalidStateAndExposeAcceptedState() {
+        SecurityContext securityContext = mock(SecurityContext.class);
+        assertEquals(Status.NOT_FOUND.getStatusCode(),
+                itemResource.putItemStatePlain(null, null, "MissingItem", "ON", null, securityContext).getStatus());
+        assertEquals(Status.BAD_REQUEST.getStatusCode(),
+                itemResource.putItemStatePlain(null, null, ITEM_NAME1, "invalid", null, securityContext).getStatus());
+
+        assertEquals(Status.ACCEPTED.getStatusCode(),
+                itemResource.putItemStatePlain(null, null, ITEM_NAME1, "ON", null, securityContext).getStatus());
+        waitForAssert(() -> {
+            try (Response response = itemResource.getPlainItemState(ITEM_NAME1)) {
+                assertEquals(Status.OK.getStatusCode(), response.getStatus());
+                assertEquals("ON", response.getEntity());
+            }
+        }, 15_000, 50);
+    }
+
+    @Test
+    public void shouldPublishToggleCommandWithHeaderSource() throws Exception {
+        item1.setState(OnOffType.ON);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getUserPrincipal()).thenReturn(() -> "tester");
+        CompletableFuture<ItemCommandEvent> commandReceived = new CompletableFuture<>();
+        registerService(new EventSubscriber() {
+            @Override
+            public Set<String> getSubscribedEventTypes() {
+                return Set.of(ItemCommandEvent.TYPE);
+            }
+
+            @Override
+            public void receive(Event event) {
+                if (event instanceof ItemCommandEvent command && ITEM_NAME1.equals(command.getItemName())) {
+                    commandReceived.complete(command);
+                }
+            }
+        });
+
+        assertEquals(Status.BAD_REQUEST.getStatusCode(),
+                itemResource.postItemCommandPlain("test-client", ITEM_NAME1, "invalid", "query-source", securityContext)
+                        .getStatus());
+        assertEquals(Status.OK.getStatusCode(),
+                itemResource.postItemCommandPlain("test-client", ITEM_NAME1, "toggle", "query-source", securityContext)
+                        .getStatus());
+        ItemCommandEvent command = commandReceived.get(15, TimeUnit.SECONDS);
+        assertEquals(OnOffType.OFF, command.getItemCommand());
+        assertEquals(AbstractEvent.buildDelegatedSource("test-client", "org.openhab.core.io.rest", "tester"),
+                command.getSource());
     }
 
     @Test

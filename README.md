@@ -182,6 +182,7 @@ Integration tests use shared core BOMs and bundle indexes, so `-am` can select a
 
 The runtime smoke tests use the Magic Binding to discover and approve a thing and exercise a linked item, a thing handler and a rule together.
 They also verify that command routing and rule execution recover after the binding bundle restarts.
+The smoke suite checks that item time-series events reach a registered persistence backend and that a replacement preserves samples outside its time range.
 To run the smoke tests:
 
 ```shell
