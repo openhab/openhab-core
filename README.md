@@ -189,6 +189,18 @@ mvn clean install -DwithResolver
 
 Review any changes to the `*.bndrun` files produced by the resolver.
 
+### Coverage of changed lines
+
+The Java 21 pull request build requires at least 80% line coverage on added or modified executable Java lines in the production sources of `bundles/` and `tools/`.
+It combines the JaCoCo data from unit tests and OSGi integration tests and lists uncovered lines in the workflow summary.
+
+To run the same check locally, build the revision you want to check and pass the comparison revision to the script:
+
+```shell
+./mvnw clean verify -Pcoverage -DskipChecks
+python3 .github/scripts/check-coverage.py "$(git merge-base origin/main HEAD)"
+```
+
 ## How to contribute
 
 If you want to become a contributor to the project, please read about [contributing](https://www.openhab.org/docs/developer/contributing.html) and check our [guidelines](https://www.openhab.org/docs/developer/guidelines.html) first.

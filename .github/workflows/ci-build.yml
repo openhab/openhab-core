@@ -9,8 +9,6 @@ on:
   pull_request:
     branches:
       - 'main'
-    paths-ignore:
-      - '.github/**/*.md'
   workflow_dispatch:
 
 jobs:
@@ -33,7 +31,8 @@ jobs:
         if: github.head_ref != ''
         uses: actions/checkout@v7
         with:
-          ref: refs/pull/${{github.event.pull_request.number}}/merge
+          ref: ${{ github.sha }}
+          fetch-depth: 2
 
       - name: Set up Cache
         uses: actions/cache@v6
@@ -61,7 +60,9 @@ jobs:
         id: build
         # this target includes spotless, build, test, itest
         # (spotless done with build - will add 1 min, but build is faster than sat)
-        run: './.github/scripts/maven-build verify -B -T 1.5C -U -DskipChecks'
+        run: >-
+          ./.github/scripts/maven-build verify -B -T 1.5C -U -DskipChecks
+          ${{ github.event_name == 'pull_request' && matrix.java == '21' && '-Pcoverage' || '' }}
         env:
           MAVEN_OPTS: >-
             -Xmx2g
@@ -92,6 +93,11 @@ jobs:
         run: |
           echo "::error::Files have changed: $CHANGED_FILES"
           exit 1
+
+      - name: Check coverage of changed Java lines
+        if: github.event_name == 'pull_request' && matrix.java == '21'
+        shell: bash
+        run: python3 .github/scripts/check-coverage.py HEAD^1 | tee -a "$GITHUB_STEP_SUMMARY"
 
   checks:
     strategy:
