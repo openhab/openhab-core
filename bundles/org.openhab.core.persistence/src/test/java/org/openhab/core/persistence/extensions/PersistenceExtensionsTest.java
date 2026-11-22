@@ -34,6 +34,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -953,6 +955,26 @@ public class PersistenceExtensionsTest {
         // default persistence service
         variance = PersistenceExtensions.varianceSince(numberItem, startStored);
         assertNull(variance);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { -1, 1 })
+    public void testVarianceAndDeviationSinceWithoutHistory(int clockOffsetSeconds) {
+        ZonedDateTime now = ZonedDateTime.parse("2026-01-01T12:00:00Z");
+        ZonedDateTime adjustedTime = now.plusSeconds(clockOffsetSeconds);
+        ZonedDateTime start = now.minusHours(1);
+        String serviceId = TestCachedValuesPersistenceService.ID;
+        createTestCachedValuesPersistenceService(now, 0, 0);
+        numberItem.setState(new DecimalType(7));
+
+        try (MockedStatic<ZonedDateTime> clock = mockStatic(ZonedDateTime.class, CALLS_REAL_METHODS)) {
+            clock.when(ZonedDateTime::now).thenReturn(now, adjustedTime);
+            State variance = PersistenceExtensions.varianceSince(numberItem, start, serviceId);
+            clock.when(ZonedDateTime::now).thenReturn(now, adjustedTime);
+            State deviation = PersistenceExtensions.deviationSince(numberItem, start, serviceId);
+
+            assertAll(() -> assertNull(variance, "variance"), () -> assertNull(deviation, "deviation"));
+        }
     }
 
     @Test

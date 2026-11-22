@@ -1512,10 +1512,11 @@ public class PersistenceExtensions {
             return null;
         }
         Iterator<HistoricItem> it = result.iterator();
-        // Remove initial part of history that does not have any values persisted
-        if (beginTime.isBefore(now)) {
-            if (it.hasNext()) {
-                beginTime = it.next().getTimestamp();
+        // Start at the first available state. A single state provides no interval to average.
+        if (beginTime.isBefore(now) && it.hasNext()) {
+            beginTime = it.next().getTimestamp();
+            if (!it.hasNext()) {
+                return null;
             }
             it = result.iterator();
         }
