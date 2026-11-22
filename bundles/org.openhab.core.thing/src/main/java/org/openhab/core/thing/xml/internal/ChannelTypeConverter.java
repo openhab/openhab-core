@@ -37,8 +37,6 @@ import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -59,8 +57,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  */
 @NonNullByDefault
 public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<ChannelTypeXmlResult> {
-
-    private final Logger logger = LoggerFactory.getLogger(ChannelTypeConverter.class);
 
     record ItemType(@Nullable String itemType, @Nullable String unitHint) {
     }

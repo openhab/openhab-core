@@ -20,7 +20,6 @@ import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.ConsoleCommandCompleter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
@@ -29,7 +28,6 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
  *
  * @author Cody Cutrer - Initial contribution
  */
-@NonNullByDefault({})
 public class CompleterWrapper implements Completer {
 
     private final @Nullable ConsoleCommandCompleter completer;
