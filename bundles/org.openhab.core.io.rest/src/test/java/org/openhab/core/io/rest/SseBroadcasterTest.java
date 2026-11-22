@@ -37,7 +37,9 @@ public class SseBroadcasterTest {
     @Test
     public void sendIfRemovesSinkThatFailsSynchronouslyAndContinues() {
         SseEventSink failingSink = mock(SseEventSink.class);
-        when(failingSink.send(event)).thenThrow(new IllegalStateException("ServiceLocator has been shut down"));
+        when(failingSink.send(event)).thenAnswer(invocation -> {
+            throw closedSinkFailure("ServiceLocator has been shut down");
+        });
         SseEventSink workingSink = mock(SseEventSink.class);
         when(workingSink.send(event)).thenReturn(CompletableFuture.completedFuture(null));
 
@@ -59,12 +61,18 @@ public class SseBroadcasterTest {
     @Test
     public void sendIfRemovesSinkThatFailsAsynchronously() {
         SseEventSink failingSink = mock(SseEventSink.class);
-        when(failingSink.send(event)).thenReturn(CompletableFuture.failedFuture(new IllegalStateException("closed")));
+        when(failingSink.send(event)).thenReturn(CompletableFuture.failedFuture(closedSinkFailure("closed")));
 
         broadcaster.add(failingSink, "failing");
         broadcaster.send(event);
 
         verify(failingSink).close();
         assertNull(broadcaster.getInfo(failingSink));
+    }
+
+    private static IllegalStateException closedSinkFailure(String message) {
+        IllegalStateException failure = new IllegalStateException(message);
+        failure.setStackTrace(new StackTraceElement[0]);
+        return failure;
     }
 }
