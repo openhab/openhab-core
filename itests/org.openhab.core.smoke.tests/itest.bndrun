@@ -2,9 +2,10 @@
 
 Bundle-SymbolicName: ${project.artifactId}
 
+# Start with an empty JSON database on each launch, including repeated Maven runs.
 -runvm.smoke: \
 	-Dopenhab.conf=${project.build.directory}/smoke/conf,\
-	-Dopenhab.userdata=${project.build.directory}/smoke/userdata
+	-Dopenhab.userdata=${project.build.directory}/smoke/${currenttime}/userdata
 
 -runrequires: \
 	bnd.identity;id='org.openhab.core.smoke.tests',\
