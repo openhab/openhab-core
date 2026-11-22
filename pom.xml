@@ -97,7 +97,7 @@
     <spotless.eclipse.version>4.41</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
 
-    <swagger.version>2.2.55</swagger.version>
+    <swagger.version>2.2.56</swagger.version>
 
     <!-- TEST -->
     <junit.version>5.14.4</junit.version>
