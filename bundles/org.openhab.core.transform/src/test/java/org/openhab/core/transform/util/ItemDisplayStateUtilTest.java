@@ -243,13 +243,43 @@ public class ItemDisplayStateUtilTest {
     }
 
     @Test
-    public void formatStateAppliesFirstMatchingNumericOption() {
+    public void formatStatePrefersExactOptionMatchOverNumericFallback() {
         State state = new DecimalType("1.0");
         List<StateOption> options = List.of(new StateOption("1", "one"), new StateOption("1.0", "one point zero"));
 
         String result = ItemDisplayStateUtil.formatState("item", null, options, state, zoneId);
 
+        assertThat(result, is("one point zero"));
+    }
+
+    @Test
+    public void formatStatePrefersExactOptionMatchRegardlessOfOptionOrder() {
+        State state = new DecimalType("1.0");
+        List<StateOption> options = List.of(new StateOption("1.0", "one point zero"), new StateOption("1", "one"));
+
+        String result = ItemDisplayStateUtil.formatState("item", null, options, state, zoneId);
+
+        assertThat(result, is("one point zero"));
+    }
+
+    @Test
+    public void formatStateAppliesFirstMatchingNumericOptionWithoutExactMatch() {
+        State state = new DecimalType("1.00");
+        List<StateOption> options = List.of(new StateOption("1", "one"), new StateOption("1.0", "one point zero"));
+
+        String result = ItemDisplayStateUtil.formatState("item", null, options, state, zoneId);
+
         assertThat(result, is("one"));
+    }
+
+    @Test
+    public void formatStateSkipsUnlabelledOptionsForNumericFallback() {
+        State state = new DecimalType("1.00");
+        List<StateOption> options = List.of(new StateOption("1", null), new StateOption("1.0", "one point zero"));
+
+        String result = ItemDisplayStateUtil.formatState("item", null, options, state, zoneId);
+
+        assertThat(result, is("one point zero"));
     }
 
     @Test

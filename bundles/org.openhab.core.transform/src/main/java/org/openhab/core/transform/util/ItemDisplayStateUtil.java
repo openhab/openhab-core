@@ -168,21 +168,21 @@ public class ItemDisplayStateUtil {
         else if (!(state instanceof UnDefType)) {
             boolean optionMatched = false;
             if (!options.isEmpty()) {
-                // Look for a state option with a value corresponding to the state
-                for (StateOption option : options) {
-                    String label = option.getLabel();
-                    if ((option.getValue().equals(state.toString()) || matchesNumericOption(option.getValue(), state))
-                            && label != null) {
-                        optionMatched = true;
-                        try {
-                            displayState = pattern == null ? label : String.format(pattern, label);
-                        } catch (IllegalFormatException e) {
-                            LOGGER.debug(
-                                    "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
-                                    label, itemName, pattern, e.getMessage());
-                            displayState = label;
-                        }
-                        break;
+                // Prefer an exact match over the numeric fallback, regardless of the option order
+                String label = findExactOptionLabel(options, state.toString());
+                if (label == null) {
+                    // Fall back to the first numerically matching option (e.g. option "0" vs. state "0.0")
+                    label = findNumericOptionLabel(options, state);
+                }
+                if (label != null) {
+                    optionMatched = true;
+                    try {
+                        displayState = pattern == null ? label : String.format(pattern, label);
+                    } catch (IllegalFormatException e) {
+                        LOGGER.debug(
+                                "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
+                                label, itemName, pattern, e.getMessage());
+                        displayState = label;
                     }
                 }
             }
@@ -241,5 +241,39 @@ public class ItemDisplayStateUtil {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    /**
+     * Find the label of the first state option whose value exactly equals the given state string.
+     *
+     * @param options the state options
+     * @param stateString the state's string representation
+     * @return the label of the matching option, or null if no labelled option matches
+     */
+    private static @Nullable String findExactOptionLabel(List<StateOption> options, String stateString) {
+        for (StateOption option : options) {
+            String label = option.getLabel();
+            if (label != null && option.getValue().equals(stateString)) {
+                return label;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the label of the first state option whose value is numerically equal to the given state.
+     *
+     * @param options the state options
+     * @param state the current state
+     * @return the label of the matching option, or null if no labelled option matches
+     */
+    private static @Nullable String findNumericOptionLabel(List<StateOption> options, State state) {
+        for (StateOption option : options) {
+            String label = option.getLabel();
+            if (label != null && matchesNumericOption(option.getValue(), state)) {
+                return label;
+            }
+        }
+        return null;
     }
 }
