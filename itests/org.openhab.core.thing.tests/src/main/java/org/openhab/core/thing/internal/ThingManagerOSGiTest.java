@@ -516,7 +516,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             public @Nullable Void answer(InvocationOnMock invocation) throws Throwable {
                 Boolean shouldFail = (Boolean) testThing.getConfiguration().get("shouldFail");
                 if (shouldFail) {
-                    throw new IllegalStateException("Invalid config!");
+                    throw expectedFailure(new IllegalStateException("Invalid config!"));
                 } else {
                     state.callback.statusUpdated(testThing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
                 }
@@ -1138,7 +1138,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
-        when(thingHandlerFactory.registerHandler(any(Thing.class))).thenThrow(new RuntimeException(exceptionMessage));
+        when(thingHandlerFactory.registerHandler(any(Thing.class))).thenAnswer(invocation -> {
+            throw expectedFailure(new RuntimeException(exceptionMessage));
+        });
 
         registerService(thingHandlerFactory);
         registerThingTypeProvider();
@@ -2055,6 +2057,11 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             assertThat(state.calledChannelUID, is(equalTo(new ChannelUID(thing.getUID(), "channel"))));
             assertThat(state.calledCommand, is(equalTo(OnOffType.ON)));
         });
+    }
+
+    private static RuntimeException expectedFailure(RuntimeException failure) {
+        failure.setStackTrace(new StackTraceElement[0]);
+        return failure;
     }
 
     private void registerThingTypeProvider() {

@@ -48,7 +48,9 @@ public class DiscoveryServiceMock extends AbstractDiscoveryService {
     @Override
     public void startScan() {
         if (faulty) {
-            throw new IllegalStateException();
+            IllegalStateException failure = new IllegalStateException();
+            failure.setStackTrace(new StackTraceElement[0]);
+            throw failure;
         }
         thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(thingType, "test" + new Random().nextInt(999999999)))
                 .withTTL(DEFAULT_TTL).build());
