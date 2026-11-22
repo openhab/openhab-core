@@ -266,6 +266,7 @@ Import-Package: \
           <configuration>
             <compilerId>eclipse</compilerId>
             <compilerArgs>
+              <arg>-enableJavadoc</arg>
               <arg>-annotationpath</arg>
               <arg>CLASSPATH</arg>
               <arg>-classpath</arg>
