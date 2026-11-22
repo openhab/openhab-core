@@ -119,9 +119,12 @@ public class ScriptEngineManagerImplTest {
         // Configure the factory to return our invocableEngine
         when(scriptEngineFactoryMock.createScriptEngine(SUPPORTED_SCRIPT_TYPE)).thenReturn(invocableEngine);
 
-        // Set up the mock to throw RuntimeException when scriptUnloaded is called
         Invocable invocable = (Invocable) invocableEngine;
-        when(invocable.invokeFunction("scriptUnloaded")).thenThrow(new RuntimeException("Test Exception"));
+        when(invocable.invokeFunction("scriptUnloaded")).thenAnswer(invocation -> {
+            RuntimeException failure = new RuntimeException("Test Exception");
+            failure.setStackTrace(new StackTraceElement[0]);
+            throw failure;
+        });
 
         scriptEngineManager.createScriptEngine(SUPPORTED_SCRIPT_TYPE, engineIdentifier);
 

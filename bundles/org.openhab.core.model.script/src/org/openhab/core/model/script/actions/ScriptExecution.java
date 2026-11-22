@@ -25,8 +25,6 @@ import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.internal.engine.action.ScriptExecutionActionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link ScriptExecution} is a wrapper for the ScriptExecution actions
@@ -35,8 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class ScriptExecution {
-
-    private static final Logger logger = LoggerFactory.getLogger(ScriptExecution.class);
 
     /**
      * Calls a script which must be located in the configurations/scripts folder.

@@ -69,7 +69,6 @@ import org.slf4j.LoggerFactory;
 public class SitemapSubscriptionService implements RegistryChangeListener<Sitemap>, EventSubscriber {
 
     private static final String SITEMAP_PAGE_SEPARATOR = "#";
-    private static final String SITEMAP_SUFFIX = ".sitemap";
     private static final int DEFAULT_MAX_SUBSCRIPTIONS = 50;
     private static final Duration WAIT_AFTER_CREATE_SECONDS = Duration.ofSeconds(30);
 

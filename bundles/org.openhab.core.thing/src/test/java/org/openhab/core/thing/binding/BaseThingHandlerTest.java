@@ -19,7 +19,6 @@ import static org.mockito.Mockito.*;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,8 +55,6 @@ class BaseThingHandlerTest {
     private @NonNullByDefault({}) TestThingHandler handler;
 
     private static class TestThingHandler extends BaseThingHandler {
-        public @Nullable Configuration configInInitialize = null;
-
         public TestThingHandler(Thing thing) {
             super(thing);
         }
@@ -68,7 +65,6 @@ class BaseThingHandlerTest {
 
         @Override
         public void initialize() {
-            this.configInInitialize = getConfig();
         }
 
         public void replaceThing(Thing thing) {

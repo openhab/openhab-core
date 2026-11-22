@@ -263,7 +263,11 @@ public class FolderObserverTest extends JavaTest {
 
     @Test
     public void testException() throws Exception {
-        when(modelRepoMock.addOrRefreshModel(any(), any())).thenThrow(new IllegalStateException("intentional failure"));
+        when(modelRepoMock.addOrRefreshModel(any(), any())).thenAnswer(invocation -> {
+            IllegalStateException failure = new IllegalStateException("intentional failure");
+            failure.setStackTrace(new StackTraceElement[0]);
+            throw failure;
+        });
 
         FolderObserver localFolderObserver = new FolderObserver(modelRepoMock, readyServiceMock, watchServiceMock);
         localFolderObserver.addModelParser(modelParserMock);

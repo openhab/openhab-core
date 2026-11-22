@@ -31,7 +31,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,27 +105,27 @@ public class SitemapResourceTest extends JavaTest {
     private static final String WIDGET4_ICON = "icon4";
     private static final String CLIENT_IP = "127.0.0.1";
 
-    private @NonNullByDefault({}) SitemapResource sitemapResource;
-    private @NonNullByDefault({}) SitemapSubscriptionService subscriptions;
-    private @NonNullByDefault({}) GenericItem item;
-    private @NonNullByDefault({}) GenericItem visibilityRuleItem;
-    private @NonNullByDefault({}) GenericItem labelColorItem;
-    private @NonNullByDefault({}) GenericItem valueColorItem;
-    private @NonNullByDefault({}) GenericItem iconColorItem;
-    private @NonNullByDefault({}) GenericItem iconItem;
-    private @NonNullByDefault({}) GenericItem commandConfirmItem;
+    private SitemapResource sitemapResource;
+    private SitemapSubscriptionService subscriptions;
+    private GenericItem item;
+    private GenericItem visibilityRuleItem;
+    private GenericItem labelColorItem;
+    private GenericItem valueColorItem;
+    private GenericItem iconColorItem;
+    private GenericItem iconItem;
+    private GenericItem commandConfirmItem;
 
-    private @Mock @NonNullByDefault({}) HttpHeaders headersMock;
-    private @Mock @NonNullByDefault({}) Sitemap defaultSitemapMock;
-    private @Mock @NonNullByDefault({}) ItemUIRegistry itemUIRegistryMock;
-    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
-    private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
-    private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
-    private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactory;
-    private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
-    private @Mock @NonNullByDefault({}) ManagedSitemapProvider managedSitemapProviderMock;
-    private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
-    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
+    private @Mock HttpHeaders headersMock;
+    private @Mock Sitemap defaultSitemapMock;
+    private @Mock ItemUIRegistry itemUIRegistryMock;
+    private @Mock TimeZoneProvider timeZoneProviderMock;
+    private @Mock LocaleService localeServiceMock;
+    private @Mock HttpServletRequest requestMock;
+    private @Mock SitemapFactory sitemapFactory;
+    private @Mock SitemapRegistry sitemapRegistryMock;
+    private @Mock ManagedSitemapProvider managedSitemapProviderMock;
+    private @Mock UriInfo uriInfoMock;
+    private @Mock BundleContext bundleContextMock;
 
     private List<Widget> widgets = new ArrayList<>();
 

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,8 +37,6 @@ import org.openhab.core.thing.profiles.ProfileTypeUID;
  */
 @YamlElementName("items")
 public class YamlItemDTO implements YamlElement, Cloneable {
-
-    private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public String name;
     public String type;

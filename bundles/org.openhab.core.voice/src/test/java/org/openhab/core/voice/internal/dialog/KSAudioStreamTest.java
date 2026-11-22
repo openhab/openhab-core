@@ -43,14 +43,14 @@ public class KSAudioStreamTest {
     @Test
     public void branchStartsBeforeTheAudioReadAndContinuesWithTheAudioReadNext() throws IOException {
         byte[] audio = audio(3200);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT));
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT))) {
+            stream.readNBytes(1600);
+            AudioStream branch = stream.branch(Duration.ofMillis(10));
+            stream.readAllBytes();
 
-        stream.readNBytes(1600);
-        AudioStream branch = stream.branch(Duration.ofMillis(10));
-        stream.readAllBytes();
-
-        assertArrayEquals(Arrays.copyOfRange(audio, 1280, 3200), branch.readAllBytes());
-        assertEquals(FORMAT, branch.getFormat());
+            assertArrayEquals(Arrays.copyOfRange(audio, 1280, 3200), branch.readAllBytes());
+            assertEquals(FORMAT, branch.getFormat());
+        }
     }
 
     @Test
@@ -68,68 +68,69 @@ public class KSAudioStreamTest {
     @Test
     public void branchStartsWithNoMoreAudioThanWasRead() throws IOException {
         byte[] audio = audio(3200);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT));
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT))) {
+            stream.readNBytes(320);
+            AudioStream branch = stream.branch(Duration.ofMillis(50));
+            stream.readAllBytes();
 
-        stream.readNBytes(320);
-        AudioStream branch = stream.branch(Duration.ofMillis(50));
-        stream.readAllBytes();
-
-        assertArrayEquals(audio, branch.readAllBytes());
+            assertArrayEquals(audio, branch.readAllBytes());
+        }
     }
 
     @Test
     public void branchStartsOnAWholeSample() throws IOException {
         byte[] audio = audio(2000);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, STEREO));
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, STEREO))) {
+            stream.readNBytes(1000);
+            // 6.4 bytes would split a 4-byte stereo sample
+            AudioStream branch = stream.branch(Duration.ofNanos(100_000));
+            stream.readAllBytes();
 
-        stream.readNBytes(1000);
-        // 6.4 bytes would split a 4-byte stereo sample
-        AudioStream branch = stream.branch(Duration.ofNanos(100_000));
-        stream.readAllBytes();
-
-        assertArrayEquals(Arrays.copyOfRange(audio, 996, 2000), branch.readAllBytes());
+            assertArrayEquals(Arrays.copyOfRange(audio, 996, 2000), branch.readAllBytes());
+        }
     }
 
     @Test
     public void branchStartsOnAWholeSampleWhenTheAudioReadEndsMidSample() throws IOException {
         byte[] audio = audio(3200);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT));
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT))) {
+            stream.readNBytes(1001);
+            AudioStream branch = stream.branch(Duration.ZERO);
+            stream.readAllBytes();
 
-        stream.readNBytes(1001);
-        AudioStream branch = stream.branch(Duration.ZERO);
-        stream.readAllBytes();
-
-        assertArrayEquals(Arrays.copyOfRange(audio, 1000, 3200), branch.readAllBytes());
+            assertArrayEquals(Arrays.copyOfRange(audio, 1000, 3200), branch.readAllBytes());
+        }
     }
 
     @Test
     public void branchWithoutAudioBeforeStartsWithTheAudioReadNext() throws IOException {
         byte[] audio = audio(3200);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT));
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT))) {
+            stream.readNBytes(1600);
+            AudioStream branch = stream.branch(Duration.ofMillis(-10));
+            stream.readAllBytes();
 
-        stream.readNBytes(1600);
-        AudioStream branch = stream.branch(Duration.ofMillis(-10));
-        stream.readAllBytes();
-
-        assertArrayEquals(Arrays.copyOfRange(audio, 1600, 3200), branch.readAllBytes());
+            assertArrayEquals(Arrays.copyOfRange(audio, 1600, 3200), branch.readAllBytes());
+        }
     }
 
     @Test
     public void branchWaitsForTheAudioReadNext() throws Exception {
         byte[] audio = audio(3200);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT));
-        AudioStream branch = stream.branch(Duration.ZERO);
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT))) {
+            AudioStream branch = stream.branch(Duration.ZERO);
 
-        CompletableFuture<byte[]> read = CompletableFuture.supplyAsync(() -> {
-            try {
-                return branch.readNBytes(320);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        });
-        stream.readNBytes(320);
+            CompletableFuture<byte[]> read = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return branch.readNBytes(320);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            });
+            stream.readNBytes(320);
 
-        assertArrayEquals(Arrays.copyOfRange(audio, 0, 320), read.get(10, TimeUnit.SECONDS));
+            assertArrayEquals(Arrays.copyOfRange(audio, 0, 320), read.get(10, TimeUnit.SECONDS));
+        }
     }
 
     @Test
@@ -178,15 +179,16 @@ public class KSAudioStreamTest {
     @Test
     public void closedBranchGetsNoMoreAudio() throws IOException {
         byte[] audio = audio(3200);
-        KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT));
-        AudioStream branch = stream.branch(Duration.ZERO);
+        try (KSAudioStream stream = new KSAudioStream(new ByteArrayAudioStream(audio, FORMAT))) {
+            AudioStream branch = stream.branch(Duration.ZERO);
 
-        stream.readNBytes(320);
-        branch.close();
-        stream.readNBytes(320);
+            stream.readNBytes(320);
+            branch.close();
+            stream.readNBytes(320);
 
-        assertEquals(-1, branch.read());
-        assertEquals(0, branch.available());
+            assertEquals(-1, branch.read());
+            assertEquals(0, branch.available());
+        }
     }
 
     @Test

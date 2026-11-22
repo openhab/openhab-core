@@ -39,8 +39,6 @@ import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link SitemapDTOMapper} is a utility class to map sitemaps into data transfer objects (DTO).
@@ -49,8 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class SitemapDTOMapper {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SitemapDTOMapper.class);
 
     /**
      * Maps sitemaps into sitemap data transfer object (DTO).

@@ -67,7 +67,9 @@ public class KSServiceStub implements KSService {
     public KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
             throws KSException {
         if (exceptionExpected) {
-            throw new KSException(EXCEPTION_MESSAGE);
+            KSException failure = new KSException(EXCEPTION_MESSAGE);
+            failure.setStackTrace(new StackTraceElement[0]);
+            throw failure;
         } else {
             if (errorExpected) {
                 ksListener.ksEventReceived(new KSErrorEvent(ERROR_MESSAGE));

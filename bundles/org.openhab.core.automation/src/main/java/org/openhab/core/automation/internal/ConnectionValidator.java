@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
@@ -73,8 +72,8 @@ public class ConnectionValidator {
      * @param actions is a list with actions of the rule whose connections have to be validated
      * @throws IllegalArgumentException when validation fails.
      */
-    public static void validateConnections(ModuleTypeRegistry mtRegistry, List<? extends @NonNull Trigger> triggers,
-            List<? extends @NonNull Condition> conditions, List<? extends @NonNull Action> actions) {
+    public static void validateConnections(ModuleTypeRegistry mtRegistry, List<? extends Trigger> triggers,
+            List<? extends Condition> conditions, List<? extends Action> actions) {
         if (!triggers.isEmpty()) {
             for (Condition condition : conditions) {
                 validateConditionConnections(mtRegistry, condition, triggers);
@@ -98,7 +97,7 @@ public class ConnectionValidator {
      * @throws IllegalArgumentException when validation fails.
      */
     private static void validateActionConnections(ModuleTypeRegistry mtRegistry, Action action,
-            List<? extends @NonNull Trigger> triggers, List<? extends @NonNull Action> actions) {
+            List<? extends Trigger> triggers, List<? extends Action> actions) {
         ActionType type = (ActionType) mtRegistry.get(action.getTypeUID()); // get module type of the condition
         if (type == null) {
             // if module type not exists in the system - throws exception
@@ -142,7 +141,7 @@ public class ConnectionValidator {
      * @throws IllegalArgumentException when validation fails.
      */
     private static void checkConnection(ModuleTypeRegistry mtRegistry, Connection connection, Input input,
-            List<? extends @NonNull Trigger> triggers, List<? extends @NonNull Action> actions) {
+            List<? extends Trigger> triggers, List<? extends Action> actions) {
         Map<String, Action> actionsMap = new HashMap<>();
         for (Action a : actions) {
             actionsMap.put(a.getId(), a);
@@ -172,7 +171,7 @@ public class ConnectionValidator {
      * @throws IllegalArgumentException when validation fails.
      */
     private static void validateConditionConnections(ModuleTypeRegistry mtRegistry, Condition condition,
-            List<? extends @NonNull Trigger> triggers) {
+            List<? extends Trigger> triggers) {
         ConditionType type = (ConditionType) mtRegistry.get(condition.getTypeUID()); // get module type of the condition
         if (type == null) {
             // if module type not exists in the system - throws exception
@@ -215,7 +214,7 @@ public class ConnectionValidator {
      * @throws IllegalArgumentException when validation fails.
      */
     private static void checkConnection(ModuleTypeRegistry mtRegistry, Connection connection, Input input,
-            List<? extends @NonNull Trigger> triggers) {
+            List<? extends Trigger> triggers) {
         Map<String, Trigger> triggersMap = new HashMap<>();
         for (Trigger trigger : triggers) {
             triggersMap.put(trigger.getId(), trigger);

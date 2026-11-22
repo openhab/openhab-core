@@ -104,6 +104,12 @@ public class ThingManagerImplTest extends JavaTest {
                 bundleResolverMock, translationProviderMock, bundleContextMock);
     }
 
+    private static NoClassDefFoundError missingFactoryDependency() {
+        NoClassDefFoundError error = new NoClassDefFoundError("javax/activation/CommandMap");
+        error.setStackTrace(new StackTraceElement[0]);
+        return error;
+    }
+
     @SuppressWarnings("unchecked")
     private void stubSuccessfulInitialization(Thing thing, ThingHandler handler) {
         SafeCallerBuilder<ThingHandler> safeCallerBuilderMock = mock(SafeCallerBuilder.class);
@@ -218,7 +224,9 @@ public class ThingManagerImplTest extends JavaTest {
 
         ThingHandlerFactory brokenFactory = mock(ThingHandlerFactory.class);
         when(brokenFactory.supportsThingType(any())).thenReturn(true);
-        when(brokenFactory.registerHandler(any())).thenThrow(new NoClassDefFoundError("javax/activation/CommandMap"));
+        when(brokenFactory.registerHandler(any())).thenAnswer(invocation -> {
+            throw missingFactoryDependency();
+        });
 
         thingManager.addThingHandlerFactory(brokenFactory);
         assertDoesNotThrow(() -> thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED));
@@ -238,7 +246,9 @@ public class ThingManagerImplTest extends JavaTest {
         ThingManagerImpl thingManager = createThingManager();
 
         ThingHandlerFactory brokenFactory = mock(ThingHandlerFactory.class);
-        when(brokenFactory.supportsThingType(any())).thenThrow(new NoClassDefFoundError("javax/activation/CommandMap"));
+        when(brokenFactory.supportsThingType(any())).thenAnswer(invocation -> {
+            throw missingFactoryDependency();
+        });
 
         ThingHandlerFactory goodFactory = mock(ThingHandlerFactory.class);
         when(goodFactory.supportsThingType(any())).thenReturn(true);
@@ -273,7 +283,7 @@ public class ThingManagerImplTest extends JavaTest {
             if (thing.getUID().equals(thing2.getUID())) {
                 return handlerMock;
             }
-            throw new NoClassDefFoundError("javax/activation/CommandMap");
+            throw missingFactoryDependency();
         });
         stubSuccessfulInitialization(thing2, handlerMock);
 
@@ -302,7 +312,9 @@ public class ThingManagerImplTest extends JavaTest {
 
         ThingHandlerFactory brokenFactory = mock(ThingHandlerFactory.class);
         when(brokenFactory.supportsThingType(eq(brokenTypeUID))).thenReturn(true);
-        when(brokenFactory.registerHandler(any())).thenThrow(new NoClassDefFoundError("javax/activation/CommandMap"));
+        when(brokenFactory.registerHandler(any())).thenAnswer(invocation -> {
+            throw missingFactoryDependency();
+        });
 
         Thing thing2 = mock(Thing.class);
         when(thing2.getUID()).thenReturn(new ThingUID("test", "thing2"));
