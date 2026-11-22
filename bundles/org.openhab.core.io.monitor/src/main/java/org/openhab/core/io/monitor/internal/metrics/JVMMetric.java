@@ -42,6 +42,7 @@ public class JVMMetric implements OpenhabCoreMeterBinder {
     private static final Tag CORE_JVM_METRIC_TAG = Tag.of("metric", "openhab.core.metric.jvm");
     private final Set<Tag> tags = new HashSet<>();
     private @Nullable MeterRegistry meterRegistry;
+    private @Nullable JvmGcMetrics gcMetrics;
 
     public JVMMetric(Collection<Tag> tags) {
         this.tags.addAll(tags);
@@ -55,13 +56,20 @@ public class JVMMetric implements OpenhabCoreMeterBinder {
         this.meterRegistry = registry;
         new ClassLoaderMetrics(tags).bindTo(meterRegistry);
         new JvmMemoryMetrics(tags).bindTo(meterRegistry);
-        new JvmGcMetrics(tags).bindTo(meterRegistry);
+        JvmGcMetrics gcMetrics = new JvmGcMetrics(tags);
+        this.gcMetrics = gcMetrics;
+        gcMetrics.bindTo(registry);
         new ProcessorMetrics(tags).bindTo(meterRegistry);
         new JvmThreadMetrics(tags).bindTo(meterRegistry);
     }
 
     @Override
     public void unbind() {
+        JvmGcMetrics gcMetrics = this.gcMetrics;
+        if (gcMetrics != null) {
+            this.gcMetrics = null;
+            gcMetrics.close();
+        }
         MeterRegistry meterRegistry = this.meterRegistry;
         if (meterRegistry == null) {
             return;
