@@ -510,7 +510,7 @@ public class DialogProcessor {
             }
             session.invalidate();
             currentSession = null;
-            if (dialogContext.dt() != null && dialogContext.keyword() != null) {
+            if (triggerStarted) {
                 state = DialogState.WAITING_FOR_TRIGGER;
             } else {
                 state = DialogState.IDLE;
@@ -618,7 +618,7 @@ public class DialogProcessor {
             finishDialog(session);
             return;
         } catch (RuntimeException e) {
-            logger.debug("Unexpected error starting follow-up recognition: {}", e.getMessage(), e);
+            logger.warn("Unexpected error starting follow-up recognition: {}", e.getMessage(), e);
             finishDialog(session);
             return;
         }

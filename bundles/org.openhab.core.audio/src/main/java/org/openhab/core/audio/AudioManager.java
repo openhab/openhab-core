@@ -81,19 +81,15 @@ public interface AudioManager {
     void play(@Nullable AudioStream audioStream, AudioSink sink, @Nullable PercentType volume);
 
     /**
-     * Plays the passed audio stream on the given sink and reports when playback has finished. The default
-     * implementation completes as soon as {@link #play(AudioStream, AudioSink, PercentType)} returns.
+     * Plays the passed audio stream on the given sink and reports when playback has finished.
      *
      * @param audioStream The audio stream to play or null if streaming should be stopped
      * @param sink The audio sink to use
      * @param volume The volume to be used or null if the default notification volume should be used
      * @return a future that completes when playback has finished, or exceptionally if it fails
      */
-    default CompletableFuture<@Nullable Void> playAndComplete(@Nullable AudioStream audioStream, AudioSink sink,
-            @Nullable PercentType volume) {
-        play(audioStream, sink, volume);
-        return CompletableFuture.completedFuture(null);
-    }
+    CompletableFuture<@Nullable Void> playAndComplete(@Nullable AudioStream audioStream, AudioSink sink,
+            @Nullable PercentType volume);
 
     /**
      * Plays an audio file from the "sounds" folder using the default audio sink.

@@ -246,7 +246,7 @@ public class DialogAudioDriver {
         final STTServiceHandle handle;
         try {
             handle = dialogContext.stt().recognize(listener, stream, dialogContext.locale());
-        } catch (STTException e) {
+        } catch (STTException | RuntimeException e) {
             detachAndCloseStreamSTT(stream);
             throw e;
         }

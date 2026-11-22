@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -173,6 +174,24 @@ public class DialogAudioDriverTest {
 
         driver.stopRecognition();
         verify(sttHandle).abort();
+        verify(audioStream).close();
+    }
+
+    @Test
+    public void startRecognitionClosesTheStreamWhenRecognitionFailsUnexpectedly()
+            throws AudioException, STTException, IOException {
+        when(audioSource.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(sttService.getSupportedFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(audioSource.getInputStream(any())).thenReturn(audioStream);
+        when(sttService.recognize(eq(sttListener), eq(audioStream), eq(Locale.ENGLISH)))
+                .thenThrow(new IllegalStateException("bug"));
+
+        DialogContext context = new DialogContext.Builder("keyword", Locale.ENGLISH).withSource(audioSource)
+                .withSink(audioSink).withKS(ksService).withSTT(sttService).withTTS(ttsService).withHLI(hli).build();
+
+        DialogAudioDriver driver = new DialogAudioDriver(context);
+        assertThrows(IllegalStateException.class, () -> driver.startRecognition(sttListener));
+
         verify(audioStream).close();
     }
 
