@@ -67,7 +67,9 @@ public class STTServiceStub implements STTService {
     public STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale)
             throws STTException {
         if (exceptionExpected) {
-            throw new STTException(EXCEPTION_MESSAGE);
+            STTException failure = new STTException(EXCEPTION_MESSAGE);
+            failure.setStackTrace(new StackTraceElement[0]);
+            throw failure;
         } else {
             if (errorExpected) {
                 sttListener.sttEventReceived(new SpeechRecognitionErrorEvent(ERROR_MESSAGE));

@@ -47,6 +47,8 @@ import org.openhab.core.audio.AudioSourceRegistry;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.transcode.AudioTranscoder;
 import org.openhab.core.audio.transcode.AudioTranscodingException;
 import org.openhab.core.audio.utils.AudioFormatMatcher;
@@ -175,7 +177,10 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
                 }
             }
 
-            if (throwable != null) {
+            if (throwable instanceof UnsupportedAudioFormatException
+                    || throwable instanceof UnsupportedAudioStreamException) {
+                logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage());
+            } else if (throwable != null) {
                 logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
             }
 
