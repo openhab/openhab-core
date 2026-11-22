@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -604,6 +605,54 @@ public class DialogProcessorTest {
     }
 
     @Test
+    public void followUpStopsAtTheLimitUntilTheNextDialog() throws STTException, InterpretationException {
+        when(eventListener.shouldListenForFollowUp(any())).thenReturn(true);
+        when(eventListener.getFollowUpLimit(any())).thenReturn(1);
+        DialogContext context = createTestContext(List.of(answeringInterpreter()));
+        when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+        DialogProcessor processor = createFollowUpProcessor(context);
+        processor.start();
+
+        processor.startSimpleDialog();
+        recognitionListener().sttEventReceived(new SpeechRecognitionEvent("turn on the light", 1.0f));
+        followUpListener().sttEventReceived(new SpeechRecognitionEvent("and the hallway too", 1.0f));
+
+        verify(audioDriver, times(1)).startRecognition(any(), isNull(), any());
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        verify(eventListener).onReleaseGroup(context);
+
+        processor.startSimpleDialog();
+        ArgumentCaptor<STTListener> nextDialog = ArgumentCaptor.forClass(STTListener.class);
+        verify(audioDriver, times(2)).startRecognition(nextDialog.capture());
+        nextDialog.getValue().sttEventReceived(new SpeechRecognitionEvent("turn off the light", 1.0f));
+
+        verify(audioDriver, times(2)).startRecognition(any(), isNull(), any());
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+    }
+
+    @Test
+    public void followUpKeepsListeningWithoutALimit() throws STTException, InterpretationException {
+        when(eventListener.shouldListenForFollowUp(any())).thenReturn(true);
+        when(eventListener.getFollowUpLimit(any())).thenReturn(0);
+        DialogContext context = createTestContext(List.of(answeringInterpreter()));
+        when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+        DialogProcessor processor = createFollowUpProcessor(context);
+        processor.start();
+
+        processor.startSimpleDialog();
+        recognitionListener().sttEventReceived(new SpeechRecognitionEvent("turn on the light", 1.0f));
+        for (int i = 0; i < 3; i++) {
+            followUpListener().sttEventReceived(new SpeechRecognitionEvent("and the next one", 1.0f));
+        }
+
+        verify(audioDriver, times(4)).startRecognition(any(), isNull(), any());
+        assertEquals(DialogProcessor.DialogState.LISTENING, processor.getState());
+        verify(eventListener, never()).onReleaseGroup(context);
+    }
+
+    @Test
     public void triggerDuringFollowUpStartsANewDialog() throws DTException, STTException, InterpretationException {
         when(eventListener.shouldListenForFollowUp(any())).thenReturn(true);
         HumanLanguageInterpreter hli = answeringInterpreter();
@@ -666,6 +715,23 @@ public class DialogProcessorTest {
         DialogContext context = createTestContext(List.of(answeringInterpreter()));
         when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
                 .thenReturn(CompletableFuture.failedFuture(new IOException("sink gone")));
+        DialogProcessor processor = createFollowUpProcessor(context);
+        processor.start();
+
+        processor.startSimpleDialog();
+        recognitionListener().sttEventReceived(new SpeechRecognitionEvent("turn on the light", 1.0f));
+
+        verify(eventListener).onReleaseGroup(context);
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+        verify(audioDriver, never()).startRecognition(any(), any(), any());
+    }
+
+    @Test
+    public void followUpIsSkippedWhenPlayingTheAnswerThrows() throws STTException, InterpretationException {
+        when(eventListener.shouldListenForFollowUp(any())).thenReturn(true);
+        DialogContext context = createTestContext(List.of(answeringInterpreter()));
+        when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
+                .thenThrow(new IllegalStateException("sink gone"));
         DialogProcessor processor = createFollowUpProcessor(context);
         processor.start();
 
@@ -776,6 +842,39 @@ public class DialogProcessorTest {
         inOrder.verify(eventListener).onReleaseGroup(context);
         verify(feedbackService, times(2)).setListening(false);
         verify(speechSynthesizer, times(1)).say(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void followUpTimeoutEndsTheFollowUpOnTheDialogExecutor() throws STTException, InterpretationException {
+        when(eventListener.shouldListenForFollowUp(any())).thenReturn(true);
+        DialogContext context = createTestContext(List.of(answeringInterpreter()));
+        when(speechSynthesizer.say(eq("answer"), any(), any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+        List<Runnable> dialogTasks = new ArrayList<>();
+        DialogProcessor processor = new DialogProcessor(context, audioDriver, feedbackService, interpretationService,
+                speechSynthesizer, i18nProvider, eventListener, scheduler, dialogTasks::add);
+        processor.start();
+
+        processor.startSimpleDialog();
+        recognitionListener().sttEventReceived(new SpeechRecognitionEvent("turn on the light", 1.0f));
+        runAll(dialogTasks);
+        STTListener followUpListener = followUpListener();
+        ArgumentCaptor<Runnable> followUpTimeout = ArgumentCaptor.forClass(Runnable.class);
+        verify(scheduler).schedule(followUpTimeout.capture(), eq(DialogProcessor.MAX_FOLLOW_UP_SECONDS),
+                eq(TimeUnit.SECONDS));
+
+        followUpTimeout.getValue().run();
+        verify(audioDriver, never()).stopRecognition(followUpListener);
+
+        runAll(dialogTasks);
+        verify(audioDriver).stopRecognition(followUpListener);
+        assertEquals(DialogProcessor.DialogState.WAITING_FOR_TRIGGER, processor.getState());
+    }
+
+    private static void runAll(List<Runnable> tasks) {
+        while (!tasks.isEmpty()) {
+            tasks.remove(0).run();
+        }
     }
 
     @Test

@@ -524,6 +524,11 @@ public class DialogManagerImpl implements DialogManager, DialogProcessor.DialogE
         return voiceServiceResolver.getConfiguration().isFollowUpListening();
     }
 
+    @Override
+    public int getFollowUpLimit(DialogContext context) {
+        return voiceServiceResolver.getConfiguration().getFollowUpLimit();
+    }
+
     private void stopDialogs(Predicate<DialogProcessor> filter) {
         List<DialogProcessor> persistentToStop = dialogProcessors.values().stream().filter(filter).toList();
         for (var dialog : persistentToStop) {

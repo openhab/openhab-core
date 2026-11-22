@@ -136,7 +136,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
         } catch (IOException e) {
             logger.warn("IOException: {}", e.getMessage());
         } catch (InterruptedException e) {
-            logger.warn("InterruptedException: {}", e.getMessage());
+            Thread.currentThread().interrupt();
+            logger.debug("Interrupted while playing audio on sink {}", sinkId);
         } finally {
             try {
                 audioStream.close();

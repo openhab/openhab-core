@@ -100,7 +100,8 @@ import org.slf4j.LoggerFactory;
  * </pre>
  * 
  * With follow-up listening, a persistent dialog listens again once the answer has played, unless the command
- * couldn't be interpreted, and stops when nothing is heard. The trigger is ignored while the answer plays, and
+ * couldn't be interpreted, and stops when nothing is heard or the follow-up limit is reached. The trigger is ignored
+ * while the answer plays, and
  * starts a new interaction during a follow-up.
  * <p>
  * Any active state transitions immediately to {@link DialogState#IDLE} upon calling {@link #stop()}.
@@ -200,11 +201,16 @@ public class DialogProcessor {
     private class RecognitionSession implements STTListener {
         private final AtomicBoolean cancelled = new AtomicBoolean(false);
         private final AtomicBoolean terminalHandled = new AtomicBoolean(false);
-        private final boolean followUp;
+        // follow-ups since the trigger, 0 for the dialog the trigger started
+        private final int followUps;
         private volatile @Nullable ScheduledFuture<?> timeout;
 
-        RecognitionSession(boolean followUp) {
-            this.followUp = followUp;
+        RecognitionSession(int followUps) {
+            this.followUps = followUps;
+        }
+
+        boolean isFollowUp() {
+            return followUps > 0;
         }
 
         void invalidate() {
@@ -273,7 +279,8 @@ public class DialogProcessor {
                         return;
                     }
                     // so background talk doesn't keep the follow-up going
-                    if (interpreted && triggerStarted && eventListener.shouldListenForFollowUp(dialogContext)) {
+                    if (interpreted && triggerStarted && eventListener.shouldListenForFollowUp(dialogContext)
+                            && hasFollowUpLeft(followUps)) {
                         sayThenListenForFollowUp(this, answer);
                     } else {
                         say(answer);
@@ -301,7 +308,7 @@ public class DialogProcessor {
                     audioDriver.stopRecognition(this);
                     feedbackService.setListening(false);
                     // a follow-up normally ends by hearing nothing, so stay quiet
-                    if (!followUp && eventListener.shouldSpeakRecognitionErrors(dialogContext)) {
+                    if (!isFollowUp() && eventListener.shouldSpeakRecognitionErrors(dialogContext)) {
                         if (!transitionSession(this, DialogState.SPEAKING)) {
                             return;
                         }
@@ -406,7 +413,7 @@ public class DialogProcessor {
             }
             return;
         }
-        RecognitionSession session = new RecognitionSession(false);
+        RecognitionSession session = new RecognitionSession(0);
         synchronized (stateLock) {
             if (stopped) {
                 session.invalidate();
@@ -524,12 +531,19 @@ public class DialogProcessor {
      * ends.
      */
     private void sayThenListenForFollowUp(RecognitionSession session, @Nullable String answer) {
-        session.setTimeout(scheduler.schedule(() -> {
+        session.setTimeout(scheduleOnDialogExecutor(() -> {
             logger.debug("Not listening for a follow-up, the answer didn't finish playing within {}s",
                     MAX_ANSWER_PLAYBACK_SECONDS);
             finishDialog(session);
-        }, MAX_ANSWER_PLAYBACK_SECONDS, TimeUnit.SECONDS));
-        say(answer).whenCompleteAsync((result, error) -> {
+        }, MAX_ANSWER_PLAYBACK_SECONDS));
+        CompletableFuture<@Nullable Void> playback;
+        try {
+            playback = say(answer);
+        } catch (RuntimeException e) {
+            // a sink may throw instead of failing the future
+            playback = CompletableFuture.failedFuture(e);
+        }
+        playback.whenCompleteAsync((result, error) -> {
             if (error != null) {
                 logger.debug("Not listening for a follow-up, playing the answer failed: {}", error.getMessage());
                 finishDialog(session);
@@ -537,6 +551,19 @@ public class DialogProcessor {
                 listenForFollowUp(session);
             }
         }, dialogExecutor);
+    }
+
+    /**
+     * Runs the task on the dialog executor after the delay, as ending a dialog can block.
+     */
+    private ScheduledFuture<?> scheduleOnDialogExecutor(Runnable task, long delaySeconds) {
+        return scheduler.schedule(() -> dialogExecutor.execute(task), delaySeconds, TimeUnit.SECONDS);
+    }
+
+    private boolean hasFollowUpLeft(int followUps) {
+        int limit = eventListener.getFollowUpLimit(dialogContext);
+        // 0 means no limit
+        return limit <= 0 || followUps < limit;
     }
 
     private void endFollowUpOnTrigger() {
@@ -554,7 +581,7 @@ public class DialogProcessor {
      */
     private void endFollowUp(RecognitionSession session, String reason) {
         synchronized (stateLock) {
-            if (stopped || !session.equals(currentSession) || !session.followUp) {
+            if (stopped || !session.equals(currentSession) || !session.isFollowUp()) {
                 return;
             }
         }
@@ -571,7 +598,7 @@ public class DialogProcessor {
     }
 
     private void listenForFollowUp(RecognitionSession previous) {
-        RecognitionSession session = new RecognitionSession(true);
+        RecognitionSession session = new RecognitionSession(previous.followUps + 1);
         synchronized (stateLock) {
             if (stopped || !previous.equals(currentSession) || previous.isCancelled()) {
                 return;
@@ -581,9 +608,9 @@ public class DialogProcessor {
             state = DialogState.LISTENING;
         }
         logger.debug("Listening for a follow-up command");
-        session.setTimeout(scheduler.schedule(
+        session.setTimeout(scheduleOnDialogExecutor(
                 () -> endFollowUp(session, "Nothing recognized within " + MAX_FOLLOW_UP_SECONDS + "s"),
-                MAX_FOLLOW_UP_SECONDS, TimeUnit.SECONDS));
+                MAX_FOLLOW_UP_SECONDS));
         try {
             audioDriver.startRecognition(session, null, session::isCancelled);
         } catch (STTException e) {
@@ -691,5 +718,13 @@ public class DialogProcessor {
          * @return true to listen for a follow-up
          */
         boolean shouldListenForFollowUp(DialogContext context);
+
+        /**
+         * Tells how many follow-up commands a persistent dialog listens for after the trigger.
+         *
+         * @param context used by the dialog processor
+         * @return the limit, or 0 for no limit
+         */
+        int getFollowUpLimit(DialogContext context);
     }
 }

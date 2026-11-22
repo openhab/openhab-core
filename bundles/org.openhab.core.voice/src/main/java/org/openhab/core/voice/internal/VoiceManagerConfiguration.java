@@ -81,6 +81,10 @@ public class VoiceManagerConfiguration {
         return configurationDTO.followUpListening;
     }
 
+    public int getFollowUpLimit() {
+        return configurationDTO.followUpLimit;
+    }
+
     public @Nullable String getListeningItem() {
         return configurationDTO.listeningItem;
     }
@@ -135,6 +139,7 @@ public class VoiceManagerConfiguration {
         public @Nullable String defaultKS;
         public String keyword = "Wakeup";
         public boolean followUpListening = false;
+        public int followUpLimit = 1;
         public @Nullable String listeningItem;
         public @Nullable String listeningMelody;
         public String promptItems = VoiceConfigurationConstants.PROMPT_ITEMS_ALL;

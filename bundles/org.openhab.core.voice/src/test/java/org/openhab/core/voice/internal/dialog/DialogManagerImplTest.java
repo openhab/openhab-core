@@ -270,6 +270,16 @@ public class DialogManagerImplTest {
     }
 
     @Test
+    public void getFollowUpLimitFollowsTheConfiguration() throws AudioException, STTException, KSException {
+        DialogContext context = createValidContext("source-1", "sink-1");
+        assertEquals(1, dialogManager.getFollowUpLimit(context));
+
+        voiceServiceResolver.getConfiguration().update(Map.of("followUpLimit", 0));
+
+        assertEquals(0, dialogManager.getFollowUpLimit(context));
+    }
+
+    @Test
     public void listenAndAnswerPreventsDuplicateExecutionOnSameDialogGroup()
             throws AudioException, STTException, KSException {
         DialogContext context1 = createValidContextBuilder("source-1", "sink-1").withDialogGroup("group-A").build();

@@ -32,9 +32,15 @@
 		</parameter>
 		<parameter name="followUpListening" type="boolean">
 			<label>Follow-Up Listening</label>
-			<description>After answering, listen again for a follow-up command without the magic word, until nothing is heard.
-				Not used when the command couldn't be interpreted. The magic word is ignored while the answer plays.</description>
+			<description>After answering, listen again for a follow-up command without the magic word, until nothing is heard or
+				the follow-up limit is reached. Not used when the command couldn't be interpreted. The magic word is ignored while
+				the answer plays.</description>
 			<default>false</default>
+		</parameter>
+		<parameter name="followUpLimit" type="integer" min="0">
+			<label>Follow-Up Limit</label>
+			<description>How many follow-up commands to listen for after the magic word. 0 means no limit.</description>
+			<default>1</default>
 		</parameter>
 		<parameter name="listeningItem" type="text">
 			<context>item</context>
