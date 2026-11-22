@@ -180,6 +180,14 @@ mvn clean install -pl :org.openhab.core.thing.tests -am
 
 Integration tests use shared core BOMs and bundle indexes, so `-am` can select a substantial part of core even when only one test module is requested.
 
+The runtime smoke tests use the Magic Binding to discover and approve a thing and exercise a linked item, a thing handler and a rule together.
+They also verify that command routing and rule execution recover after the binding bundle restarts.
+To run the smoke tests:
+
+```shell
+mvn verify -pl :org.openhab.core.smoke.tests -am
+```
+
 When Maven dependencies or OSGi bundle requirements change, the run bundles in the integration tests' `itest.bndrun` files may need updating.
 To resolve those dependencies and run the full build:
 
