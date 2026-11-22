@@ -137,36 +137,6 @@
     </dependencies>
   </dependencyManagement>
 
-  <repositories>
-    <!-- Required for Karaf ${karaf.compile.version} while the release vote is running. Remove once it is released. -->
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>apache-karaf-staging-1224</id>
-      <name>Apache Karaf Staging Repository</name>
-      <url>https://repository.apache.org/content/repositories/orgapachekaraf-1224/</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <!-- Required for karaf-maven-plugin ${karaf.tooling.version}, see the repository comment above. -->
-    <pluginRepository>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>apache-karaf-staging-1224</id>
-      <name>Apache Karaf Staging Repository</name>
-      <url>https://repository.apache.org/content/repositories/orgapachekaraf-1224/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
     <pluginManagement>
       <plugins>
