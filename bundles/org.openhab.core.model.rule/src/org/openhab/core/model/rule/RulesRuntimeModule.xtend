@@ -22,10 +22,10 @@ import org.openhab.core.model.rule.scoping.RulesJavaReflectAccess
 import org.openhab.core.model.script.interpreter.ScriptInterpreter
 import org.openhab.core.model.script.jvmmodel.ScriptTypeComputer
 import org.openhab.core.model.script.scoping.ActionClassLoader
+import org.openhab.core.model.core.types.DisposableTypeProviderFactory
 import org.openhab.core.model.script.scoping.ScriptImplicitlyImportedTypes
 import org.openhab.core.model.script.scoping.ScriptImportSectionNamespaceScopeProvider
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
-import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeProviderFactory
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeScopeProvider
 import org.eclipse.xtext.common.types.util.JavaReflectAccess
 import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
@@ -76,7 +76,7 @@ import org.openhab.core.model.rule.formatting.RulesFormatter
     }
 
     override Class<? extends IJvmTypeProvider.Factory> bindIJvmTypeProvider$Factory() {
-        return ReflectionTypeProviderFactory
+        return DisposableTypeProviderFactory
     }
 
     override Class<? extends AbstractTypeScopeProvider> bindAbstractTypeScopeProvider() {
