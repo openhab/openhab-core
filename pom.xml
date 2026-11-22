@@ -86,8 +86,8 @@
     <jbbp.version>3.0.3</jbbp.version>
     <jersey.version>3.1.3</jersey.version>
     <jupnp.version>4.0.0.M1</jupnp.version>
-    <karaf.compile.version>4.5.0-SNAPSHOT</karaf.compile.version>
-    <karaf.tooling.version>4.5.0-SNAPSHOT</karaf.tooling.version>
+    <karaf.compile.version>4.5.0</karaf.compile.version>
+    <karaf.tooling.version>4.5.0</karaf.tooling.version>
     <maven.plugin.tools.version>3.16.0</maven.plugin.tools.version>
     <osgitech.rest.version>1.2.3</osgitech.rest.version>
     <sat.version>0.18.0</sat.version>
@@ -136,6 +136,36 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <repositories>
+    <!-- Required for Karaf ${karaf.compile.version} while the release vote is running. Remove once it is released. -->
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>apache-karaf-staging-1224</id>
+      <name>Apache Karaf Staging Repository</name>
+      <url>https://repository.apache.org/content/repositories/orgapachekaraf-1224/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <!-- Required for karaf-maven-plugin ${karaf.tooling.version}, see the repository comment above. -->
+    <pluginRepository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>apache-karaf-staging-1224</id>
+      <name>Apache Karaf Staging Repository</name>
+      <url>https://repository.apache.org/content/repositories/orgapachekaraf-1224/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <pluginManagement>
