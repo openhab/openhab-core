@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Implementations provide an item specific, localized {@link CommandDescription}.
  *
  * @author Henning Treu - Initial contribution
+ * @author Cody Cutrer - Provider ranking
  */
 @NonNullByDefault
 public interface CommandDescriptionProvider {
@@ -34,4 +35,15 @@ public interface CommandDescriptionProvider {
      */
     @Nullable
     CommandDescription getCommandDescription(String itemName, @Nullable Locale locale);
+
+    /**
+     * Returns the provider rank. Higher-ranked providers are queried first; providers with equal ranks retain their
+     * registration order. Implementations may use the {@code service.ranking} OSGi component property.
+     *
+     * @return the provider rank, defaulting to zero
+     * @since 5.3.0
+     */
+    default Integer getRank() {
+        return 0;
+    }
 }

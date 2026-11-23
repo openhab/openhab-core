@@ -12,6 +12,7 @@
  */
 package org.openhab.core.internal.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,10 +28,11 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * The {@link CommandDescriptionService} combines all available {@link CommandDescriptionProvider} implementations to
- * build a resulting {@link CommandDescription}.
+ * The {@link CommandDescriptionService} returns the first non-null {@link CommandDescription} from providers in
+ * descending rank order, preserving registration order for equal ranks.
  *
  * @author Henning Treu - Initial contribution
+ * @author Cody Cutrer - Provider ranking
  */
 @NonNullByDefault
 @Component
@@ -40,11 +42,8 @@ public class CommandDescriptionServiceImpl implements CommandDescriptionService 
 
     @Override
     public @Nullable CommandDescription getCommandDescription(String itemName, @Nullable Locale locale) {
-        /*
-         * As of now there is only the ChannelCommandDescriptionProvider, so there is no merge logic as for
-         * {@link StateDescriptionFragment}s. Just take the first CommandDescription which was provided.
-         */
-        for (CommandDescriptionProvider cdp : commandDescriptionProviders) {
+        for (CommandDescriptionProvider cdp : commandDescriptionProviders.stream()
+                .sorted(Comparator.comparing(CommandDescriptionProvider::getRank).reversed()).toList()) {
             CommandDescription commandDescription = cdp.getCommandDescription(itemName, locale);
             if (commandDescription != null) {
                 return commandDescription;
