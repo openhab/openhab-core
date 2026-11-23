@@ -67,13 +67,11 @@ public class StateDescriptionServiceImpl implements StateDescriptionService {
                 continue;
             }
 
-            // we pick up the first valid StateDescriptionFragment here:
             if (result == null) {
-                // create a deep copy of the first found fragment before merging other fragments into it
-                result = new StateDescriptionFragmentImpl((StateDescriptionFragmentImpl) fragment);
-            } else {
-                result.merge(fragment);
+                // Merge into a separate accumulator to preserve provider-owned fragments.
+                result = new StateDescriptionFragmentImpl();
             }
+            result.merge(fragment);
         }
         return result;
     }

@@ -269,6 +269,29 @@ public class StateDescriptionServiceImplTest {
         assertEquals("higher", Objects.requireNonNull(item.getStateDescription()).getPattern());
     }
 
+    @Test
+    public void customFragmentImplementationCanBeMergedWithoutModification() {
+        StateDescriptionFragment fragment = mock(StateDescriptionFragment.class);
+        List<StateOption> options = List.of(new StateOption("value", "Custom label"));
+        when(fragment.getMinimum()).thenReturn(BigDecimal.ONE);
+        when(fragment.getPattern()).thenReturn("custom");
+        when(fragment.isReadOnly()).thenReturn(Boolean.FALSE);
+        when(fragment.getOptions()).thenReturn(options);
+        registerStateDescriptionFragmentProvider(fragment, 1);
+        registerStateDescriptionFragmentProvider(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.TEN).withPattern("fallback").withReadOnly(Boolean.TRUE)
+                .withOption(new StateOption("other", "Fallback label")).build(), 0);
+
+        StateDescription description = Objects.requireNonNull(item.getStateDescription());
+        assertEquals(BigDecimal.ONE, description.getMinimum());
+        assertEquals(BigDecimal.TEN, description.getMaximum());
+        assertEquals("custom", description.getPattern());
+        assertFalse(description.isReadOnly());
+        assertEquals(options, description.getOptions());
+        assertNull(fragment.getMaximum());
+        assertEquals(options, fragment.getOptions());
+    }
+
     private StateDescriptionFragmentProvider registerStateDescriptionFragmentProvider(
             StateDescriptionFragment stateDescriptionFragment, int serviceRanking) {
         StateDescriptionFragmentProvider stateDescriptionProvider = mock(StateDescriptionFragmentProvider.class);
