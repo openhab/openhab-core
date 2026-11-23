@@ -527,6 +527,32 @@ public class PersistenceManagerTest {
     }
 
     @Test
+    public void storeTimeSeriesWithDecimalStateRestoresScaledDecimalState() {
+        TestModifiablePersistenceService service = spy(new TestModifiablePersistenceService());
+        manager.addPersistenceService(service);
+        addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.FORECAST, null);
+
+        Instant now = Instant.now();
+        ZonedDateTime initialUpdate = now.minusSeconds(5000).atZone(ZoneId.systemDefault());
+        Instant stateInPast = now.minusSeconds(1000);
+        DecimalType decimalState = new DecimalType("0.0");
+        // a different current state is needed, otherwise the restore keeps the existing state object
+        TEST_ITEM3.setState(new DecimalType(1), null, initialUpdate, null, null);
+
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
+        timeSeries.add(stateInPast, decimalState);
+
+        manager.timeSeriesUpdated(TEST_ITEM3, timeSeries);
+
+        // the time series entry is stored with its timestamp and decimal scale
+        verify(service).store(eq(TEST_ITEM3), eq(stateInPast.atZone(ZoneId.systemDefault())), eq(decimalState));
+        // the restored item state keeps the decimal scale from the time series entry
+        assertThat(TEST_ITEM3.getState(), is(decimalState));
+        assertThat(TEST_ITEM3.getState().toString(), is("0.0"));
+    }
+
+    @Test
     public void externalPersistenceDataChangeIsHandled() {
         setupPersistence(new PersistenceAllConfig());
         addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),

@@ -135,6 +135,25 @@ public class SseItemStatesEventBuilderTest {
     }
 
     @Test
+    public void getDisplayStateWhenMatchingStateOptionWithDifferentDecimalScale() {
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create()
+                .withOption(new StateOption("0", ITEM_STATE_OPTION_LABEL)).build().toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
+
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType("0.0"));
+        String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(ITEM_STATE_OPTION_LABEL, result);
+
+        // the default Number pattern must not prevent the numeric state option match
+        StateDescription stateDescription2 = StateDescriptionFragmentBuilder.create().withPattern("%.0f")
+                .withOption(new StateOption("0", ITEM_STATE_OPTION_LABEL)).build().toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription2);
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType("0.00"));
+        result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(ITEM_STATE_OPTION_LABEL, result);
+    }
+
+    @Test
     public void getDisplayStateWhenNoMatchingStateOptionAndNoPattern() {
         StateDescription stateDescription = StateDescriptionFragmentBuilder.create()
                 .withOption(new StateOption(ITEM_STATE_VALUE, ITEM_STATE_OPTION_LABEL)).build().toStateDescription();
