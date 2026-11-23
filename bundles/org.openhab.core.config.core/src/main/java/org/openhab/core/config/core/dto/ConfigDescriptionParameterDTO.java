@@ -13,6 +13,7 @@
 package org.openhab.core.config.core.dto;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -36,6 +37,11 @@ public class ConfigDescriptionParameterDTO {
     @Schema(name = "default")
     @SerializedName(value = "default", alternate = "defaultValue")
     public String defaultValue;
+    /**
+     * List of default values for parameters with <code>multiple=true</code>. This is kept as-is so that UI components
+     * (e.g. custom widgets) can persist and deliver it.
+     */
+    public Collection<String> defaultValues;
     public String description;
     public String label;
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)

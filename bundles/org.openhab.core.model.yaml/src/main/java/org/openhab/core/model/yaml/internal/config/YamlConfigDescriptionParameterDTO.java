@@ -50,6 +50,7 @@ public class YamlConfigDescriptionParameterDTO {
     @JsonProperty("default")
     @JsonAlias("defaultValue")
     public String defaultValue;
+    public List<String> defaultValues;
     public String description;
     public String label;
     public Boolean required;
@@ -142,9 +143,9 @@ public class YamlConfigDescriptionParameterDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(advanced, context, defaultValue, description, filterCriteria, groupName, label,
-                limitToOptions, max, min, multiple, multipleLimit, options, pattern, readOnly, required, step, type,
-                unit, unitLabel, verify);
+        return Objects.hash(advanced, context, defaultValue, defaultValues, description, filterCriteria, groupName,
+                label, limitToOptions, max, min, multiple, multipleLimit, options, pattern, readOnly, required, step,
+                type, unit, unitLabel, verify);
     }
 
     @Override
@@ -157,7 +158,8 @@ public class YamlConfigDescriptionParameterDTO {
         }
         YamlConfigDescriptionParameterDTO other = (YamlConfigDescriptionParameterDTO) obj;
         return Objects.equals(advanced, other.advanced) && Objects.equals(context, other.context)
-                && Objects.equals(defaultValue, other.defaultValue) && Objects.equals(description, other.description)
+                && Objects.equals(defaultValue, other.defaultValue)
+                && Objects.equals(defaultValues, other.defaultValues) && Objects.equals(description, other.description)
                 && Objects.equals(filterCriteria, other.filterCriteria) && Objects.equals(groupName, other.groupName)
                 && Objects.equals(label, other.label) && Objects.equals(limitToOptions, other.limitToOptions)
                 && Objects.equals(max, other.max) && Objects.equals(min, other.min)
@@ -283,6 +285,7 @@ public class YamlConfigDescriptionParameterDTO {
         result.type = type;
         result.context = context;
         result.defaultValue = defaultValue;
+        result.defaultValues = defaultValues;
         result.description = description;
         result.label = label;
         result.required = required;
@@ -334,6 +337,7 @@ public class YamlConfigDescriptionParameterDTO {
         @JsonProperty("default")
         @JsonAlias("defaultValue")
         public String defaultValue;
+        public List<String> defaultValues;
         public String description;
         public String label;
         public boolean required;
@@ -367,6 +371,7 @@ public class YamlConfigDescriptionParameterDTO {
             YamlConfigDescriptionParameterDTO result = new YamlConfigDescriptionParameterDTO();
             result.context = context;
             result.defaultValue = defaultValue;
+            result.defaultValues = defaultValues;
             result.description = description;
             result.label = label;
             result.required = required;
