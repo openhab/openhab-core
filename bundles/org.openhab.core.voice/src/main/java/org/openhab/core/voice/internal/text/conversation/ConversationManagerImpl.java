@@ -14,6 +14,7 @@ package org.openhab.core.voice.internal.text.conversation;
 
 import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -51,15 +52,22 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
     private final Storage<PersistedConversationDTO> conversationStorage;
     private final Map<String, Conversation> activeConversations = new ConcurrentHashMap<>();
     private final EventPublisher eventPublisher;
+    private final Clock clock;
 
     private volatile int historyLimit;
 
     @Activate
     public ConversationManagerImpl(final @Reference StorageService storageService,
             final @Reference EventPublisher eventPublisher, Map<String, Object> config) {
+        this(storageService, eventPublisher, config, Clock.systemUTC());
+    }
+
+    ConversationManagerImpl(StorageService storageService, EventPublisher eventPublisher, Map<String, Object> config,
+            Clock clock) {
         this.conversationStorage = storageService.getStorage(Conversation.class.getName(),
                 this.getClass().getClassLoader());
         this.eventPublisher = eventPublisher;
+        this.clock = clock;
 
         processConfig(config);
     }
@@ -113,7 +121,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
                         persistedConversationDTO.messages().stream().map(PersistedMessageDTO::toMessage).toList());
             } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
-                conversation = new Conversation(id);
+                conversation = new Conversation(id, clock);
                 eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, VOICE_SOURCE));
             } else {
                 return null;

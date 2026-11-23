@@ -29,7 +29,7 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
  *
  * @author Cody Cutrer - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public class CompleterWrapper implements Completer {
 
     private final @Nullable ConsoleCommandCompleter completer;
@@ -49,6 +49,7 @@ public class CompleterWrapper implements Completer {
     }
 
     @Override
+    @NonNullByDefault({})
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         String localGlobalCommand = globalCommand;
         if (commandLine.getCursorArgumentIndex() == 0) {
@@ -84,6 +85,7 @@ public class CompleterWrapper implements Completer {
 
     // Override this method to give command descriptions if completing the command name
     @Override
+    @NonNullByDefault({})
     public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
         if (commandLine.getCursorArgumentIndex() == 0) {
             String arg = commandLine.getArguments()[0];

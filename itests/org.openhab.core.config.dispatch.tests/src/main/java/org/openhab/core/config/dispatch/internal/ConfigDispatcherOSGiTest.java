@@ -59,6 +59,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) ConfigurationAdmin configAdmin;
     private @NonNullByDefault({}) String configBaseDirectory;
+    private @NonNullByDefault({}) String emptyDefaultConfigFile;
     private @NonNullByDefault({}) ConfigDispatcher configDispatcher;
 
     @BeforeAll
@@ -72,6 +73,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         configBaseDirectory = tmpBaseFolder.getAbsolutePath();
         final Path source = Path.of(CONFIGURATION_BASE_DIR);
         Files.walkFileTree(source, new CopyDirectoryRecursive(source, Path.of(configBaseDirectory)));
+        emptyDefaultConfigFile = Files.createFile(tmpBaseFolder.toPath().resolve("empty-default.cfg")).toString();
 
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
@@ -919,7 +921,8 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     private void initialize(@Nullable String defaultConfigFile) {
-        setSystemProperty(ConfigDispatcher.SERVICECFG_PROG_ARGUMENT, defaultConfigFile);
+        System.setProperty(ConfigDispatcher.SERVICECFG_PROG_ARGUMENT,
+                defaultConfigFile != null ? defaultConfigFile : emptyDefaultConfigFile);
 
         configDispatcher.activate(bundleContext);
     }

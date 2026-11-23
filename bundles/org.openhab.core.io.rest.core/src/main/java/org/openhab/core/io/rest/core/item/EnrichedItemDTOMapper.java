@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.core.item;
 
+import static org.openhab.core.transform.util.ItemDisplayStateUtil.EXTRACT_TRANSFORM_FUNCTION_PATTERN;
+
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,9 +23,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.ws.rs.core.UriBuilder;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -44,6 +43,8 @@ import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.ws.rs.core.UriBuilder;
+
 /**
  * The {@link EnrichedItemDTOMapper} is a utility class to map items into enriched item data transform objects (DTOs).
  *
@@ -52,8 +53,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class EnrichedItemDTOMapper {
-
-    private static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichedItemDTOMapper.class);
 

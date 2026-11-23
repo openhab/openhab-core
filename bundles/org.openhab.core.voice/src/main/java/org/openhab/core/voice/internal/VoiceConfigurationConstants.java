@@ -33,6 +33,11 @@ public final class VoiceConfigurationConstants {
     public static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
     public static final String CONFIG_CONVERSATION_HISTORY_LIMIT = "conversationHistoryLimit";
     public static final String CONFIG_IMPLICIT_ITEM_PERMISSION = "implicitItemPermission";
+    public static final String CONFIG_PROMPT_ITEMS = "promptItems";
+
+    // values of CONFIG_PROMPT_ITEMS
+    public static final String PROMPT_ITEMS_ALL = "ALL";
+    public static final String PROMPT_ITEMS_SEMANTIC = "SEMANTIC";
 
     // configuration defaults
     public static final int DEFAULT_CONVERSATION_HISTORY_LIMIT = Conversation.DEFAULT_MAX_MESSAGES;

@@ -1,0 +1,11 @@
+# jetty-client 12.1 imports org.eclipse.jetty.compression only optionally, but HttpClient.doStart() always calls
+# ServiceLoader.load(Compression.class). Resolvers (Karaf, bnd) do not pull in optional imports, so if the package is
+# not wired when jetty-client resolves, every HttpClient.start() fails with NoClassDefFoundError.
+# As a fragment, the imports below become mandatory imports of jetty-client. This forces jetty-compression-common
+# and jetty-compression-gzip (the gzip decoder Jetty 9 had built in) to be installed and wired.
+# Remove this fragment once jetty-client imports the package as mandatory.
+Bundle-SymbolicName: ${project.artifactId}
+Fragment-Host: org.eclipse.jetty.client
+Import-Package: org.eclipse.jetty.compression,\
+	org.eclipse.jetty.compression.gzip
+Export-Package:

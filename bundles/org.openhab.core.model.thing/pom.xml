@@ -51,6 +51,7 @@
           <configuration>
             <compilerId>eclipse</compilerId>
             <compilerArgs>
+              <arg>-enableJavadoc</arg>
               <!-- Xtend doesn't support type annotations so warn on null analysis issues -->
               <!-- See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=506374 -->
               <arg>-warn:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot,-nullUncheckedConversion,+null,+inheritNullAnnot,+nullAnnotConflict,-nullUncheckedConversion,+nullAnnotRedundant,+nullDereference</arg>
@@ -83,7 +84,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.6.4</version>
+        <version>3.7.0</version>
         <configuration>
           <executable>java</executable>
           <classpathScope>compile</classpathScope>

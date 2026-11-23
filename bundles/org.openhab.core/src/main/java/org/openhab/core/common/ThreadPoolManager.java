@@ -223,13 +223,13 @@ public class ThreadPoolManager {
 
     // needs to be of a class supported by micrometer-core, see ExecutorServiceMetrics.java,
     // originally this class was intended to be defined as "implements ExecutorService"
-    static class UnstoppableExecutorService<T extends ExecutorService> extends ThreadPoolExecutor {
+    static class UnstoppableExecutorService<E extends ExecutorService> extends ThreadPoolExecutor {
 
         protected final Logger logger = LoggerFactory.getLogger(getClass());
-        protected final T delegate;
+        protected final E delegate;
         protected final String threadPoolName;
 
-        private UnstoppableExecutorService(String threadPoolName, T delegate) {
+        private UnstoppableExecutorService(String threadPoolName, E delegate) {
             // although nearly all methods of ThreadPoolExecutor are overwritten, super() needs to be
             // called with valid parameters
             super(0, 1, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(1));
@@ -308,7 +308,7 @@ public class ThreadPoolManager {
             delegate.execute(command);
         }
 
-        T getDelegate() {
+        E getDelegate() {
             return delegate;
         }
 

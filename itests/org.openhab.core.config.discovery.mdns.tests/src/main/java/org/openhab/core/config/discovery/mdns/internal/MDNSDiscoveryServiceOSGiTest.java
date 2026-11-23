@@ -69,7 +69,9 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         testListener = null;
 
         mdnsDiscoveryService = getService(DiscoveryService.class, MDNSDiscoveryService.class);
-        serviceType = "_http._tcp.local.";
+        // a service type no real device announces: the participant is also registered with the real mDNS client,
+        // so a common type like _http._tcp would add discovery results from devices on the local network
+        serviceType = "_openhab-itest._tcp.local.";
         thingTypeUID = new ThingTypeUID("myBinding", "myThingType");
         thingUID = new ThingUID(thingTypeUID, "test" + new Random().nextInt(999999999));
         Set<ThingTypeUID> thingTypeUIDs = Set.of(thingTypeUID);
@@ -108,7 +110,7 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         InetAddress addr = InetAddress.getByName("192.168.1.10");
         when(serviceInfo.getInetAddresses()).thenReturn(new InetAddress[] { addr });
         when(serviceInfo.getTextBytes()).thenReturn("ok".getBytes(StandardCharsets.UTF_8));
-        when(serviceInfo.getKey()).thenReturn("my-host._http._tcp.local.");
+        when(serviceInfo.getKey()).thenReturn("my-host." + serviceType);
         when(serviceInfo.getType()).thenReturn(serviceType);
         when(serviceInfo.getName()).thenReturn("my-host");
 

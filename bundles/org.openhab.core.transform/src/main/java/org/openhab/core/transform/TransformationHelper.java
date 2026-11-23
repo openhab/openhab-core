@@ -12,6 +12,8 @@
  */
 package org.openhab.core.transform;
 
+import static org.openhab.core.transform.util.ItemDisplayStateUtil.EXTRACT_TRANSFORM_FUNCTION_PATTERN;
+
 import java.util.IllegalFormatException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,9 +47,7 @@ public class TransformationHelper {
 
     public static final String FUNCTION_VALUE_DELIMITER = ":";
 
-    /* RegEx to extract and parse a function String <code>'(.*?)\((.*)\):(.*)'</code> */
-    protected static final Pattern EXTRACT_TRANSFORMFUNCTION_PATTERN = Pattern
-            .compile("(.*?)\\((.*)\\)" + FUNCTION_VALUE_DELIMITER + "(.*)");
+    protected static final Pattern EXTRACT_TRANSFORMFUNCTION_PATTERN = EXTRACT_TRANSFORM_FUNCTION_PATTERN;
 
     private final BundleContext bundleContext;
 

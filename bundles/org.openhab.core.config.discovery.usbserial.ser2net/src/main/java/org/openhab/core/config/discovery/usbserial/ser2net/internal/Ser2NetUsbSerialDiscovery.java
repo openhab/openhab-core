@@ -224,7 +224,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
             logger.debug("Created {} based on {}", deviceInfo, serviceInfo);
             return Optional.of(deviceInfo);
         } catch (NumberFormatException e) {
-            logger.debug("Failed to create UsbSerialDeviceInformation based on {}", serviceInfo, e);
+            logger.debug("Failed to create UsbSerialDeviceInformation based on {}: {}", serviceInfo, e.getMessage());
             return Optional.empty();
         }
     }

@@ -25,7 +25,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public enum UnDefType implements PrimitiveType, State {
+    /**
+     * Indicates that a value exists but cannot be represented as a concrete state. Examples include
+     * Infinity and NaN cannot be represented as a DecimalType; a sensor that knows the
+     * reading is out of range, and thus cannot know what the exact value is; a rollershutter that
+     * can know when it's at either extreme, but not the exact position in between.
+     */
     UNDEF,
+
+    /**
+     * Indicates the absence of a value, for example when an item has not yet been initialized,
+     * has gone offline so we can no longer determine its state, or if a channel is not relevant
+     * for a specific device.
+     */
     NULL;
 
     @Override

@@ -115,14 +115,16 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
             for (Object tagNodeObject : tagsNode) {
                 NodeValue tagNode = (NodeValue) tagNodeObject;
 
-                if ("tag".equals(tagNode.getNodeName())) {
-                    String tag = (String) tagNode.getValue();
-
-                    if (tag != null) {
-                        tags.add(tag);
+                String name = tagNode.getNodeName();
+                switch (name) {
+                    case "point", "property", "tag" -> {
+                        Object value = tagNode.getValue();
+                        if (value instanceof String tag) {
+                            tags.add(tag);
+                        }
                     }
-                } else {
-                    throw new ConversionException("The 'tags' node must only contain 'tag' nodes!");
+                    default -> throw new ConversionException(
+                            "The 'tags' node must only contain 'point', 'property', or DEPRECATED 'tag' nodes!");
                 }
             }
         }

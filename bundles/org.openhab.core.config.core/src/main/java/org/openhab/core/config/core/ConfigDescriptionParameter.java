@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,9 +27,8 @@ import com.google.gson.annotations.SerializedName;
  * concrete configuration parameter. Such parameter descriptions are collected
  * within the {@link ConfigDescription} and can be retrieved from the {@link ConfigDescriptionRegistry}.
  *
- * This class defines available configuration parameter types in {@link ConfigDescriptionParameter.Type},
- * it defines available unit types in {@link ConfigDescriptionParameter#UNITS} and available
- * contexts (see {@link ConfigDescriptionParameter#getContext()}).
+ * This class defines the available {@link Type parameter types} and describes the parameter's
+ * {@link #getUnit() unit} and {@link #getContext() context}.
  *
  * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Added options, filter criteria, and more parameter
@@ -106,10 +104,6 @@ public class ConfigDescriptionParameter {
     private boolean limitToOptions = true;
     private boolean advanced = false;
     private boolean verify = false;
-
-    private static final Set<String> UNITS = Set.of("A", "cd", "K", "kg", "m", "mol", "s", "g", "rad", "sr", "Hz", "N",
-            "Pa", "J", "W", "C", "V", "F", "Ω", "S", "Wb", "T", "H", "Cel", "lm", "lx", "Bq", "Gy", "Sv", "kat", "m/s2",
-            "m2v", "m3", "kph", "%", "l", "ms", "min", "h", "d", "week", "y");
 
     /**
      * Default constructor.

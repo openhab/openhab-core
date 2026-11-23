@@ -123,7 +123,7 @@ public class AutomaticInboxProcessorTest {
         when(thing3Mock.getStatus()).thenReturn(ThingStatus.ONLINE);
         when(thing3Mock.getUID()).thenReturn(THING_UID3);
 
-        when(thingRegistryMock.stream()).thenReturn(Stream.empty());
+        when(thingRegistryMock.stream()).thenAnswer(invocation -> Stream.empty());
 
         when(thingTypeRegistryMock.getThingType(THING_TYPE_UID)).thenReturn(THING_TYPE);
         when(thingTypeRegistryMock.getThingType(THING_TYPE_UID2)).thenReturn(THING_TYPE2);
@@ -189,7 +189,7 @@ public class AutomaticInboxProcessorTest {
     public void testThingWithOtherBindingIDButSameRepresentationPropertyIsDiscovered() {
         // insert thing with thing type THING_TYPE_UID3 and representation property value DEVICE_ID in registry
         when(thingRegistryMock.get(THING_UID)).thenReturn(thingMock);
-        when(thingRegistryMock.stream()).thenReturn(Stream.of(thingMock));
+        when(thingRegistryMock.stream()).thenAnswer(invocation -> Stream.of(thingMock));
 
         // Add discovery result with thing type THING_TYPE_UID3 and representation property value DEVICE_ID
         inbox.add(DiscoveryResultBuilder.create(THING_UID3).withProperty(DEVICE_ID_KEY, DEVICE_ID)
@@ -256,7 +256,7 @@ public class AutomaticInboxProcessorTest {
         assertThat(inbox.getAll().size(), is(0));
 
         when(thingRegistryMock.get(THING_UID)).thenReturn(thingMock);
-        when(thingRegistryMock.stream()).thenReturn(Stream.of(thingMock));
+        when(thingRegistryMock.stream()).thenAnswer(invocation -> Stream.of(thingMock));
 
         inbox.add(DiscoveryResultBuilder.create(THING_UID2).withProperty(DEVICE_ID_KEY, DEVICE_ID)
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
@@ -332,7 +332,7 @@ public class AutomaticInboxProcessorTest {
         assertThat(inbox.getAll().size(), is(0));
 
         when(thingRegistryMock.get(THING_UID2)).thenReturn(thing2Mock);
-        when(thingRegistryMock.stream()).thenReturn(Stream.of(thing2Mock));
+        when(thingRegistryMock.stream()).thenAnswer(invocation -> Stream.of(thing2Mock));
 
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty(OTHER_KEY, OTHER_VALUE)
                 .withRepresentationProperty(OTHER_KEY).build());

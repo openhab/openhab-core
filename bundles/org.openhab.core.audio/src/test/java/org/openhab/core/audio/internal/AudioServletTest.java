@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
@@ -219,12 +219,12 @@ public class AudioServletTest extends AbstractAudioServletTest {
         AudioStream clonedStream = mock(AudioStream.class);
         AudioFormat audioFormat = mock(AudioFormat.class);
         when(audioStream.getFormat()).thenReturn(audioFormat);
+        when(audioStream.length()).thenReturn((long) testByteArray.length);
         when(audioStream.getClonedStream()).thenAnswer(answer -> {
             cloneCounter.getAndIncrement();
             return clonedStream;
         });
-        when(audioStream.readNBytes(anyInt())).thenReturn(new byte[] { 1, 2, 3 });
-        when(clonedStream.readNBytes(anyInt())).thenReturn(new byte[] { 1, 2, 3 });
+        when(clonedStream.readNBytes(anyInt())).thenReturn(testByteArray);
         when(audioFormat.getCodec()).thenReturn(AudioFormat.CODEC_MP3);
 
         String url = serveStream(audioStream, 2);

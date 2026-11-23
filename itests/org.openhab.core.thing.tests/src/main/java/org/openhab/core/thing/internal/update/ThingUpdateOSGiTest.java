@@ -12,10 +12,11 @@
  */
 package org.openhab.core.thing.internal.update;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.openhab.core.thing.internal.ThingManagerImpl.PROPERTY_THING_TYPE_VERSION;
+import static org.openhab.core.thing.internal.ThingManagerImpl.*;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -90,7 +91,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
     private static final ThingTypeUID MULTIPLE_CHANNEL_THING_TYPE_UID = new ThingTypeUID(BINDING_ID,
             "testThingTypeMultiple");
 
-    private static final String[] ADDED_TAGS = { "Tag1", "Tag2" };
+    private static final String[] ADDED_TAGS = { "Switch", "Power" };
 
     private static final String THING_ID = "thing";
 

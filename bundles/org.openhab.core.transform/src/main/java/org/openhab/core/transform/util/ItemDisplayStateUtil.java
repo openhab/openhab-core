@@ -12,6 +12,7 @@
  */
 package org.openhab.core.transform.util;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.IllegalFormatException;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * Utility class for getting the display state of an Item from its {@link StateDescription}.
  *
  * @author Florian Hotze - Initial contribution (extracted from SseItemStatesEventBuilder)
+ * @author Kai Kreuzer - Linear-time transformation matching
  */
 @NonNullByDefault
 public class ItemDisplayStateUtil {
@@ -49,8 +52,11 @@ public class ItemDisplayStateUtil {
 
     /**
      * RegEx to extract and parse a transformation function call, e.g., <code>MAP(en.map):%s</code>
+     * Start at each line boundary so a failed match never retries overlapping suffixes of that line.
+     * The first opening parenthesis and the last closing delimiter determine the function argument.
      */
-    public static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
+    public static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern
+            .compile("(?m)^([^(\\r\\n\\x{85}\\x{2028}\\x{2029}]*+)\\((.*)\\):(.*)");
 
     /**
      * Transform an arbitrary value with a transformation service
@@ -166,20 +172,21 @@ public class ItemDisplayStateUtil {
         else if (!(state instanceof UnDefType)) {
             boolean optionMatched = false;
             if (!options.isEmpty()) {
-                // Look for a state option with a value corresponding to the state
-                for (StateOption option : options) {
-                    String label = option.getLabel();
-                    if (option.getValue().equals(state.toString()) && label != null) {
-                        optionMatched = true;
-                        try {
-                            displayState = pattern == null ? label : String.format(pattern, label);
-                        } catch (IllegalFormatException e) {
-                            LOGGER.debug(
-                                    "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
-                                    label, itemName, pattern, e.getMessage());
-                            displayState = label;
-                        }
-                        break;
+                // Prefer an exact match over the numeric fallback, regardless of the option order
+                String label = findExactOptionLabel(options, state.toString());
+                if (label == null) {
+                    // Fall back to the first numerically matching option (e.g. option "0" vs. state "0.0")
+                    label = findNumericOptionLabel(options, state);
+                }
+                if (label != null) {
+                    optionMatched = true;
+                    try {
+                        displayState = pattern == null ? label : String.format(pattern, label);
+                    } catch (IllegalFormatException e) {
+                        LOGGER.debug(
+                                "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
+                                label, itemName, pattern, e.getMessage());
+                        displayState = label;
                     }
                 }
             }
@@ -220,5 +227,57 @@ public class ItemDisplayStateUtil {
         }
 
         return displayState;
+    }
+
+    /**
+     * Check whether a state option value is numerically equal to a decimal state, e.g., option "0" vs. state "0.0".
+     *
+     * @param optionValue the state option value
+     * @param state the current state
+     * @return true if the state is a {@link DecimalType} and the option value parses to the same number
+     */
+    private static boolean matchesNumericOption(String optionValue, State state) {
+        if (!(state instanceof DecimalType decimalState)) {
+            return false;
+        }
+        try {
+            return new BigDecimal(optionValue).compareTo(decimalState.toBigDecimal()) == 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Find the label of the first state option whose value exactly equals the given state string.
+     *
+     * @param options the state options
+     * @param stateString the state's string representation
+     * @return the label of the matching option, or null if no labelled option matches
+     */
+    private static @Nullable String findExactOptionLabel(List<StateOption> options, String stateString) {
+        for (StateOption option : options) {
+            String label = option.getLabel();
+            if (label != null && option.getValue().equals(stateString)) {
+                return label;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the label of the first state option whose value is numerically equal to the given state.
+     *
+     * @param options the state options
+     * @param state the current state
+     * @return the label of the matching option, or null if no labelled option matches
+     */
+    private static @Nullable String findNumericOptionLabel(List<StateOption> options, State state) {
+        for (StateOption option : options) {
+            String label = option.getLabel();
+            if (label != null && matchesNumericOption(option.getValue(), state)) {
+                return label;
+            }
+        }
+        return null;
     }
 }

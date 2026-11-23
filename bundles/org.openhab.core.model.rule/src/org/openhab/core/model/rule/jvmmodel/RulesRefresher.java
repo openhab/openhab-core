@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Oliver Libutzki - Initial contribution
  * @author Kai Kreuzer - added delayed execution
  * @author Maoliang Huang - refactor
+ * @author Leo Siepel - Preserve action changes during initial rule reload
  */
 @Component(immediate = true, service = {})
 @NonNullByDefault
@@ -70,11 +71,10 @@ public class RulesRefresher implements ReadyTracker {
     private final ThingRegistry thingRegistry;
     private final ReadyService readyService;
 
-    private final ScheduledExecutorService scheduler = Executors
-            .newSingleThreadScheduledExecutor(new NamedThreadFactory("rulesRefresher"));
+    private final ScheduledExecutorService scheduler;
 
     private @Nullable ScheduledFuture<?> job;
-    private boolean started;
+    private volatile boolean started;
 
     private final ItemRegistryChangeListener itemRegistryChangeListener = new ItemRegistryChangeListener() {
         @Override
@@ -121,6 +121,13 @@ public class RulesRefresher implements ReadyTracker {
     @Activate
     public RulesRefresher(@Reference ModelRepository modelRepository, @Reference ItemRegistry itemRegistry,
             @Reference ThingRegistry thingRegistry, @Reference ReadyService readyService) {
+        this(modelRepository, itemRegistry, thingRegistry, readyService,
+                Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("rulesRefresher")));
+    }
+
+    RulesRefresher(ModelRepository modelRepository, ItemRegistry itemRegistry, ThingRegistry thingRegistry,
+            ReadyService readyService, ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
         this.modelRepository = modelRepository;
         this.itemRegistry = itemRegistry;
         this.thingRegistry = thingRegistry;
@@ -177,13 +184,15 @@ public class RulesRefresher implements ReadyTracker {
             localJob.cancel(false);
         }
         job = scheduler.schedule(() -> {
+            boolean initialRefresh = !started;
+            // Action registrations during the initial reload must also trigger a follow-up reload.
+            started = true;
             try {
                 modelRepository.reloadAllModelsOfType("rules");
             } catch (Exception e) {
                 logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
             }
-            if (!started) {
-                started = true;
+            if (initialRefresh) {
                 readyService.markReady(MARKER);
             }
         }, delay, TimeUnit.SECONDS);

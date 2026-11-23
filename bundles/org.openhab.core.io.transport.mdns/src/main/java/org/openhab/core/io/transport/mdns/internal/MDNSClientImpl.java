@@ -18,13 +18,16 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -50,6 +53,9 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true, service = MDNSClient.class)
 public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener {
+    private static final int MAX_LABEL_LENGTH = 63;
+    private static final Pattern IP_LITERAL = Pattern.compile("^[0-9.]+$|.*:.*");
+
     private final Logger logger = LoggerFactory.getLogger(MDNSClientImpl.class);
 
     private final Map<InetAddress, JmDNS> jmdnsInstances = new ConcurrentHashMap<>();
@@ -58,9 +64,56 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     private final NetworkAddressService networkAddressService;
 
+    /**
+     * System host name (first DNS label) that is used as host name for all JmDNS instances, or null if it could not be
+     * determined. If null, JmDNS derives the name itself from a reverse lookup of the interface address and falls back
+     * to the IP address literal (e.g. 192-168-1-50.local.) if that lookup fails.
+     */
+    private final String hostName;
+
     @Activate
     public MDNSClientImpl(final @Reference NetworkAddressService networkAddressService) {
         this.networkAddressService = networkAddressService;
+        this.hostName = determineHostName();
+        logger.debug("mDNS host name: {}", hostName != null ? hostName : "<derived by JmDNS>");
+    }
+
+    /**
+     * Determines the system host name without domain part.
+     *
+     * @return the host name or null if none could be determined or if it is only an IP address or "localhost"
+     */
+    static String determineHostName() {
+        String name = null;
+        try {
+            name = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            // fall through to environment
+        }
+        if (!isUsableHostName(name)) {
+            name = System.getenv("HOSTNAME");
+        }
+        if (!isUsableHostName(name)) {
+            name = System.getenv("COMPUTERNAME");
+        }
+        if (!isUsableHostName(name)) {
+            return null;
+        }
+        name = name.trim();
+        int dot = name.indexOf('.');
+        return dot > 0 ? name.substring(0, dot) : name;
+    }
+
+    private static boolean isUsableHostName(String name) {
+        if (name == null || name.isBlank()) {
+            return false;
+        }
+        String lower = name.trim().toLowerCase(Locale.ROOT);
+        int dot = lower.indexOf('.');
+        if ((dot > 0 ? dot : lower.length()) > MAX_LABEL_LENGTH) {
+            return false;
+        }
+        return !lower.equals("localhost") && !lower.startsWith("localhost.") && !IP_LITERAL.matcher(lower).matches();
     }
 
     private Set<InetAddress> getAllInetAddresses() {
@@ -270,7 +323,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     private void createJmDNSByAddress(InetAddress address) {
         try {
-            JmDNS jmdns = JmDNS.create(address, null);
+            JmDNS jmdns = JmDNS.create(address, hostName);
             jmdnsInstances.put(address, jmdns);
             logger.debug("mDNS service has been started ({} for IP {})", jmdns.getName(), address.getHostAddress());
         } catch (IOException e) {

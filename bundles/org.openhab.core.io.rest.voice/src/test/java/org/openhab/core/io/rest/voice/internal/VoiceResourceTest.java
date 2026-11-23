@@ -17,18 +17,22 @@ import static org.mockito.Mockito.*;
 
 import java.time.Instant;
 import java.util.List;
-
-import javax.ws.rs.core.Response;
+import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
+import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * Test class for {@link VoiceResource}.
@@ -111,5 +115,87 @@ public class VoiceResourceTest {
         assertEquals("tool-2", dto2.id());
         assertEquals("Tool 2", dto2.label());
         assertEquals("Description of tool 2", dto2.description());
+    }
+
+    @Test
+    public void testInterpretJsonNullOrBlankTextReturnsBadRequest() {
+        Response nullResponse = voiceResource.interpret(null, null);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), nullResponse.getStatus());
+
+        InterpretationRequestDTO blankRequest = new InterpretationRequestDTO("   ", null, null, null, null);
+        Response blankResponse = voiceResource.interpret(null, blankRequest);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), blankResponse.getStatus());
+    }
+
+    @Test
+    public void testInterpretJsonDefaultInterpreterAndTools() throws InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        when(voiceManager.getHLI()).thenReturn(hli);
+        when(localeService.getLocale(null)).thenReturn(Locale.ENGLISH);
+        when(voiceManager.interpret("Turn on the kitchen lights",
+                new InterpretationArguments("", "", "*", null, Locale.ENGLISH))).thenReturn("Done");
+
+        InterpretationRequestDTO request = new InterpretationRequestDTO("Turn on the kitchen lights", null, null, null,
+                null);
+        Response response = voiceResource.interpret(null, request);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("Done", response.getEntity());
+
+        request = new InterpretationRequestDTO("Turn on the kitchen lights", List.of(), null, List.of(), null);
+        response = voiceResource.interpret(null, request);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("Done", response.getEntity());
+    }
+
+    @Test
+    public void testInterpretJsonDefaultInterpreterNotFound() {
+        when(voiceManager.getHLI()).thenReturn(null);
+
+        InterpretationRequestDTO request = new InterpretationRequestDTO("Turn on the kitchen lights", null, null, null,
+                null);
+        Response response = voiceResource.interpret(null, request);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testInterpretJsonWithAllParameters() throws InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        when(voiceManager.getHLIsByIds(List.of("standard", "gemini"))).thenReturn(List.of(hli));
+        when(localeService.getLocale("en")).thenReturn(Locale.ENGLISH);
+        when(voiceManager.interpret("Turn on the kitchen lights",
+                new InterpretationArguments("standard,gemini", "conv-1", "tool1,tool2", "Kitchen", Locale.ENGLISH)))
+                .thenReturn("Lights turned on");
+
+        InterpretationRequestDTO request = new InterpretationRequestDTO("Turn on the kitchen lights",
+                List.of("standard", "gemini"), "conv-1", List.of("tool1", "tool2"), "Kitchen");
+
+        Response response = voiceResource.interpret("en", request);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("Lights turned on", response.getEntity());
+    }
+
+    @Test
+    public void testInterpretJsonSpecifiedInterpretersNotFound() {
+        when(voiceManager.getHLIsByIds(List.of("unknown"))).thenReturn(List.of());
+
+        InterpretationRequestDTO request = new InterpretationRequestDTO("Turn on the kitchen lights",
+                List.of("unknown"), null, null, null);
+
+        Response response = voiceResource.interpret(null, request);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testInterpretJsonInterpretationExceptionReturnsBadRequest() throws InterpretationException {
+        HumanLanguageInterpreter hli = mock(HumanLanguageInterpreter.class);
+        when(voiceManager.getHLI()).thenReturn(hli);
+        when(localeService.getLocale(null)).thenReturn(Locale.ENGLISH);
+        when(voiceManager.interpret(eq("Invalid"), any(InterpretationArguments.class)))
+                .thenThrow(new InterpretationException("Cannot interpret"));
+
+        InterpretationRequestDTO request = new InterpretationRequestDTO("Invalid", null, null, null, null);
+
+        Response response = voiceResource.interpret(null, request);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 }

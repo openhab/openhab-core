@@ -16,7 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,12 +56,13 @@ public class ConversationManagerImplTest {
     private final Storage<PersistedConversationDTO> storageMock = mock(Storage.class);
 
     private @NonNullByDefault({}) ConversationManagerImpl conversationManager;
+    private MutableClock clock = new MutableClock(Instant.now());
 
     @BeforeEach
     public void setUp() {
         doReturn(storageMock).when(storageServiceMock).getStorage(eq(Conversation.class.getName()), any());
         conversationManager = new ConversationManagerImpl(storageServiceMock, eventPublisherMock,
-                Map.of(VoiceConfigurationConstants.CONFIG_CONVERSATION_HISTORY_LIMIT, "10"));
+                Map.of(VoiceConfigurationConstants.CONFIG_CONVERSATION_HISTORY_LIMIT, "10"), clock);
     }
 
     @AfterEach
@@ -189,6 +193,8 @@ public class ConversationManagerImplTest {
         String id = "last-updated-test";
         Conversation conversation = conversationManager.getConversation(id);
         Instant oldLastUpdated = conversation.getLastUpdated();
+        // Advance the clock so adding a message is guaranteed to produce a newer timestamp.
+        clock.setTime(oldLastUpdated.plusMillis(1));
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
@@ -251,5 +257,36 @@ public class ConversationManagerImplTest {
         conversation.removeSinceMessage(3);
         conversation.removeSinceMessage(0);
         verify(storageMock, never()).put(eq(id), any(PersistedConversationDTO.class));
+    }
+
+    /**
+     * A {@link Clock} with a mutable instant so time-dependent tests are deterministic.
+     */
+    @NonNullByDefault({})
+    private static class MutableClock extends Clock {
+        private Instant instant;
+
+        private MutableClock(Instant instant) {
+            this.instant = instant;
+        }
+
+        private void setTime(Instant instant) {
+            this.instant = instant;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return instant;
+        }
     }
 }

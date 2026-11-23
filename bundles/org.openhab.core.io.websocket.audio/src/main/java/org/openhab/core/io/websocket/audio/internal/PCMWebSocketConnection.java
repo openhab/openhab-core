@@ -24,9 +24,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
@@ -47,6 +50,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * The websocket supports only one line for the {@link PCMWebSocketAudioSource} (the audio is shared on the server),
  * the data transmission is instructed by the server (START_LISTENING and STOP_LISTENING commands).
  * <p>
+ * The server sends DIALOG_IDLE each time the dialog finishes an interaction, so the client knows when no reply is
+ * coming.
+ * <p>
  * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplish that, the outgoing data
  * chucks are prefixed with a 6 byte header to transmit the identity and format specification, check
  * {@link PCMWebSocketAudioSink.PCMWebSocketOutputStream})
@@ -56,11 +62,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WebSocket
 @NonNullByDefault
 @SuppressWarnings("unused")
-public class PCMWebSocketConnection implements WebSocketListener {
+public class PCMWebSocketConnection {
     private final Logger logger = LoggerFactory.getLogger(PCMWebSocketConnection.class);
     protected final Map<String, ServiceRegistration<?>> audioComponentRegistrations = new ConcurrentHashMap<>();
     private volatile @Nullable Session session;
-    private @Nullable RemoteEndpoint remote;
     private final PCMWebSocketAdapter wsAdapter;
     private final ScheduledExecutorService executor;
     private @Nullable ScheduledFuture<?> scheduledDisconnection;
@@ -79,13 +84,13 @@ public class PCMWebSocketConnection implements WebSocketListener {
 
     public void sendAudio(byte[] id, byte[] b) {
         try {
-            var remote = getRemote();
-            if (remote != null) {
+            var session = getSession();
+            if (session != null) {
                 // concat stream identifier and send
                 ByteBuffer buff = ByteBuffer.wrap(new byte[id.length + b.length]);
                 buff.put(id);
                 buff.put(b);
-                remote.sendBytesByFuture(ByteBuffer.wrap(buff.array()));
+                session.sendBinary(ByteBuffer.wrap(buff.array()), Callback.NOOP);
             }
         } catch (IllegalStateException ignored) {
             logger.warn("Unable to send audio buffer");
@@ -97,62 +102,63 @@ public class PCMWebSocketConnection implements WebSocketListener {
                 : WebSocketCommand.OutputCommands.STOP_LISTENING));
     }
 
+    private void sendDialogIdle() {
+        sendClientCommand(new WebSocketCommand(WebSocketCommand.OutputCommands.DIALOG_IDLE));
+    }
+
     public void disconnect() {
         var session = getSession();
         if (session != null) {
-            try {
-                session.disconnect();
-            } catch (IOException ignored) {
-            }
+            session.close();
         }
     }
 
-    @Override
-    public void onWebSocketConnect(@Nullable Session sess) {
+    @OnWebSocketOpen
+    public void onWebSocketOpen(@Nullable Session sess) {
         if (sess == null) {
             // never
             return;
         }
         this.session = sess;
-        this.remote = sess.getRemote();
         logger.debug("New client connected.");
-        scheduledDisconnection = executor.schedule(() -> {
-            try {
-                sess.disconnect();
-            } catch (IOException ignored) {
-            }
-        }, 5, TimeUnit.SECONDS);
+        scheduledDisconnection = executor.schedule(() -> sess.close(), 5, TimeUnit.SECONDS);
     }
 
     private <T extends WebSocketCommand> void sendClientCommand(T msg) {
-        var remote = getRemote();
-        if (remote != null) {
+        var session = getSession();
+        if (session != null) {
             try {
-                remote.sendStringByFuture(new ObjectMapper().writeValueAsString(msg));
+                session.sendText(new ObjectMapper().writeValueAsString(msg), Callback.NOOP);
             } catch (JsonProcessingException e) {
                 logger.warn("JsonProcessingException writing JSON message", e);
             }
         }
     }
 
-    @Override
-    public void onWebSocketBinary(byte @Nullable [] payload, int offset, int len) {
-        logger.trace("Received binary data of length {}", len);
+    @OnWebSocketMessage
+    public void onWebSocketBinary(ByteBuffer payload, Callback callback) {
+        logger.trace("Received binary data of length {}", payload.remaining());
         PCMWebSocketAudioSource audioSource = this.audioSource;
-        if (payload != null && audioSource != null) {
-            PCMWebSocketStreamIdUtil.AudioPacketData streamData;
-            try {
-                streamData = PCMWebSocketStreamIdUtil.parseAudioPacket(payload);
-            } catch (IOException e) {
-                logger.warn("Exception processing binary message: {}", e.getMessage());
-                return;
-            }
-            audioSource.writeToStreams(streamData.id(), streamData.sampleRate(), streamData.bitDepth(),
-                    streamData.channels(), streamData.audioData());
+        if (audioSource == null) {
+            callback.succeed();
+            return;
         }
+        byte[] bytes = new byte[payload.remaining()];
+        payload.get(bytes);
+        // the payload is not used after copying it, so release Jetty's frame buffer right away
+        callback.succeed();
+        PCMWebSocketStreamIdUtil.AudioPacketData streamData;
+        try {
+            streamData = PCMWebSocketStreamIdUtil.parseAudioPacket(bytes);
+        } catch (IOException e) {
+            logger.warn("Exception processing binary message: {}", e.getMessage());
+            return;
+        }
+        audioSource.writeToStreams(streamData.id(), streamData.sampleRate(), streamData.bitDepth(),
+                streamData.channels(), streamData.audioData());
     }
 
-    @Override
+    @OnWebSocketMessage
     public void onWebSocketText(@Nullable String message) {
         try {
             JsonNode rootMessageNode = jsonMapper.readTree(message);
@@ -190,15 +196,14 @@ public class PCMWebSocketConnection implements WebSocketListener {
         }
     }
 
-    @Override
+    @OnWebSocketError
     public void onWebSocketError(@Nullable Throwable cause) {
         logger.warn("WebSocket Error", cause);
     }
 
-    @Override
+    @OnWebSocketClose
     public void onWebSocketClose(int statusCode, @Nullable String reason) {
         this.session = null;
-        this.remote = null;
         logger.debug("Session closed with code {}: {}", statusCode, reason);
         wsAdapter.onClientDisconnected(this);
         unregisterSpeakerComponents(id);
@@ -216,10 +221,6 @@ public class PCMWebSocketConnection implements WebSocketListener {
             sendClientCommand(
                     new WebSocketCommand(WebSocketCommand.OutputCommands.SOURCE_VOLUME, Map.of("value", value)));
         }
-    }
-
-    public @Nullable RemoteEndpoint getRemote() {
-        return this.remote;
     }
 
     public @Nullable Session getSession() {
@@ -255,9 +256,18 @@ public class PCMWebSocketConnection implements WebSocketListener {
             if (dialogProvider == null) {
                 throw new IOException("Voice functionality is not ready");
             }
-            dialogTrigger = dialogProvider.startDialog(audioSink, audioSource,
-                    !clientOptions.locationItem.isBlank() ? clientOptions.locationItem : null,
-                    !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null, () -> disconnect());
+            String locationItem = !clientOptions.locationItem.isBlank() ? clientOptions.locationItem : null;
+            String listeningItem = !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null;
+            if (clientOptions.keywordSpotting) {
+                dialogTrigger = null;
+                if (!dialogProvider.startKeywordSpottingDialog(audioSink, audioSource, locationItem, listeningItem,
+                        this::disconnect, this::sendDialogIdle)) {
+                    throw new IOException("Unable to start the keyword spotting dialog");
+                }
+            } else {
+                dialogTrigger = dialogProvider.startDialog(audioSink, audioSource, locationItem, listeningItem,
+                        this::disconnect, this::sendDialogIdle);
+            }
         } else {
             dialogTrigger = null;
         }
@@ -326,6 +336,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
             INITIALIZED,
             START_LISTENING,
             STOP_LISTENING,
+            DIALOG_IDLE,
             SINK_VOLUME,
             SOURCE_VOLUME,
         }
@@ -360,6 +371,10 @@ public class PCMWebSocketConnection implements WebSocketListener {
          * Start a dialog processor using the registered audio components
          */
         public boolean startDialog = false;
+        /**
+         * Trigger the dialog with the default keyword spotter instead of ON_SPOT commands
+         */
+        public boolean keywordSpotting = false;
         /**
          * Listening item for the dialog
          */

@@ -503,7 +503,6 @@ public class ConfigDispatcher {
     /**
      * Represents a result of parseLine().
      */
-    @NonNullByDefault
     private static class ParseLineResult {
         public @Nullable String pid;
         public @Nullable String property;

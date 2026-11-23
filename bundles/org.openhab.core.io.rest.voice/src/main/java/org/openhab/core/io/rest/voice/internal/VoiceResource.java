@@ -16,22 +16,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
@@ -58,11 +42,11 @@ import org.openhab.core.voice.tts.Voice;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -71,6 +55,21 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * This class acts as a REST resource for voice features.
@@ -81,9 +80,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
-@JaxrsResource
-@JaxrsName(VoiceResource.PATH_VOICE)
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsResource
+@JakartarsName(VoiceResource.PATH_VOICE)
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(VoiceResource.PATH_VOICE)
 @RolesAllowed({ Role.USER, Role.ADMIN })
@@ -193,7 +192,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/interpreters/{ids: [a-zA-Z_0-9,]+}")
+    @Path("/interpreters/{ids: [a-zA-Z_0-9]+((,|%2[cC])[a-zA-Z_0-9]+)*}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter(s).", responses = {
@@ -244,6 +243,54 @@ public class VoiceResource implements RESTResource {
 
         InterpretationArguments args = new InterpretationArguments("", Objects.requireNonNullElse(conversationId, ""),
                 llmToolIds == null ? "*" : String.join(",", llmToolIds), locationItem, locale);
+        try {
+            String answer = voiceManager.interpret(text, args);
+            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
+        } catch (InterpretationException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("/interpret")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "interpretJson", summary = "Sends a text to human language interpreter(s).", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request or interpretation exception occurs"),
+            @ApiResponse(responseCode = "404", description = "No human language interpreter was found.") })
+    public Response interpret(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @Parameter(description = "interpretation request", required = true) @Nullable InterpretationRequestDTO request) {
+        String text = request != null ? request.text() : null;
+        if (request == null || text == null || text.isBlank()) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Text must not be blank");
+        }
+
+        String hliIds;
+        List<String> interpreters = request.interpreters() != null
+                ? request.interpreters().stream().filter(Objects::nonNull).map(String::trim).toList()
+                : null;
+        if (interpreters == null || interpreters.isEmpty()) {
+            if (voiceManager.getHLI() == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+            }
+            hliIds = "";
+        } else {
+            if (voiceManager.getHLIsByIds(interpreters).isEmpty()) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+            }
+            hliIds = String.join(",", interpreters);
+        }
+
+        final Locale locale = localeService.getLocale(language);
+        List<String> llmTools = request.llmTools() != null
+                ? request.llmTools().stream().filter(Objects::nonNull).map(String::trim).toList()
+                : null;
+        InterpretationArguments args = new InterpretationArguments(hliIds,
+                Objects.requireNonNullElse(request.conversationId(), ""),
+                llmTools == null || llmTools.isEmpty() ? "*" : String.join(",", llmTools), request.locationItem(),
+                locale);
         try {
             String answer = voiceManager.interpret(text, args);
             return Response.ok(answer, MediaType.TEXT_PLAIN).build();

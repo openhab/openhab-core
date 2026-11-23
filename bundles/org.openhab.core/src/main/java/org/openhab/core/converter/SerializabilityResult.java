@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public record SerializabilityResult<T> (T uid, boolean ok, String failureReason) {
+public record SerializabilityResult<T>(T uid, boolean ok, String failureReason) {
 
     @Override
     public String toString() {

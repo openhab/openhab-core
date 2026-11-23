@@ -16,12 +16,12 @@ import java.io.Serial;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This version of the proxy servlet uses asynchronous I/O and request processing, and is based on Jetty's proxy
@@ -29,7 +29,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  *
  * @author John Cocula - Initial contribution
  */
-public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet {
+public class AsyncProxyServlet extends org.eclipse.jetty.ee10.proxy.AsyncProxyServlet {
 
     @Serial
     private static final long serialVersionUID = -4716754591953017795L;
@@ -50,7 +50,9 @@ public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet
      */
     @Override
     protected HttpClient newHttpClient() {
-        return new HttpClient(new SslContextFactory.Client());
+        HttpClient httpClient = new HttpClient();
+        httpClient.setSslContextFactory(new SslContextFactory.Client());
+        return httpClient;
     }
 
     @Override

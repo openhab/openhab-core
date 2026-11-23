@@ -14,12 +14,20 @@ package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -27,10 +35,16 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +54,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.FileAudioStream;
+import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
@@ -59,6 +74,8 @@ import org.openhab.core.library.types.PercentType;
 public class AudioManagerTest {
 
     private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioSinkRegistryImpl audioSinkRegistry;
+    private @NonNullByDefault({}) AudioSourceRegistryImpl audioSourceRegistry;
     private @NonNullByDefault({}) AudioSinkFake audioSink;
     private @NonNullByDefault({}) AudioSource audioSource;
     private @NonNullByDefault({}) BundledSoundFileHandler fileHandler;
@@ -66,11 +83,14 @@ public class AudioManagerTest {
     @BeforeEach
     public void setup() throws IOException {
         fileHandler = new BundledSoundFileHandler();
-        audioManager = new AudioManagerImpl();
+        audioSinkRegistry = new AudioSinkRegistryImpl();
+        audioSourceRegistry = new AudioSourceRegistryImpl();
+        audioManager = new AudioManagerImpl(audioSinkRegistry, audioSourceRegistry);
         audioSink = new AudioSinkFake();
 
         audioSource = mock(AudioSource.class);
         when(audioSource.getId()).thenReturn("audioSourceId");
+        when(audioSource.getUID()).thenReturn("audioSourceId");
         when(audioSource.getLabel(any(Locale.class))).thenReturn("audioSourceLabel");
     }
 
@@ -80,8 +100,8 @@ public class AudioManagerTest {
     }
 
     @Test
-    public void audioManagerPlaysByteArrayAudioStream() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+    public void audioManagerPlaysByteArrayAudioStream() {
+        audioSinkRegistry.addAudioSink(audioSink);
         ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
                 AudioFormat.CODEC_PCM_SIGNED);
 
@@ -93,8 +113,20 @@ public class AudioManagerTest {
     }
 
     @Test
+    public void audioManagerPlaysByteArrayAudioStreamDirectlyToAudioSink() {
+        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
+
+        audioManager.play(audioStream, audioSink);
+
+        AudioFormat expectedAudioFormat = audioStream.getFormat();
+
+        assertThat(audioSink.audioFormat.isCompatible(expectedAudioFormat), is(true));
+    }
+
+    @Test
     public void nullStreamsAreProcessed() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioManager.play(null, audioSink.getId());
 
         assertThat(audioSink.isStreamProcessed, is(true));
@@ -103,7 +135,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysStreamFromWavAudioFiles() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
         audioManager.play(audioStream, audioSink.getId());
@@ -113,7 +145,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysStreamFromMp3AudioFiles() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.mp3FilePath()));
 
         audioManager.play(audioStream, audioSink.getId());
@@ -123,7 +155,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysWavAudioFiles() throws AudioException, IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
         audioManager.playFile(fileHandler.wavFileName(), audioSink.getId());
 
@@ -133,7 +165,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerPlaysMp3AudioFiles() throws AudioException, IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AudioStream audioStream = new FileAudioStream(new File(fileHandler.mp3FilePath()));
         audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
 
@@ -152,7 +184,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerHandlesUnsupportedAudioFormatException() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioFormatExceptionExpected = true;
         try {
             audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
@@ -163,7 +195,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerHandlesUnsupportedAudioStreamException() throws AudioException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioStreamExceptionExpected = true;
         try {
             audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
@@ -174,7 +206,7 @@ public class AudioManagerTest {
 
     @Test
     public void audioManagerSetsTheVolumeOfASink() throws IOException {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         PercentType initialVolume = new PercentType(67);
         PercentType sinkMockVolume = getSinkMockVolume(initialVolume);
 
@@ -226,7 +258,7 @@ public class AudioManagerTest {
 
     @Test
     public void inCaseOfWrongUriNoParameterOptionsAreAdded() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
 
         Collection<ParameterOption> parameterOptions = audioManager.getParameterOptions(URI.create("wrong.uri"),
                 AudioManagerImpl.CONFIG_DEFAULT_SINK, null, Locale.US);
@@ -234,7 +266,7 @@ public class AudioManagerTest {
     }
 
     private void assertRegisteredSource(boolean isSourceDefault) {
-        audioManager.addAudioSource(audioSource);
+        audioSourceRegistry.addAudioSource(audioSource);
 
         if (isSourceDefault) {
             audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
@@ -252,7 +284,7 @@ public class AudioManagerTest {
     }
 
     private void assertRegisteredSink(boolean isSinkDefault) {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
 
         if (isSinkDefault) {
             audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SINK, audioSink.getId()));
@@ -286,12 +318,12 @@ public class AudioManagerTest {
 
         switch (param) {
             case AudioManagerImpl.CONFIG_DEFAULT_SINK:
-                audioManager.addAudioSink(audioSink);
+                audioSinkRegistry.addAudioSink(audioSink);
                 id = audioSink.getId();
                 label = Objects.requireNonNull(audioSink.getLabel(locale));
                 break;
             case AudioManagerImpl.CONFIG_DEFAULT_SOURCE:
-                audioManager.addAudioSource(audioSource);
+                audioSourceRegistry.addAudioSource(audioSource);
                 id = audioSource.getId();
                 label = Objects.requireNonNull(audioSource.getLabel(locale));
                 break;
@@ -312,7 +344,7 @@ public class AudioManagerTest {
 
     @Test
     public void disposableStreamIsDisposedOnSuccessfulPlayback() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         AtomicBoolean disposed = new AtomicBoolean(false);
         DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
                 new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L, 1),
@@ -325,7 +357,7 @@ public class AudioManagerTest {
 
     @Test
     public void disposableStreamIsDisposedOnFailedPlayback() {
-        audioManager.addAudioSink(audioSink);
+        audioSinkRegistry.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioFormatExceptionExpected = true;
         AtomicBoolean disposed = new AtomicBoolean(false);
         DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
@@ -335,6 +367,182 @@ public class AudioManagerTest {
         audioManager.play(stream, audioSink.getId());
 
         assertTrue(disposed.get());
+    }
+
+    @Test
+    public void playTranscodesAudioStreamWhenFormatNotDirectlySupportedBySink() throws IOException {
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.PCM_SIGNED);
+        audioSink.supportedAudioStreams = Set.of(AudioStream.class);
+        AudioStream audioStream = createWavAudioStream();
+
+        audioManager.play(audioStream, audioSink);
+
+        assertTrue(audioSink.isStreamProcessed);
+        assertNotNull(audioSink.audioFormat);
+        assertTrue(AudioFormat.PCM_SIGNED.isCompatible(audioSink.audioFormat));
+        assertEquals(AudioFormat.CONTAINER_NONE, audioSink.audioFormat.getContainer());
+    }
+
+    @Test
+    public void playWithSinkIdTranscodesAudioStreamWhenFormatNotDirectlySupportedBySink() throws IOException {
+        audioSinkRegistry.addAudioSink(audioSink);
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.PCM_SIGNED);
+        audioSink.supportedAudioStreams = Set.of(AudioStream.class);
+        AudioStream audioStream = createWavAudioStream();
+
+        audioManager.play(audioStream, audioSink.getId());
+
+        assertTrue(audioSink.isStreamProcessed);
+        assertNotNull(audioSink.audioFormat);
+        assertTrue(AudioFormat.PCM_SIGNED.isCompatible(audioSink.audioFormat));
+        assertEquals(AudioFormat.CONTAINER_NONE, audioSink.audioFormat.getContainer());
+    }
+
+    @Test
+    public void playTranscodesAudioStreamWhenSinkRequiresSizeableStream() throws IOException {
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.WAV);
+        audioSink.supportedAudioStreams = Set.of(FileAudioStream.class);
+        ByteArrayAudioStream wavStream = createWavAudioStream();
+        AudioStream nonSizeableStream = new AudioStream() {
+            @Override
+            public AudioFormat getFormat() {
+                return wavStream.getFormat();
+            }
+
+            @Override
+            public int read() throws IOException {
+                return wavStream.read();
+            }
+
+            @Override
+            public int read(byte @Nullable [] b, int off, int len) throws IOException {
+                return wavStream.read(b, off, len);
+            }
+
+            @Override
+            public void close() throws IOException {
+                wavStream.close();
+            }
+        };
+
+        audioManager.play(nonSizeableStream, audioSink);
+
+        assertTrue(audioSink.isStreamProcessed);
+        assertInstanceOf(SizeableAudioStream.class, audioSink.audioStream);
+    }
+
+    @Test
+    public void playPassesStreamDirectlyWhenFormatAndStreamTypeAreSupported() throws IOException {
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.WAV);
+        audioSink.supportedAudioStreams = Set.of(ByteArrayAudioStream.class);
+        AudioStream audioStream = createWavAudioStream();
+
+        audioManager.play(audioStream, audioSink);
+
+        assertTrue(audioSink.isStreamProcessed);
+        assertSame(audioStream, audioSink.audioStream);
+    }
+
+    @Test
+    public void playDoesNotSendStreamToSinkWhenTranscodingFailsForUnsupportedFormat() throws IOException {
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.AAC);
+        audioSink.supportedAudioStreams = Set.of(AudioStream.class);
+        AudioStream audioStream = createWavAudioStream();
+
+        audioManager.play(audioStream, audioSink);
+
+        assertFalse(audioSink.isStreamProcessed);
+        assertNull(audioSink.audioStream);
+    }
+
+    @Test
+    public void playDoesNotSendStreamToSinkWhenSinkSupportsNoFormats() throws IOException {
+        audioSink.supportedAudioFormats = Set.of();
+        audioSink.supportedAudioStreams = Set.of(AudioStream.class);
+        AudioStream audioStream = createWavAudioStream();
+
+        audioManager.play(audioStream, audioSink);
+
+        assertFalse(audioSink.isStreamProcessed);
+        assertNull(audioSink.audioStream);
+    }
+
+    @Test
+    public void playClosesSourceStreamWhenTranscodingFails() throws IOException {
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.AAC);
+        audioSink.supportedAudioStreams = Set.of(AudioStream.class);
+        AtomicBoolean closed = new AtomicBoolean(false);
+        ByteArrayAudioStream wavStream = createWavAudioStream();
+        AudioStream audioStream = new AudioStream() {
+            @Override
+            public AudioFormat getFormat() {
+                return wavStream.getFormat();
+            }
+
+            @Override
+            public int read() throws IOException {
+                return wavStream.read();
+            }
+
+            @Override
+            public int read(byte @Nullable [] b, int off, int len) throws IOException {
+                return wavStream.read(b, off, len);
+            }
+
+            @Override
+            public void close() throws IOException {
+                closed.set(true);
+                wavStream.close();
+            }
+        };
+
+        audioManager.play(audioStream, audioSink);
+
+        assertTrue(closed.get());
+        assertFalse(audioSink.isStreamProcessed);
+    }
+
+    @Test
+    public void playWithSinkIdDoesNotSendStreamToSinkWhenTranscodingFails() throws IOException {
+        audioSinkRegistry.addAudioSink(audioSink);
+        audioSink.supportedAudioFormats = Set.of(AudioFormat.AAC);
+        audioSink.supportedAudioStreams = Set.of(AudioStream.class);
+        AudioStream audioStream = createWavAudioStream();
+
+        audioManager.play(audioStream, audioSink.getId());
+
+        assertFalse(audioSink.isStreamProcessed);
+        assertNull(audioSink.audioStream);
+    }
+
+    private ByteArrayAudioStream createWavAudioStream() throws IOException {
+        int sampleRate = 44100;
+        int bitDepth = 16;
+        int channels = 1;
+
+        int durationMs = 50;
+        int totalSamples = (sampleRate * durationMs) / 1000;
+        int bytesPerSample = bitDepth / 8;
+        int frameSize = bytesPerSample * channels;
+
+        byte[] pcmData = new byte[totalSamples * frameSize];
+        for (int i = 0; i < totalSamples; i++) {
+            double angle = 2.0 * Math.PI * 440.0 * i / sampleRate;
+            int sampleValue = (int) (Math.sin(angle) * ((1L << (bitDepth - 1)) - 1));
+            pcmData[i * 2] = (byte) (sampleValue & 0xFF);
+            pcmData[i * 2 + 1] = (byte) ((sampleValue >> 8) & 0xFF);
+        }
+
+        javax.sound.sampled.AudioFormat jFormat = new javax.sound.sampled.AudioFormat(
+                javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED, sampleRate, bitDepth, channels, frameSize,
+                sampleRate, false);
+
+        AudioInputStream ais = new AudioInputStream(new ByteArrayInputStream(pcmData), jFormat,
+                pcmData.length / frameSize);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        AudioSystem.write(ais, AudioFileFormat.Type.WAVE, baos);
+
+        return new ByteArrayAudioStream(baos.toByteArray(), AudioFormat.WAV);
     }
 
     private ByteArrayAudioStream getByteArrayAudioStream(String container, String codec) {

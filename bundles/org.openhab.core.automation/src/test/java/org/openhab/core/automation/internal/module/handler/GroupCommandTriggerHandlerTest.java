@@ -45,8 +45,7 @@ class GroupCommandTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupCommandTriggerHandler.class, LogLevel.WARN);
 
-        GroupCommandTriggerHandler unused = new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock,
-                itemRegistryMock);
+        new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock, itemRegistryMock);
 
         stopInterceptedLogger(GroupCommandTriggerHandler.class);
 
@@ -61,8 +60,7 @@ class GroupCommandTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupCommandTriggerHandler.class, LogLevel.WARN);
 
-        GroupCommandTriggerHandler unused = new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock,
-                itemRegistryMock);
+        new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock, itemRegistryMock);
 
         stopInterceptedLogger(GroupCommandTriggerHandler.class);
 

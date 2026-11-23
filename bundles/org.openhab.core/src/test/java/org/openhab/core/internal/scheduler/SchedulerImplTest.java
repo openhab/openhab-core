@@ -66,6 +66,12 @@ public class SchedulerImplTest extends JavaTest {
         scheduler = new SchedulerImpl();
     }
 
+    private static FileNotFoundException scheduledTestFailure() {
+        FileNotFoundException failure = new FileNotFoundException("testBeforeTimeoutException");
+        failure.setStackTrace(new StackTraceElement[0]);
+        return failure;
+    }
+
     @Test
     @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testAfterCancelled() throws InterruptedException, InvocationTargetException, ExecutionException {
@@ -100,7 +106,7 @@ public class SchedulerImplTest extends JavaTest {
     public void testAfterResolvedWithException() throws InterruptedException {
         Callable<Void> callable = () -> {
             // Pass an exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
-            throw new FileNotFoundException("testBeforeTimeoutException");
+            throw scheduledTestFailure();
         };
         ScheduledCompletableFuture<Void> after = scheduler.after(callable, Duration.ofMillis(100));
         Thread.sleep(500);
@@ -163,7 +169,7 @@ public class SchedulerImplTest extends JavaTest {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
         // Pass an exception not very likely thrown by the scheduler it self to avoid missing real exceptions.
-        d.completeExceptionally(new FileNotFoundException("testBeforeTimeoutException"));
+        d.completeExceptionally(scheduledTestFailure());
         assertTrue(before.isDone(), "Scheduled job should be done");
         assertTrue(before.getPromise().isCompletedExceptionally(),
                 "Before CompletableFuture should have completed with an exception");
@@ -237,7 +243,7 @@ public class SchedulerImplTest extends JavaTest {
         TestSchedulerWithCounter temporalAdjuster = new TestSchedulerWithCounter();
         SchedulerRunnable runnable = () -> {
             // Pass an exception not very likely thrown by the scheduler itself to avoid missing real exceptions.
-            throw new FileNotFoundException("testBeforeTimeoutException");
+            throw scheduledTestFailure();
         };
 
         ScheduledCompletableFuture<@Nullable Void> schedule = scheduler.schedule(runnable, "myScheduledJob",

@@ -444,7 +444,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void initialize() {
                 if (getBridge() == null) {
-                    throw new IllegalStateException("Fail because of missing bridge");
+                    throw missingBridge();
                 }
                 updateStatus(ThingStatus.ONLINE);
             }
@@ -513,7 +513,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void initialize() {
                 if (getBridge() == null) {
-                    throw new IllegalStateException("Fail because of missing bridge");
+                    throw missingBridge();
                 }
                 updateStatus(ThingStatus.ONLINE);
             }
@@ -1014,6 +1014,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
+    }
+
+    private static IllegalStateException missingBridge() {
+        IllegalStateException failure = new IllegalStateException("Fail because of missing bridge");
+        failure.setStackTrace(new StackTraceElement[0]);
+        return failure;
     }
 
     private void assertThingStatus(Map<String, Object> propsThing, Map<String, Object> propsChannel, ThingStatus status,

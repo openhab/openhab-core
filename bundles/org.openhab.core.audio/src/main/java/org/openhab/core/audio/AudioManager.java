@@ -61,6 +61,25 @@ public interface AudioManager {
     void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume);
 
     /**
+     * Plays the passed audio stream on the given sink.
+     *
+     * @param audioStream The audio stream to play or null if streaming should be stopped
+     * @param sink The audio sink to use
+     */
+    default void play(@Nullable AudioStream audioStream, AudioSink sink) {
+        play(audioStream, sink, null);
+    }
+
+    /**
+     * Plays the passed audio stream on the given sink.
+     *
+     * @param audioStream The audio stream to play or null if streaming should be stopped
+     * @param sink The audio sink to use
+     * @param volume The volume to be used or null if the default notification volume should be used
+     */
+    void play(@Nullable AudioStream audioStream, AudioSink sink, @Nullable PercentType volume);
+
+    /**
      * Plays an audio file from the "sounds" folder using the default audio sink.
      *
      * @param fileName The file from the "sounds" folder

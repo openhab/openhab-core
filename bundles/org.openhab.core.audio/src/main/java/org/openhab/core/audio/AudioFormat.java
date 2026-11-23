@@ -358,7 +358,9 @@ public class AudioFormat {
      * @param inputs the supported audio formats of an audio source
      * @param outputs the supported audio formats of an audio sink
      * @return the best matching format or null, if source and sink are incompatible
+     * @deprecated Use {@link org.openhab.core.audio.utils.AudioFormatMatcher#getBestMatch(Set, Set)} instead.
      */
+    @Deprecated
     public static @Nullable AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
         AudioFormat preferredFormat = getPreferredFormat(inputs);
         if (preferredFormat != null) {
@@ -378,13 +380,15 @@ public class AudioFormat {
     }
 
     /**
-     * Gets the first concrete AudioFormat in the passed set or a preferred one
-     * based on 16bit, 16KHz, big endian default
+     * Gets the first concrete AudioFormat from the passed set or a preferred one based on 16bit, 16KHz, big endian
+     * default.
      *
      * @param audioFormats The AudioFormats from which to choose
      * @return The preferred AudioFormat or null if none could be determined. A passed concrete format is preferred
-     *         adding default values to an abstract AudioFormat in the passed set.
+     *         adding default values to an abstract AudioFormat from the passed set.
+     * @deprecated Use {@link org.openhab.core.audio.utils.AudioFormatMatcher#getPreferredFormat(Set)} instead.
      */
+    @Deprecated
     public static @Nullable AudioFormat getPreferredFormat(Set<AudioFormat> audioFormats) {
         // Return the first concrete AudioFormat found
         for (AudioFormat currentAudioFormat : audioFormats) {

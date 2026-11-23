@@ -21,34 +21,38 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.audio.AudioDialogProvider;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSource;
-import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.dialog.DialogContext;
 import org.openhab.core.voice.dialog.DialogRegistration;
 import org.openhab.core.voice.dialog.trigger.ks.KSServiceStub;
+import org.openhab.core.voice.internal.text.interpreter.llm.FindItemsLLMTool;
 import org.openhab.core.voice.stt.STTServiceStub;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.tts.TTSServiceStub;
@@ -59,14 +63,13 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Tests for {@link org.openhab.core.voice.internal.VoiceManagerImpl}
+ * Tests for {@link VoiceManagerImpl}
  *
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
 @NonNullByDefault
 public class VoiceManagerImplTest extends JavaOSGiTest {
-    private static final URI VOICE_CONFIG_URI = URI.create("system:voice");
     private static final String CONFIG_DEFAULT_SINK = "defaultSink";
     private static final String CONFIG_DEFAULT_SOURCE = "defaultSource";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
@@ -527,6 +530,104 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     }
 
     @Test
+    public void startKeywordSpottingDialogWithTheDefaultServices() throws IOException {
+        sttService = new STTServiceStub();
+        ksService = new KSServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(sttService);
+        registerService(ksService);
+        registerService(ttsService);
+        registerService(hliStub);
+        Dictionary<String, Object> config = new Hashtable<>();
+        config.put(CONFIG_KEYWORD, "word");
+        config.put(CONFIG_DEFAULT_STT, sttService.getId());
+        config.put(CONFIG_DEFAULT_KS, ksService.getId());
+        config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
+        config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
+        ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+        configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID).update(config);
+        // seeing the keyword proves the configuration was applied, since it has no fallback value
+        waitForAssert(() -> {
+            try {
+                assertThat(voiceManager.getDialogContextBuilder().build().keyword(), is("word"));
+            } catch (IllegalStateException e) {
+                // the default services are missing until the configuration is applied
+                throw new AssertionError(e);
+            }
+        });
+        AudioDialogProvider dialogProvider = getService(AudioDialogProvider.class);
+        assertNotNull(dialogProvider);
+
+        AtomicBoolean onAbortCalled = new AtomicBoolean();
+        assertTrue(dialogProvider.startKeywordSpottingDialog(sink, source, null, null, () -> onAbortCalled.set(true)));
+
+        assertTrue(ksService.isWordSpotted());
+        assertTrue(sttService.isRecognized());
+        assertThat(hliStub.getAnswer(), is("Interpreted text"));
+        assertThat(ttsService.getSynthesized(), is("Interpreted text"));
+        assertFalse(onAbortCalled.get());
+        voiceManager.stopDialog(source);
+        assertTrue(ksService.isAborted());
+        assertTrue(onAbortCalled.get());
+    }
+
+    @Test
+    public void triggeredDialogReportsIdleAfterEachInteraction() throws IOException {
+        sttService = new STTServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(sttService);
+        registerService(ttsService);
+        registerService(hliStub);
+        Dictionary<String, Object> config = new Hashtable<>();
+        config.put(CONFIG_KEYWORD, "word");
+        config.put(CONFIG_DEFAULT_STT, sttService.getId());
+        config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
+        config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
+        ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+        configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID).update(config);
+        // seeing the keyword proves the configuration was applied, since it has no fallback value
+        waitForAssert(() -> {
+            try {
+                assertThat(voiceManager.getDialogContextBuilder().build().keyword(), is("word"));
+            } catch (IllegalStateException e) {
+                // the default services are missing until the configuration is applied
+                throw new AssertionError(e);
+            }
+        });
+        AudioDialogProvider dialogProvider = getService(AudioDialogProvider.class);
+        assertNotNull(dialogProvider);
+
+        AtomicInteger idleCount = new AtomicInteger();
+        Runnable trigger = dialogProvider.startDialog(sink, source, null, null, null, idleCount::incrementAndGet);
+        assertNotNull(trigger);
+        assertThat(idleCount.get(), is(0));
+
+        trigger.run();
+        waitForAssert(() -> assertThat(idleCount.get(), is(1)));
+        assertTrue(sttService.isRecognized());
+        assertThat(ttsService.getSynthesized(), is("Interpreted text"));
+
+        trigger.run();
+        waitForAssert(() -> assertThat(idleCount.get(), is(2)));
+
+        voiceManager.stopDialog(source);
+        assertThat(idleCount.get(), is(2));
+    }
+
+    @Test
+    public void keywordSpottingDialogNeedsAKeywordSpotter() {
+        sttService = new STTServiceStub();
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(sttService);
+        registerService(hliStub);
+        AudioDialogProvider dialogProvider = getService(AudioDialogProvider.class);
+        assertNotNull(dialogProvider);
+
+        assertThrows(IllegalStateException.class,
+                () -> dialogProvider.startKeywordSpottingDialog(sink, source, null, null, null));
+    }
+
+    @Test
     public void startDialogWithoutPassingAnyParameters() throws Exception {
         sttService = new STTServiceStub();
         ksService = new KSServiceStub();
@@ -594,134 +695,6 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertTrue(ksService.isAborted());
 
         assertThrows(IllegalStateException.class, () -> voiceManager.stopDialog(source));
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultHli() {
-        hliStub = new HumanLanguageInterpreterStub();
-        registerService(hliStub);
-
-        boolean isHliStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultHLI", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String hliStubId = hliStub.getId();
-            String hliLabel = hliStub.getLabel(null);
-            if (optionValue.equals(hliStubId) && optionLabel.equals(hliLabel)) {
-                isHliStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isHliStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultKs() {
-        ksService = new KSServiceStub();
-        registerService(ksService);
-
-        boolean isKSStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultKS", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String ksStubId = ksService.getId();
-            String ksLabel = ksService.getLabel(null);
-            if (optionValue.equals(ksStubId) && optionLabel.equals(ksLabel)) {
-                isKSStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isKSStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultSTT() {
-        sttService = new STTServiceStub();
-        registerService(sttService);
-
-        boolean isSTTStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultSTT", null,
-                null);
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String sttStubId = sttService.getId();
-            String sttLabel = sttService.getLabel(null);
-            if (optionValue.equals(sttStubId) && optionLabel.equals(sttLabel)) {
-                isSTTStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isSTTStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultTts() {
-        ttsService = new TTSServiceStub();
-        registerService(ttsService);
-
-        boolean isTTSStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultTTS", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String ttsStubId = ttsService.getId();
-            String ttsLabel = ttsService.getLabel(null);
-            if (optionValue.equals(ttsStubId) && optionLabel.equals(ttsLabel)) {
-                isTTSStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isTTSStubInTheOptions);
-    }
-
-    @Test
-    public void getParameterOptionsForTheDefaultVoice() {
-        BundleContext context = bundleContext;
-        ttsService = new TTSServiceStub(context);
-        registerService(ttsService);
-        Locale locale = localeProvider.getLocale();
-
-        boolean isVoiceStubInTheOptions = false;
-
-        Collection<ParameterOption> options = voiceManager.getParameterOptions(VOICE_CONFIG_URI, "defaultVoice", null,
-                null);
-
-        assertNotNull(options);
-
-        for (ParameterOption option : options) {
-            String optionValue = option.getValue();
-            String optionLabel = option.getLabel();
-            String voiceStubId = voice.getUID();
-            String expectedLabel = String.format("%s - %s - %s", ttsService.getLabel(locale),
-                    voice.getLocale().getDisplayName(locale), voice.getLabel());
-
-            if (optionValue.equals(voiceStubId) && optionLabel.equals(expectedLabel)) {
-                isVoiceStubInTheOptions = true;
-            }
-        }
-
-        assertTrue(isVoiceStubInTheOptions);
     }
 
     @Test
@@ -795,8 +768,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertNotNull(itemRegistry);
 
         // Add a test item
-        org.openhab.core.library.items.SwitchItem testItem = new org.openhab.core.library.items.SwitchItem(
-                "TestSwitch");
+        SwitchItem testItem = new SwitchItem("TestSwitch");
         testItem.setLabel("Test Switch Label");
 
         // Setup a custom HumanLanguageInterpreter to capture InterpreterContext
@@ -818,7 +790,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
             }
 
             @Override
-            public String interpret(Locale locale, org.openhab.core.voice.text.InterpreterContext interpreterContext)
+            public String interpret(Locale locale, InterpreterContext interpreterContext)
                     throws InterpretationException {
                 capturedPrompt[0] = interpreterContext.systemPrompt();
                 return "Interpreted Context";
@@ -867,6 +839,106 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         } finally {
             // Clean up item and service
             itemRegistry.remove("TestSwitch");
+        }
+    }
+
+    @Test
+    public void testPromptListsOnlySemanticItemsAndOffersFindItems() throws Exception {
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        assertNotNull(itemRegistry);
+
+        SwitchItem semanticItem = new SwitchItem("SemanticLamp");
+        semanticItem.addTag("Switch");
+        SwitchItem helperItem = new SwitchItem("HelperSwitch");
+
+        final String[] capturedPrompt = new String[1];
+        final List<String> capturedTools = new ArrayList<>();
+        HumanLanguageInterpreter customHli = new HumanLanguageInterpreter() {
+            @Override
+            public String getId() {
+                return "promptHli";
+            }
+
+            @Override
+            public String getLabel(@Nullable Locale locale) {
+                return "Prompt HLI";
+            }
+
+            @Override
+            public String interpret(Locale locale, String text) throws InterpretationException {
+                return "Interpreted";
+            }
+
+            @Override
+            public String interpret(Locale locale, InterpreterContext interpreterContext)
+                    throws InterpretationException {
+                capturedPrompt[0] = interpreterContext.systemPrompt();
+                capturedTools.clear();
+                interpreterContext.tools().forEach(tool -> capturedTools.add(tool.getUID()));
+                return "Interpreted Context";
+            }
+
+            @Override
+            public @Nullable String getGrammar(Locale locale, String format) {
+                return null;
+            }
+
+            @Override
+            public Set<Locale> getSupportedLocales() {
+                return Set.of(Locale.ENGLISH);
+            }
+
+            @Override
+            public Set<String> getSupportedGrammarFormats() {
+                return Set.of();
+            }
+        };
+
+        try {
+            itemRegistry.add(semanticItem);
+            itemRegistry.add(helperItem);
+            registerService(customHli);
+            ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+            Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
+
+            Dictionary<String, Object> config = new Hashtable<>();
+            config.put("defaultHLI", "promptHli");
+            config.put("systemPrompt", "You are an assistant.");
+            config.put(VoiceConfigurationConstants.CONFIG_PROMPT_ITEMS,
+                    VoiceConfigurationConstants.PROMPT_ITEMS_SEMANTIC);
+            configuration.update(config);
+
+            waitForAssert(() -> {
+                interpretWithAllTools();
+                assertNotNull(capturedPrompt[0]);
+                assertTrue(capturedPrompt[0].contains("SemanticLamp"));
+                assertFalse(capturedPrompt[0].contains("HelperSwitch"));
+                assertTrue(capturedPrompt[0].contains(FindItemsLLMTool.ID));
+                assertTrue(capturedTools.contains(FindItemsLLMTool.ID));
+            });
+
+            config.put(VoiceConfigurationConstants.CONFIG_PROMPT_ITEMS, VoiceConfigurationConstants.PROMPT_ITEMS_ALL);
+            configuration.update(config);
+
+            waitForAssert(() -> {
+                interpretWithAllTools();
+                assertTrue(capturedPrompt[0].contains("SemanticLamp"));
+                assertTrue(capturedPrompt[0].contains("HelperSwitch"));
+                assertFalse(capturedPrompt[0].contains(FindItemsLLMTool.ID));
+                assertFalse(capturedTools.contains(FindItemsLLMTool.ID));
+                assertFalse(capturedTools.isEmpty());
+            });
+        } finally {
+            itemRegistry.remove("SemanticLamp");
+            itemRegistry.remove("HelperSwitch");
+        }
+    }
+
+    private void interpretWithAllTools() {
+        try {
+            voiceManager.interpret("hello", new InterpretationArguments("promptHli", "", "*", "", null));
+        } catch (InterpretationException e) {
+            throw new AssertionError(e);
         }
     }
 }

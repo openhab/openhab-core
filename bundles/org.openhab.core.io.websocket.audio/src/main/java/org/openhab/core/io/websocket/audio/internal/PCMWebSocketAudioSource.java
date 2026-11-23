@@ -39,13 +39,15 @@ import org.slf4j.LoggerFactory;
  * a single PCM audio line through a WebSocket connection and shared across all active {@link AudioStream} instances.
  *
  * @author Miguel Álvarez Díez - Initial contribution
+ * @author Dan Cunningham - Label the stream as raw PCM
  */
 @NonNullByDefault
 public class PCMWebSocketAudioSource implements AudioSource {
     private static final int SUPPORTED_BIT_DEPTH = 16;
     private static final int SUPPORTED_SAMPLE_RATE = 16000;
     private static final int SUPPORTED_CHANNELS = 1;
-    public static AudioFormat supportedFormat = new AudioFormat(AudioFormat.CONTAINER_WAVE,
+    // the client sends raw samples without a WAVE header
+    public static AudioFormat supportedFormat = new AudioFormat(AudioFormat.CONTAINER_NONE,
             AudioFormat.CODEC_PCM_SIGNED, false, SUPPORTED_BIT_DEPTH, null, (long) SUPPORTED_SAMPLE_RATE,
             SUPPORTED_CHANNELS);
     private final Logger logger = LoggerFactory.getLogger(PCMWebSocketAudioSource.class);

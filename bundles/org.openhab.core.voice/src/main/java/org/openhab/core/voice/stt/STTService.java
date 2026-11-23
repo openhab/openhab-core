@@ -82,6 +82,9 @@ public interface STTService extends Identifiable<String> {
      * The passed {@code Locale} must be supported. That is to say it must be
      * a {@code Locale} returned from the {@code getSupportedLocales()} method.
      *
+     * @implNote This should return quickly and just start recognition in the background. It might be called on the
+     *           same thread that feeds the {@link AudioStream}.
+     *
      * @see <a href="https://www.w3.org/TR/jsgf/">JSpeech Grammar Format.</a>
      * @param sttListener The {@link STTListener} that {@link STTEvent} events target
      * @param audioStream The {@link AudioStream} from which speech is recognized

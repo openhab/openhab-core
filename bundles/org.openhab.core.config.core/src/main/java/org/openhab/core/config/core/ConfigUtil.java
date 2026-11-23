@@ -136,7 +136,7 @@ public class ConfigUtil {
         } catch (NumberFormatException e) {
             LoggerFactory.getLogger(ConfigUtil.class).warn(
                     "Could not parse default value '{}' as type '{}' for parameter '{}': {}", defaultValue,
-                    parameterType, parameterName, e.getMessage(), e);
+                    parameterType, parameterName, e.getMessage());
             return null;
         }
     }

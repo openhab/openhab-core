@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.text.conversation;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +35,37 @@ public class Conversation {
     private Instant lastUpdated;
     private final List<Message> messages;
     private final CopyOnWriteArrayList<ConversationListener> listeners = new CopyOnWriteArrayList<>();
+    private final Clock clock;
     private int maxMessages = DEFAULT_MAX_MESSAGES;
 
     public Conversation(String id) {
+        this(id, Clock.systemUTC());
+    }
+
+    /**
+     * Creates a new conversation using the given clock for its timestamps.
+     *
+     * @param id the identifier of the conversation
+     * @param clock the clock used for {@link #getCreated()} and {@link #getLastUpdated()}
+     */
+    public Conversation(String id, Clock clock) {
         this.id = id;
-        this.created = Instant.now();
+        this.created = clock.instant();
         this.lastUpdated = created;
         this.messages = new ArrayList<>();
+        this.clock = clock;
     }
 
     public Conversation(String id, Instant created, Instant lastUpdated, List<Message> messages) {
+        this(id, created, lastUpdated, messages, Clock.systemUTC());
+    }
+
+    private Conversation(String id, Instant created, Instant lastUpdated, List<Message> messages, Clock clock) {
         this.id = id;
         this.created = created;
         this.lastUpdated = lastUpdated;
         this.messages = new ArrayList<>(messages);
+        this.clock = clock;
     }
 
     /**
@@ -182,7 +200,7 @@ public class Conversation {
                 messages.removeFirst();
             }
             messages.add(message);
-            lastUpdated = Instant.now();
+            lastUpdated = clock.instant();
         }
         notifyMessageAdded(message);
         return message.id();
@@ -201,7 +219,7 @@ public class Conversation {
             if (messageOptional.isPresent()) {
                 int index = messages.indexOf(messageOptional.get());
                 messages.subList(index, messages.size()).clear();
-                lastUpdated = Instant.now();
+                lastUpdated = clock.instant();
                 removed = true;
             }
         }
@@ -219,7 +237,7 @@ public class Conversation {
         synchronized (messages) {
             if (!messages.isEmpty()) {
                 messages.clear();
-                lastUpdated = Instant.now();
+                lastUpdated = clock.instant();
                 removed = true;
             }
         }

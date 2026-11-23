@@ -74,31 +74,32 @@
     <maven.compiler.source>${oh.java.version}</maven.compiler.source>
     <maven.compiler.target>${oh.java.version}</maven.compiler.target>
 
-    <asm.version>9.10.1</asm.version>
-    <bnd.version>7.4.0</bnd.version>
-    <bouncycastle.version>1.86</bouncycastle.version>
+    <asm.version>9.11.1</asm.version>
+    <bnd.version>7.5.0</bnd.version>
+    <bouncycastle.version>1.87</bouncycastle.version>
     <commons.net.version>3.13.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
     <gson.version>2.15.0</gson.version>
-    <jackson.annotations.version>2.22</jackson.annotations.version>
-    <jackson.version>2.22.4</jackson.version>
+    <guava.version>33.8.0-jre</guava.version>
+    <jackson.annotations.version>2.23</jackson.annotations.version>
+    <jackson.version>2.23.0</jackson.version>
     <jbbp.version>3.0.3</jbbp.version>
+    <jersey.version>3.1.3</jersey.version>
     <jupnp.version>4.0.0.M1</jupnp.version>
-    <karaf.compile.version>4.4.12</karaf.compile.version>
-    <karaf.tooling.version>4.4.12</karaf.tooling.version>
+    <karaf.compile.version>4.5.0</karaf.compile.version>
+    <karaf.tooling.version>4.5.0</karaf.tooling.version>
     <maven.plugin.tools.version>3.16.0</maven.plugin.tools.version>
+    <osgitech.rest.version>1.2.3</osgitech.rest.version>
     <sat.version>0.18.0</sat.version>
-    <slf4j.version>2.0.19</slf4j.version>
+    <slf4j.version>2.0.20</slf4j.version>
     <xtext.version>2.44.0</xtext.version>
-    <spotless.version>2.44.3</spotless.version>
-    <!-- Eclipse Java formatter version 4.26+ does not check test files -->
-    <spotless.eclipse.version>4.25</spotless.eclipse.version>
+    <spotless.version>3.11.0</spotless.version>
+    <spotless.eclipse.version>4.41</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
+
     <swagger.version>2.2.55</swagger.version>
 
     <!-- TEST -->
-    <!-- cxf can be updated independently, karaf only uses it in tests -->
-    <cxf.version>3.6.12</cxf.version>
     <junit.version>5.14.4</junit.version>
     <mockito.version>5.23.0</mockito.version>
   </properties>
@@ -152,7 +153,6 @@
 Automatic-Module-Name: ${def;bsn}
 Import-Package: \
   io.swagger.v3.oas.annotations.*;resolution:=optional,\
-  javax.annotation.security.*;resolution:=optional,\
   org.eclipse.jdt.annotation.*;resolution:=optional,\
   org.openhab.core.automation.annotation.*;resolution:=optional,\
   com.google.common.*;version="14.0",\
@@ -236,24 +236,6 @@ Import-Package: \
           </executions>
         </plugin>
 
-        <!-- Define the version of the export plugin we use -->
-        <plugin>
-          <groupId>biz.aQute.bnd</groupId>
-          <artifactId>bnd-export-maven-plugin</artifactId>
-          <version>${bnd.version}</version>
-          <configuration>
-            <resolve>true</resolve>
-            <failOnChanges>true</failOnChanges>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>export</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
         <!-- Define the version of the testing plugin that we use -->
         <plugin>
           <groupId>biz.aQute.bnd</groupId>
@@ -263,24 +245,6 @@ Import-Package: \
             <execution>
               <goals>
                 <goal>testing</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
-        <!-- Define the version of the baseline plugin we use and avoid failing when no baseline jar exists. -->
-        <!-- (for example before the first release) -->
-        <plugin>
-          <groupId>biz.aQute.bnd</groupId>
-          <artifactId>bnd-baseline-maven-plugin</artifactId>
-          <version>${bnd.version}</version>
-          <configuration>
-            <failOnMissing>false</failOnMissing>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>baseline</goal>
               </goals>
             </execution>
           </executions>
@@ -301,6 +265,7 @@ Import-Package: \
           <configuration>
             <compilerId>eclipse</compilerId>
             <compilerArgs>
+              <arg>-enableJavadoc</arg>
               <arg>-annotationpath</arg>
               <arg>CLASSPATH</arg>
               <arg>-classpath</arg>
@@ -316,7 +281,7 @@ Import-Package: \
             <dependency>
               <groupId>org.codehaus.plexus</groupId>
               <artifactId>plexus-compiler-api</artifactId>
-              <version>2.17.1</version>
+              <version>2.18.1</version>
             </dependency>
             <dependency>
               <groupId>org.codehaus.plexus</groupId>
@@ -391,7 +356,7 @@ Import-Package: \
             <additionalDependencies>
               <dependency>
                 <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations</artifactId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
                 <version>${swagger.version}</version>
                 <scope>compile</scope>
               </dependency>
@@ -403,15 +368,6 @@ Import-Package: \
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>${maven.plugin.tools.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>3.3.1</version>
-          <configuration>
-            <preparationGoals>clean install</preparationGoals>
-          </configuration>
         </plugin>
 
         <plugin>
@@ -473,7 +429,7 @@ Import-Package: \
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>3.6.2</version>
+          <version>3.8.0</version>
         </plugin>
 
         <plugin>
@@ -682,7 +638,7 @@ Import-Package: \
                 <requireJavaVersion>
                   <version>[21.0,22.0)</version>
                   <message>++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++
-JDK 25 compiler is in use, generating Java 21 bytecode.
+JDK 25 compiler is in use, generating Java ${oh.java.version} bytecode.
 This is not officially supported.
 Consider using JDK 21 for building and testing.
 ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++</message>
@@ -708,6 +664,13 @@ Consider using JDK 21 for building and testing.
   </build>
 
   <profiles>
+    <profile>
+      <!-- generate Java 25 bytecode, requires JDK 25; activate explicitly with -Pj25 -->
+      <id>j25</id>
+      <properties>
+        <oh.java.version>25</oh.java.version>
+      </properties>
+    </profile>
     <profile>
       <id>eclipse-m2e</id>
       <activation>

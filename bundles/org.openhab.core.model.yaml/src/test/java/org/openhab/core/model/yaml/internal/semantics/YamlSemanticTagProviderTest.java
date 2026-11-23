@@ -71,7 +71,7 @@ public class YamlSemanticTagProviderTest {
     private @NonNullByDefault({}) Path fullModelPath;
 
     @BeforeEach
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings("null")
     public void setup() {
         fullModelPath = watchPath.resolve(MODEL_PATH);
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
