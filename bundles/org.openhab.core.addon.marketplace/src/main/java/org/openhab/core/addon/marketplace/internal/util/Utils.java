@@ -22,7 +22,6 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLReadFeature;
 import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
@@ -38,15 +37,15 @@ public class Utils {
     }
 
     /**
-     * Creates a {@link YAMLMapper.Builder} that parses YAML like Jackson 2 did: the YAML 1.2 core schema (instead of
-     * the JSON schema Jackson 3 uses by default) and empty values as empty strings, together with the Jackson 2
-     * mapper defaults.
+     * Creates a {@link YAMLMapper.Builder} that parses YAML close to Jackson 2: the YAML 1.2 core schema (instead of
+     * the JSON schema Jackson 3 uses by default), together with the Jackson 2 mapper defaults. YAML 1.1 only scalars
+     * like yes/no/on/off are read as strings.
      *
      * @return a pre-configured {@link YAMLMapper.Builder}
      */
     public static YAMLMapper.Builder yamlMapperBuilder() {
         return YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()).configureForJackson2()
-                .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).findAndAddModules();
+                .findAndAddModules();
     }
 
     /**

@@ -17,11 +17,14 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.parser.Parser;
+import org.openhab.core.automation.template.RuleTemplate;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLReadFeature;
 import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
@@ -38,9 +41,21 @@ public abstract class AbstractJacksonYAMLParser<T> implements Parser<T> {
     protected static final ObjectMapper YAML_MAPPER;
 
     static {
-        // keep the Jackson 2 interpretation of plain scalars and the Jackson 2 mapper defaults
+        // the core schema (instead of the JSON schema Jackson 3 uses by default) and the Jackson 2 mapper defaults keep
+        // the Jackson 2 interpretation of plain scalars, except YAML 1.1 only ones like yes/no/on/off
         YAML_MAPPER = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build())
-                .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).findAndAddModules().build();
+                .configureForJackson2().addMixIn(RuleTemplate.class, RuleTemplateMixin.class).findAndAddModules()
+                .build();
+    }
+
+    /**
+     * Jackson 3 derives the property name "UID" from {@link RuleTemplate#getUID()}, Jackson 2 derived "uid" and wrote
+     * it first. Keep both, as the exported YAML is read back into {@code RuleTemplateDTO#uid}.
+     */
+    @JsonPropertyOrder("uid")
+    private abstract static class RuleTemplateMixin {
+        @JsonProperty("uid")
+        abstract String getUID();
     }
 
     @Override

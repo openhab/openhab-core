@@ -20,7 +20,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
+import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * Tests for {@link YamlMetadataDTOSerializer}.
@@ -28,7 +31,8 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
  * @author Jimmy Tanagra - Initial contribution
  */
 class YamlMetadataDTOSerializerTest {
-    private final ObjectMapper mapper = YAMLMapper.builder().configureForJackson2().build();
+    private final ObjectMapper mapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build())
+            .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
 
     @Test
     void testSerializeScalarWhenConfigEmpty() throws Exception {

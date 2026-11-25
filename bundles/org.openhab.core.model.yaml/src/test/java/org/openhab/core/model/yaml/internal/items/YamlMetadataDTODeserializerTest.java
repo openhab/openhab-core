@@ -23,7 +23,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
+import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * Tests for {@link YamlMetadataDTODeserializer}.
@@ -32,7 +35,8 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
  */
 class YamlMetadataDTODeserializerTest {
 
-    private final ObjectMapper mapper = YAMLMapper.builder().configureForJackson2().build();
+    private final ObjectMapper mapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build())
+            .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
 
     @ParameterizedTest
     @ValueSource(strings = { "string value", "123", "45.67", "true", "false" })

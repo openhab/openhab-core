@@ -53,6 +53,7 @@ import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.model.yaml.internal.uicomponents.YamlBlocksDTO;
 import org.openhab.core.model.yaml.internal.uicomponents.YamlPageDTO;
 import org.openhab.core.model.yaml.internal.uicomponents.YamlWidgetDTO;
+import org.openhab.core.model.yaml.internal.util.CoreSchemaStringQuotingChecker;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
@@ -146,7 +147,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         // are still parsed as strings, not as booleans.
         // configureForJackson2() keeps the Jackson 2 defaults the YAML model relies on, e.g. properties are written
         // in declaration order and unknown properties are reported as errors.
-        this.objectMapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()) //
+        this.objectMapper = YAMLMapper
+                .builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE)
+                        .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build()) //
                 .configureForJackson2() //
                 .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL) //
                 .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start

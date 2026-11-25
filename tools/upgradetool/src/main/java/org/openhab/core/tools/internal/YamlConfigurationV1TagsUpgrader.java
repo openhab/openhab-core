@@ -13,6 +13,7 @@
 package org.openhab.core.tools.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.tools.Upgrader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snakeyaml.engine.v2.nodes.Tag;
+import org.snakeyaml.engine.v2.resolver.ScalarResolver;
+import org.snakeyaml.engine.v2.schema.CoreSchema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -40,6 +44,7 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
 import tools.jackson.dataformat.yaml.YAMLSchema;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
+import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 /**
  * The {@link YamlConfigurationV1TagsUpgrader} upgrades YAML Tags Configuration from List to Map.
@@ -75,7 +80,9 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
     public YamlConfigurationV1TagsUpgrader() {
         // match the options used in {@link YamlModelRepositoryImpl}
-        objectMapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()) //
+        objectMapper = YAMLMapper
+                .builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE)
+                        .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build()) //
                 .configureForJackson2() //
                 .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL) //
                 .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
@@ -172,7 +179,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                     ObjectNode tagsMap = objectMapper.createObjectNode();
                     for (JsonNode tag : node) {
                         if (tag.hasNonNull("uid")) {
-                            String uid = tag.get("uid").asString();
+                            String uid = tag.get("uid").asString("");
                             ((ObjectNode) tag).remove("uid");
                             tagsMap.set(uid, tag);
                         } else {
@@ -204,6 +211,24 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
             logger.info("{} converted to map format, and the original file saved as {}", filePath, backupPath);
         } catch (IOException e) {
             logger.error("Failed to save YAML file {}: {}", filePath, e.getMessage());
+        }
+    }
+
+    /**
+     * Also quotes String values the YAML 1.2 core schema would read as another type (e.g. {@code 0x1F}), like
+     * {@code CoreSchemaStringQuotingChecker} of the YAML model.
+     */
+    private static class CoreSchemaStringQuotingChecker extends StringQuotingChecker.Default {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private static final ScalarResolver CORE_SCHEMA_RESOLVER = new CoreSchema().getScalarResolver();
+
+        @Override
+        public boolean needToQuoteValue(@NonNullByDefault({}) String value) {
+            // blank values are always quoted by the emitter itself, so keep its choice of quote style
+            return super.needToQuoteValue(value)
+                    || (!value.isBlank() && !Tag.STR.equals(CORE_SCHEMA_RESOLVER.resolve(value, true)));
         }
     }
 }
