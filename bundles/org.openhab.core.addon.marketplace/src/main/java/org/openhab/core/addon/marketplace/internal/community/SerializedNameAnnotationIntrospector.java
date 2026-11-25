@@ -19,11 +19,13 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.PropertyName;
-import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.google.gson.annotations.SerializedName;
+
+import tools.jackson.core.Version;
+import tools.jackson.databind.AnnotationIntrospector;
+import tools.jackson.databind.PropertyName;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.Annotated;
 
 /**
  * This is a {@link SerializedNameAnnotationIntrospector}, which processes SerializedName annotations.
@@ -38,17 +40,17 @@ final class SerializedNameAnnotationIntrospector extends AnnotationIntrospector 
 
     @Override
     @NonNullByDefault({})
-    public PropertyName findNameForDeserialization(Annotated annotated) {
+    public PropertyName findNameForDeserialization(MapperConfig<?> config, Annotated annotated) {
         return Optional.ofNullable(annotated.getAnnotation(SerializedName.class)).map(s -> new PropertyName(s.value()))
-                .orElseGet(() -> super.findNameForDeserialization(annotated));
+                .orElseGet(() -> super.findNameForDeserialization(config, annotated));
     }
 
     @Override
     @NonNullByDefault({})
-    public List<PropertyName> findPropertyAliases(Annotated annotated) {
+    public List<PropertyName> findPropertyAliases(MapperConfig<?> config, Annotated annotated) {
         return Optional.ofNullable(annotated.getAnnotation(SerializedName.class))
                 .map(s -> Stream.of(s.alternate()).map(PropertyName::new).toList())
-                .orElseGet(() -> super.findPropertyAliases(annotated));
+                .orElseGet(() -> super.findPropertyAliases(config, annotated));
     }
 
     @Override

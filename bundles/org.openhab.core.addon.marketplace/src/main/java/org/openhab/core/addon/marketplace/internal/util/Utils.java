@@ -12,14 +12,18 @@
  */
 package org.openhab.core.addon.marketplace.internal.util;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
+import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * A generic utility class.
@@ -31,6 +35,18 @@ public class Utils {
 
     private Utils() {
         // Not to be instantiated
+    }
+
+    /**
+     * Creates a {@link YAMLMapper.Builder} that parses YAML like Jackson 2 did: the YAML 1.2 core schema (instead of
+     * the JSON schema Jackson 3 uses by default) and empty values as empty strings, together with the Jackson 2
+     * mapper defaults.
+     *
+     * @return a pre-configured {@link YAMLMapper.Builder}
+     */
+    public static YAMLMapper.Builder yamlMapperBuilder() {
+        return YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()).configureForJackson2()
+                .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).findAndAddModules();
     }
 
     /**
@@ -52,7 +68,7 @@ public class Utils {
                 return "version".equals(entry.getKey());
             }
             return false;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return false;
         }
     }

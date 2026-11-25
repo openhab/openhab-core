@@ -52,7 +52,8 @@ import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
-import org.yaml.snakeyaml.Yaml;
+
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * The {@link YamlModelRepositoryImplTest} contains tests for the {@link YamlModelRepositoryImpl} class.
@@ -290,9 +291,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelExpectedContent.yaml"));
-        Yaml yaml = new Yaml();
+        YAMLMapper yaml = new YAMLMapper();
 
-        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
+        assertThat(yaml.readTree(actualFileContent), equalTo(yaml.readTree(expectedFileContent)));
 
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
@@ -322,9 +323,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelExpectedContent.yaml"));
-        Yaml yaml = new Yaml();
+        YAMLMapper yaml = new YAMLMapper();
 
-        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
+        assertThat(yaml.readTree(actualFileContent), equalTo(yaml.readTree(expectedFileContent)));
 
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(1));
@@ -349,9 +350,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("removeFromModelExpectedContent.yaml"));
-        Yaml yaml = new Yaml();
+        YAMLMapper yaml = new YAMLMapper();
 
-        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
+        assertThat(yaml.readTree(actualFileContent), equalTo(yaml.readTree(expectedFileContent)));
 
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(1));
@@ -377,9 +378,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"));
-        Yaml yaml = new Yaml();
+        YAMLMapper yaml = new YAMLMapper();
 
-        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
+        assertThat(yaml.readTree(actualFileContent), equalTo(yaml.readTree(expectedFileContent)));
     }
 
     @Test

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal.util;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -21,10 +20,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * A Jackson deserializer for {@link Date} that accepts a wide range of formats:
@@ -54,12 +54,12 @@ public class FlexibleDateDeserializer extends StdDeserializer<Date> {
     }
 
     @Override
-    public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public Date deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         if (p.currentToken() == JsonToken.VALUE_NUMBER_INT) {
             return new Date(p.getLongValue());
         }
 
-        String text = p.getText().trim();
+        String text = p.getString().trim();
 
         // Try each string pattern
         for (String pattern : STRING_PATTERNS) {

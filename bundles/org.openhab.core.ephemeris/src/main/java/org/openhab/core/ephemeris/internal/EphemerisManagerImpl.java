@@ -58,7 +58,6 @@ import de.focus_shift.jollyday.core.Holiday;
 import de.focus_shift.jollyday.core.HolidayManager;
 import de.focus_shift.jollyday.core.ManagerParameter;
 import de.focus_shift.jollyday.core.ManagerParameters;
-import de.focus_shift.jollyday.core.parameter.CalendarPartManagerParameter;
 import de.focus_shift.jollyday.core.util.ResourceUtil;
 
 /**
@@ -87,6 +86,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             + "descriptions/country_descriptions.properties";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
+    // file name pattern of jollyday's holiday definitions, see CalendarPartManagerParameter (not exported since 2.0)
+    private static final String JOLLYDAY_HOLIDAYS_FILE = "holidays/Holidays_%s.xml";
 
     final List<ParameterOption> countries = new ArrayList<>();
     final Map<String, List<ParameterOption>> regions = new HashMap<>();
@@ -287,8 +288,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         if (holidayManager == null) {
             final ManagerParameter parameters;
             if (managerKey instanceof String stringKey) {
-                URL urlOverride = bundle
-                        .getResource(RESOURCES_ROOT + CalendarPartManagerParameter.getConfigurationFileName(stringKey));
+                URL urlOverride = bundle.getResource(RESOURCES_ROOT + JOLLYDAY_HOLIDAYS_FILE.formatted(stringKey));
                 parameters = urlOverride != null //
                         ? ManagerParameters.create(urlOverride)
                         : ManagerParameters.create(stringKey);

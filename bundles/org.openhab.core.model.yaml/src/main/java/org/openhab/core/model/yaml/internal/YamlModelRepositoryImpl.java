@@ -67,17 +67,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
+import tools.jackson.dataformat.yaml.YAMLSchema;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
  * The {@link YamlModelRepositoryImpl} is an OSGi service, that encapsulates all YAML file processing
@@ -137,21 +141,27 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Activate
     public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService,
             final @Reference ReadyService readyService) {
-        YAMLFactory yamlFactory = YAMLFactory.builder() //
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
-                .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
-                .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
-                                                                               // strings
-                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
-                                                                                         // booleans
-        this.objectMapper = new ObjectMapper(yamlFactory);
-        objectMapper.findAndRegisterModules();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setDefaultPropertyInclusion(Include.NON_NULL);
-        objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
+        // Jackson 3 reads YAML 1.2. The core schema (instead of the default JSON schema) and keeping empty values as
+        // empty strings interpret plain scalars like Jackson 2 did (e.g. "~" as null, ".5" as number), while ON/OFF/...
+        // are still parsed as strings, not as booleans.
+        // configureForJackson2() keeps the Jackson 2 defaults the YAML model relies on, e.g. properties are written
+        // in declaration order and unknown properties are reported as errors.
+        this.objectMapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()) //
+                .configureForJackson2() //
+                .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL) //
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+                .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
+                .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as strings
+                .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) //
+                .findAndAddModules() //
+                .changeDefaultVisibility(
+                        visibility -> visibility.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                                .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
+                .changeDefaultPropertyInclusion(
+                        inclusion -> JsonInclude.Value.construct(Include.NON_NULL, Include.NON_NULL))
+                .build();
 
         this.watchService = watchService;
         this.mainWatchPath = watchService.getWatchPath();
@@ -234,7 +244,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             } else {
                 logger.trace("Ignored {}", fullPath);
             }
-        } catch (IOException e) {
+        } catch (JacksonException | IOException e) {
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
         }
         errors.forEach(error -> {
@@ -296,7 +306,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             newElementNames.add(elementName);
             JsonNode node = element.getValue();
 
-            if (!node.isContainerNode() || node.isArray()) {
+            if (!node.isContainer() || node.isArray()) {
                 // all processable sub-elements are container nodes (not array)
                 logger.warn("Element {} in model {} is not a container object, ignoring it", elementName, modelName);
                 if (getElementName(YamlSemanticTagDTO.class).equals(elementName) && node.isArray()) {
@@ -630,7 +640,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 return;
             }
             Files.writeString(outFile, fileContent);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.warn("Failed to serialize model {}: {}", modelName, e.getMessage());
         } catch (IOException e) {
             logger.warn("Failed writing model {}: {}", modelName, e.getMessage());
@@ -644,7 +654,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         boolean valid;
         try {
             valid = processModelContent(modelName, Kind.CREATE, objectMapper.readTree(inputStream), errors, warnings);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.warn("Failed to process model {}: {}", modelName, e.getMessage());
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
             valid = false;
@@ -702,7 +712,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         try {
             objectMapper.writeValue(out, rootNode);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.warn("Failed to serialize model: {}", e.getMessage());
         }
     }
@@ -727,14 +737,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             @Nullable List<String> errors, @Nullable List<String> warnings) {
         List<T> elements = new ArrayList<>();
         if (mapNode != null) {
-            Iterator<String> it = mapNode.fieldNames();
+            Iterator<String> it = mapNode.propertyNames().iterator();
             while (it.hasNext()) {
                 String id = it.next();
                 @Nullable
                 T elt = null;
                 JsonNode node = mapNode.get(id);
-                if ((node.isContainerNode() && node.isEmpty()) || node.isNull()
-                        || (node.isTextual() && node.asText().isBlank())) {
+                if ((node.isContainer() && node.isEmpty()) || node.isNull()
+                        || (node.isString() && node.asString().isBlank())) {
                     elt = createElement(elementClass, errors);
                     if (elt != null) {
                         elt.setId(id);
@@ -750,7 +760,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                             elt = objectMapper.treeToValue(node, elementClass);
                             elt.setId(id);
                         }
-                    } catch (JsonProcessingException | SerializationException e) {
+                    } catch (JacksonException | SerializationException e) {
                         if (errors != null) {
                             String msg = e.getMessage();
                             errors.add("could not parse element with ID %s to %s: %s".formatted(id,

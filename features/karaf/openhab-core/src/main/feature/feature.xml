@@ -449,6 +449,8 @@
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.ui/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
+		<feature dependency="true">openhab.tp-jackson</feature>
 	</feature>
 
 	<feature name="openhab-core-ui-icon" version="${project.version}">

@@ -32,7 +32,8 @@ import org.openhab.core.model.yaml.internal.util.ConfigDescriptionParameterGroup
 import org.openhab.core.model.yaml.internal.util.ConfigDescriptionParametersDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * This is a data transfer object used to (de)serialize a {@link ConfigDescription} in a YAML configuration.

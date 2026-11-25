@@ -29,13 +29,17 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
+import tools.jackson.dataformat.yaml.YAMLSchema;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
  * The {@link YamlConfigurationV1TagsUpgrader} upgrades YAML Tags Configuration from List to Map.
@@ -71,21 +75,22 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
     public YamlConfigurationV1TagsUpgrader() {
         // match the options used in {@link YamlModelRepositoryImpl}
-        objectMapper = YAMLMapper.builder() //
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
-                .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
-                .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
-                                                                               // strings
-                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as booleans
+        objectMapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()) //
+                .configureForJackson2() //
+                .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL) //
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+                .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
+                .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as strings
+                .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) //
                 .findAndAddModules() //
-                .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE) //
-                .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY) //
+                .changeDefaultVisibility(
+                        visibility -> visibility.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                                .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
                 // Correct compatible behavior with {@link YamlModelRepositoryImpl} for jackson > 2.8, don't use
                 // Include.ALWAYS as second argument (which would have been the behavior earlier)
-                .defaultPropertyInclusion(Value.construct(Include.NON_NULL, Include.NON_NULL)) //
-                .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN) //
+                .changeDefaultPropertyInclusion(inclusion -> Value.construct(Include.NON_NULL, Include.NON_NULL)) //
                 .build();
     }
 
@@ -167,7 +172,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                     ObjectNode tagsMap = objectMapper.createObjectNode();
                     for (JsonNode tag : node) {
                         if (tag.hasNonNull("uid")) {
-                            String uid = tag.get("uid").asText();
+                            String uid = tag.get("uid").asString();
                             ((ObjectNode) tag).remove("uid");
                             tagsMap.set(uid, tag);
                         } else {
@@ -180,7 +185,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
             String output = objectMapper.writeValueAsString(fileContent);
             saveFile(filePath, output);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error("Failed to read YAML file {}: {}", filePath, e.getMessage());
             return;
         }

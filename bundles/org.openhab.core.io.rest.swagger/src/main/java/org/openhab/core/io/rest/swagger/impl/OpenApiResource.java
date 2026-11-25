@@ -34,11 +34,7 @@ import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -47,12 +43,15 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.rest.Reader;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * An endpoint to generate and provide an OpenAPI description.
@@ -109,7 +108,7 @@ public class OpenApiResource implements RESTResource {
             return Response.status(Response.Status.OK)
                     .entity(Json.mapper().readValue(json, new TypeReference<Map<String, Object>>() {
                     })).build();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Error while serializing the OpenAPI object to JSON");
             return Response.serverError().build();
         } catch (InvalidSyntaxException e) {
