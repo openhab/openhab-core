@@ -41,7 +41,6 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLReadFeature;
 import tools.jackson.dataformat.yaml.YAMLSchema;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
@@ -79,12 +78,12 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
     private final ObjectMapper objectMapper;
 
     public YamlConfigurationV1TagsUpgrader() {
-        // match the options used in {@link YamlModelRepositoryImpl}
+        // match the options used in {@link YamlModelRepositoryImpl}, except that empty values are read as null (as this
+        // upgrader always did), so that e.g. an empty "synonyms:" is not written back as an empty String
         objectMapper = YAMLMapper
                 .builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE)
                         .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build()) //
                 .configureForJackson2() //
-                .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL) //
                 .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
                 .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
