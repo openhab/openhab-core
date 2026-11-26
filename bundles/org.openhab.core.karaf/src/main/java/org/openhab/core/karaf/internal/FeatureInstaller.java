@@ -55,6 +55,7 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -87,6 +88,9 @@ public class FeatureInstaller implements ConfigurationListener {
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
     private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
+    private static final String KAR_PID = "org.apache.karaf.kar";
+    private static final String KAR_STORAGE = "karStorage";
+    private static final String KAR_FEATURES_FILE = "features.cfg";
 
     public static final String FINDER_ADDON_TYPE = "core-config-discovery-addon";
     public static final List<String> ADDON_TYPES = Stream
@@ -105,8 +109,9 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private @Nullable String onlineRepoUrl = null;
 
-    private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
-                                          // configuration as this must be waited for before trying to add feature repos
+    // a flag used to check whether CM has already successfully updated the pax configuration as this must be waited
+    // for before trying to add feature repos
+    private volatile boolean paxCfgUpdated = true;
     private @Nullable Map<String, Object> configMapCache;
 
     @Activate
@@ -241,11 +246,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 Dictionary<String, Object> felixProperties = configurations[0].getProperties();
                 String addonsDirectory = (String) felixProperties.get("felix.fileinstall.dir");
                 if (addonsDirectory != null) {
-                    try (Stream<Path> files = Files.list(Path.of(addonsDirectory))) {
-                        return files.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".kar"))
-                                .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
-                                .allMatch(karRepos::contains);
-                    }
+                    return allKarsInstalled(Path.of(addonsDirectory), getKarStorage(), karRepos);
                 }
             }
         } catch (Exception ignored) {
@@ -254,7 +255,37 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
+    /**
+     * Checks whether all .kar files in the add-ons folder are installed and completely extracted.
+     *
+     * Karaf lists a KAR as installed as soon as its extraction starts, so a listed KAR is only considered as installed
+     * once the features repository list exists, which Karaf writes when the extraction is complete. This can be
+     * removed once Karaf contains https://github.com/apache/karaf/pull/3164.
+     */
+    static boolean allKarsInstalled(Path addonsDirectory, Path karStorage, List<String> karRepos) throws IOException {
+        try (Stream<Path> files = Files.list(addonsDirectory)) {
+            return files.map(Path::getFileName).map(Path::toString).filter(file -> file.endsWith(".kar"))
+                    .map(karFileName -> karFileName.substring(0, karFileName.lastIndexOf(".")))
+                    .allMatch(karName -> karRepos.contains(karName)
+                            && Files.isRegularFile(karStorage.resolve(karName).resolve(KAR_FEATURES_FILE)));
+        }
+    }
+
+    private Path getKarStorage() throws IOException, InvalidSyntaxException {
+        Configuration[] configurations = configurationAdmin.listConfigurations("(service.pid=" + KAR_PID + ")");
+        if (configurations != null && configurations.length > 0) {
+            Dictionary<String, Object> properties = configurations[0].getProperties();
+            if (properties != null && properties.get(KAR_STORAGE) instanceof String karStorage
+                    && !karStorage.isBlank()) {
+                return Path.of(karStorage);
+            }
+        }
+        // same default as Karaf
+        return Path.of(System.getProperty("karaf.data", ""), "kar");
+    }
+
     private void waitForConfigUpdateEvent() {
+        logger.debug("Wait for config update event...");
         int counter = 0;
         // wait up to 5 seconds for the config update event
         while (!paxCfgUpdated && counter++ < 50) {
@@ -263,7 +294,10 @@ public class FeatureInstaller implements ConfigurationListener {
             } catch (InterruptedException ignored) {
             }
         }
-        logger.warn("Waited for 5s to receive config update, but configuration was not updated. Proceeding anyway.");
+        if (!paxCfgUpdated) {
+            logger.warn(
+                    "Waited for 5s to receive config update, but configuration was not updated. Proceeding anyway.");
+        }
     }
 
     private void changeAddonConfig(String type, String id, BiFunction<Collection<String>, String, Boolean> method)
@@ -356,7 +390,9 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
                 if (changed) {
                     properties.put(PROPERTY_MVN_REPOS, String.join(",", repoCfg));
-                    paxCfgUpdated = true;
+                    // paxCfgUpdated is set to false
+                    // It will be set to true again by the configuration manager (in method configurationEvent)
+                    paxCfgUpdated = false;
                     paxCfg.update(properties);
                 }
             } catch (IOException e) {
