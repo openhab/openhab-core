@@ -24,6 +24,8 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 	-Dorg.osgi.service.http.port=${org.osgi.service.http.port},\
 	-DJETTY_AVAILABLE_PROCESSORS=4
 
+-runvm.coverage: ${def;coverageArgLine}
+
 # The integration test itself does not export anything.
 Export-Package:
 -exportcontents:

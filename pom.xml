@@ -100,6 +100,7 @@
     <swagger.version>2.2.55</swagger.version>
 
     <!-- TEST -->
+    <coverageArgLine/>
     <junit.version>5.14.4</junit.version>
     <mockito.version>5.23.0</mockito.version>
   </properties>
@@ -393,7 +394,7 @@ Import-Package: \
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.6.1</version>
           <configuration>
-            <argLine>--add-opens java.base/java.net=ALL-UNNAMED
+            <argLine>@{coverageArgLine} --add-opens java.base/java.net=ALL-UNNAMED
               --add-opens java.base/java.util=ALL-UNNAMED
               -javaagent:"${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar"
               -Xshare:off</argLine>
@@ -670,6 +671,58 @@ Consider using JDK 21 for building and testing.
       <properties>
         <oh.java.version>25</oh.java.version>
       </properties>
+    </profile>
+    <profile>
+      <id>coverage</id>
+      <properties>
+        <jacoco.version>0.8.14</jacoco.version>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.11.0</version>
+            <inherited>false</inherited>
+            <executions>
+              <execution>
+                <id>copy-jacoco-cli</id>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <phase>initialize</phase>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.jacoco</groupId>
+                      <artifactId>org.jacoco.cli</artifactId>
+                      <version>${jacoco.version}</version>
+                      <classifier>nodeps</classifier>
+                      <outputDirectory>${project.build.directory}/coverage</outputDirectory>
+                      <destFileName>jacococli.jar</destFileName>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <propertyName>coverageArgLine</propertyName>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
     <profile>
       <id>eclipse-m2e</id>
