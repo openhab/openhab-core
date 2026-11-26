@@ -12,9 +12,10 @@
  */
 package org.openhab.core.storage.json.internal;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -32,15 +34,23 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.openhab.core.OpenHAB;
+import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 /**
  * @author Simon Kaufmann - Initial contribution
+ * @author Kai Kreuzer - Verify managed item recovery after storage service restart
  */
 @NonNullByDefault
 public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
@@ -157,6 +167,52 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
         @SuppressWarnings("null")
         Object bigDecimal = storageWithoutClassloader.get("configuration").configuration.get("bigDecimal");
         assertThat(bigDecimal instanceof BigDecimal, is(true));
+    }
+
+    @Test
+    @Timeout(value = 60, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void managedItemsReturnAfterJsonStorageServiceRestarts() throws Exception {
+        ItemRegistry items = requireNonNull(getService(ItemRegistry.class));
+        ((AbstractRegistry<?, ?, ?>) items).waitForCompletedAsyncActivationTasks();
+        ServiceComponentRuntime scr = requireNonNull(getService(ServiceComponentRuntime.class));
+        ComponentDescriptionDTO jsonStorage = requireNonNull(
+                scr.getComponentDescriptionDTO(getBundleContext().getBundle(), "org.openhab.core.storage.json"));
+        String groupName = "JsonStorageRestartGroup";
+        String switchName = "JsonStorageRestartSwitch";
+        SwitchItem original = new SwitchItem(switchName);
+        original.setLabel("Light in the hall");
+        original.addTag("Light");
+        original.addGroupName(groupName);
+
+        try {
+            items.add(new GroupItem(groupName));
+            items.add(original);
+            assertSame(original, items.get(switchName));
+
+            try {
+                scr.disableComponent(jsonStorage).getValue();
+                waitForAssert(() -> {
+                    assertNull(items.get(switchName));
+                    assertNull(items.get(groupName));
+                });
+            } finally {
+                scr.enableComponent(jsonStorage).getValue();
+            }
+
+            waitForAssert(() -> {
+                SwitchItem restored = assertInstanceOf(SwitchItem.class, items.get(switchName));
+                GroupItem restoredGroup = assertInstanceOf(GroupItem.class, items.get(groupName));
+                assertNotSame(original, restored);
+                assertEquals("Light in the hall", restored.getLabel());
+                assertEquals(Set.of("Light"), restored.getTags());
+                assertEquals(List.of(groupName), restored.getGroupNames());
+                assertSame(restored, restoredGroup.getMembers().stream().findFirst().orElseThrow());
+                assertEquals(1, restoredGroup.getMembers().size());
+            }, 15_000, 50);
+        } finally {
+            items.remove(switchName);
+            items.remove(groupName);
+        }
     }
 
     public static class DummyObject {

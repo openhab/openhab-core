@@ -16,7 +16,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -26,10 +28,13 @@ import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 
 import com.google.gson.Gson;
@@ -39,6 +44,7 @@ import com.google.gson.JsonParser;
  * {@link ItemEventFactoryTest} tests the {@link ItemEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
+ * @author Kai Kreuzer - Cover time series serialization and state-only event values
  */
 @NonNullByDefault
 public class ItemEventFactoryTest {
@@ -248,5 +254,49 @@ public class ItemEventFactoryTest {
         assertEquals(RAW_ITEM_STATE, groupItemStateChangedEvent.getOldItemState());
         assertEquals(lastStateUpdate, groupItemStateChangedEvent.getLastStateUpdate());
         assertEquals(lastStateChange, groupItemStateChangedEvent.getLastStateChange());
+    }
+
+    @Test
+    public void timeSeriesEventRoundTripsTypedValuesAndReplacementPolicy() throws Exception {
+        Instant start = Instant.parse("2026-01-02T03:04:05.123456789Z");
+        TimeSeries series = new TimeSeries(TimeSeries.Policy.REPLACE);
+        series.add(start.plusSeconds(60), UnDefType.UNDEF);
+        series.add(start, new QuantityType<>("21.5 °C"));
+        ItemTimeSeriesEvent event = ItemEventFactory.createTimeSeriesEvent(ITEM_NAME, series, null);
+
+        assertEquals("openhab/items/ItemA/timeseries", event.getTopic());
+        ItemTimeSeriesEvent decoded = assertInstanceOf(ItemTimeSeriesEvent.class,
+                factory.createEvent(event.getType(), event.getTopic(), event.getPayload(), null));
+        assertEquals(ITEM_NAME, decoded.getItemName());
+        assertEquals(TimeSeries.Policy.REPLACE, decoded.getTimeSeries().getPolicy());
+        assertEquals(
+                List.of(new TimeSeries.Entry(start, new QuantityType<>("21.5 °C")),
+                        new TimeSeries.Entry(start.plusSeconds(60), UnDefType.UNDEF)),
+                decoded.getTimeSeries().getStates().toList());
+    }
+
+    @Test
+    public void decodesEmptyAddTimeSeriesUpdateFromWirePayload() throws Exception {
+        ItemTimeSeriesUpdatedEvent decoded = assertInstanceOf(ItemTimeSeriesUpdatedEvent.class,
+                factory.createEvent(ItemTimeSeriesUpdatedEvent.TYPE, "openhab/items/ItemA/timeseriesupdated", """
+                        {"timeSeries":[],"policy":"ADD"}
+                        """, null));
+
+        assertEquals(ITEM_NAME, decoded.getItemName());
+        assertEquals(TimeSeries.Policy.ADD, decoded.getTimeSeries().getPolicy());
+        assertEquals(0, decoded.getTimeSeries().size());
+    }
+
+    @Test
+    public void acceptsOpenClosedStateButRejectsItAsACommand() throws Exception {
+        String payload = """
+                {"type":"OpenClosed","value":"OPEN"}
+                """;
+        ItemStateEvent event = assertInstanceOf(ItemStateEvent.class,
+                factory.createEvent(ItemStateEvent.TYPE, ITEM_STATE_EVENT_TOPIC, payload, SOURCE));
+
+        assertEquals(OpenClosedType.OPEN, event.getItemState());
+        assertThrows(IllegalArgumentException.class,
+                () -> factory.createEvent(ItemCommandEvent.TYPE, ITEM_COMMAND_EVENT_TOPIC, payload, SOURCE));
     }
 }
