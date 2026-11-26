@@ -42,6 +42,7 @@ import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.FormRequestContent;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.client.StringRequestContent;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -76,6 +77,7 @@ public class OAuthConnector {
 
     private static final String HTTP_CLIENT_CONSUMER_NAME = "OAuthConnector";
     private static final int TIMEOUT_SECONDS = 10;
+    private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     protected final HttpClientFactory httpClientFactory;
 
@@ -367,7 +369,11 @@ public class OAuthConnector {
         int statusCode = 0;
         String content = "";
         try {
-            final FormRequestContent entity = new FormRequestContent(fields);
+            // Jetty 12's FormRequestContent appends ";charset=utf-8" to the content type, which Jetty 9 did not.
+            // RFC 6749 (appendix B) defines the body as UTF-8 without a charset parameter, and strict token
+            // endpoints may reject the parameter, so send the bare media type.
+            final StringRequestContent entity = new StringRequestContent(FORM_CONTENT_TYPE,
+                    FormRequestContent.convert(fields), StandardCharsets.UTF_8);
             Request requestWithContent = request.body(entity);
             final ContentResponse response = requestWithContent.send();
 
