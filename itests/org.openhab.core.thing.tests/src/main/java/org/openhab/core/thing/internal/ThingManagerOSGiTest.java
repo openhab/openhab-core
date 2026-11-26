@@ -1738,12 +1738,12 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     @Test
     public void thingManagerCallsChildHandlerInitializedAndChildHandlerDisposedOnBridgeHandlerCorrectly() {
         class BridgeHandlerState {
-            boolean childHandlerInitializedCalled;
+            volatile boolean childHandlerInitializedCalled;
             @Nullable
             ThingHandler initializedHandler;
             @Nullable
             Thing initializedThing;
-            boolean childHandlerDisposedCalled;
+            volatile boolean childHandlerDisposedCalled;
             @Nullable
             ThingHandler disposedHandler;
             @Nullable
@@ -1865,12 +1865,12 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     @Test
     public void thingManagerCallsChildHandlerInitializedAndChildHandlerDisposedOnBridgeHandlerCorrectlyEvenIfChildRegistrationTakesTooLong() {
         class BridgeHandlerState {
-            boolean childHandlerInitializedCalled;
+            volatile boolean childHandlerInitializedCalled;
             @Nullable
             ThingHandler initializedHandler;
             @Nullable
             Thing initializedThing;
-            boolean childHandlerDisposedCalled;
+            volatile boolean childHandlerDisposedCalled;
             @Nullable
             ThingHandler disposedHandler;
             @Nullable
@@ -1907,9 +1907,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         doAnswer(new Answer<Void>() {
             @Override
             public @Nullable Void answer(InvocationOnMock invocation) throws Throwable {
-                bridgeState.childHandlerInitializedCalled = true;
                 bridgeState.initializedHandler = (ThingHandler) invocation.getArgument(0);
                 bridgeState.initializedThing = (Thing) invocation.getArgument(1);
+                bridgeState.childHandlerInitializedCalled = true;
                 return null;
             }
         }).when(bridgeHandler).childHandlerInitialized(any(ThingHandler.class), any(Thing.class));
@@ -1917,9 +1917,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         doAnswer(new Answer<Void>() {
             @Override
             public @Nullable Void answer(InvocationOnMock invocation) throws Throwable {
-                bridgeState.childHandlerDisposedCalled = true;
                 bridgeState.disposedHandler = (ThingHandler) invocation.getArgument(0);
                 bridgeState.disposedThing = (Thing) invocation.getArgument(1);
+                bridgeState.childHandlerDisposedCalled = true;
                 return null;
             }
         }).when(bridgeHandler).childHandlerDisposed(any(ThingHandler.class), any(Thing.class));
