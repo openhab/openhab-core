@@ -187,6 +187,12 @@ public class FeatureInstaller implements ConfigurationListener {
 
             if (repoConfigurationChanged) {
                 waitForConfigUpdateEvent();
+                // It has been discovered that starting add-ons installation too fast after a configuration update
+                // can lead to a crash of the installation. That's why an additional delay of 3s is introduced.
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ignored) {
+                }
             }
 
             if (installAddons(config)) {
@@ -255,6 +261,7 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private void waitForConfigUpdateEvent() {
+        logger.debug("Wait for config update event...");
         int counter = 0;
         // wait up to 5 seconds for the config update event
         while (!paxCfgUpdated && counter++ < 50) {
@@ -263,7 +270,10 @@ public class FeatureInstaller implements ConfigurationListener {
             } catch (InterruptedException ignored) {
             }
         }
-        logger.warn("Waited for 5s to receive config update, but configuration was not updated. Proceeding anyway.");
+        if (!paxCfgUpdated) {
+            logger.warn(
+                    "Waited for 5s to receive config update, but configuration was not updated. Proceeding anyway.");
+        }
     }
 
     private void changeAddonConfig(String type, String id, BiFunction<Collection<String>, String, Boolean> method)
@@ -356,7 +366,9 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
                 if (changed) {
                     properties.put(PROPERTY_MVN_REPOS, String.join(",", repoCfg));
-                    paxCfgUpdated = true;
+                    // paxCfgUpdated is set to false
+                    // It will be set to true again by the configuration manager (in method configurationEvent)
+                    paxCfgUpdated = false;
                     paxCfg.update(properties);
                 }
             } catch (IOException e) {
