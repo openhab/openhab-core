@@ -14,12 +14,15 @@ package org.openhab.core.voice.internal.tts;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
@@ -73,7 +76,7 @@ public class SpeechSynthesizerTest {
         PercentType volume = new PercentType(80);
         speechSynthesizer.say("hello", ttsService, voice, sink, volume);
 
-        verify(audioManager).play(audioStream, sink, volume);
+        verify(audioManager).playAndComplete(audioStream, sink, volume);
     }
 
     @Test
@@ -91,6 +94,8 @@ public class SpeechSynthesizerTest {
         when(ttsService.getSupportedFormats()).thenReturn(Set.of(WAV_FORMAT));
         when(sink.getSupportedFormats()).thenReturn(Set.of());
 
-        assertDoesNotThrow(() -> speechSynthesizer.say("hello", ttsService, voice, sink, null));
+        CompletableFuture<@Nullable Void> playback = assertDoesNotThrow(
+                () -> speechSynthesizer.say("hello", ttsService, voice, sink, null));
+        assertTrue(playback.isCompletedExceptionally());
     }
 }
