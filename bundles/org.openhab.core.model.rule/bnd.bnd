@@ -25,6 +25,7 @@ Import-Package: \
  org.openhab.core.library.types,\
  org.openhab.core.library.unit,\
  org.openhab.core.model.core,\
+ org.openhab.core.model.core.types,\
  org.openhab.core.model.items,\
  org.openhab.core.model.script,\
  org.openhab.core.model.script.engine.action,\

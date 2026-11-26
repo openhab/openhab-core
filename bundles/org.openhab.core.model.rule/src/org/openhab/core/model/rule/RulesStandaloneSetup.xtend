@@ -21,6 +21,7 @@ import org.openhab.core.model.script.ScriptStandaloneSetup
 import org.openhab.core.model.script.ServiceModule
 import org.eclipse.xtext.resource.IResourceServiceProvider
 import org.openhab.core.model.script.engine.ScriptEngine
+import org.openhab.core.model.core.types.DisposableTypeProviderFactory
 
 /** 
  * Initialization support for running Xtext languages
@@ -74,6 +75,8 @@ class RulesStandaloneSetup extends RulesStandaloneSetupGenerated {
     }
     
     def static unregister() {
+        // the type providers hold the class loader of this bundle revision
+        injector?.getInstance(DisposableTypeProviderFactory)?.dispose()
         EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Rules");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("rules");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("rules");

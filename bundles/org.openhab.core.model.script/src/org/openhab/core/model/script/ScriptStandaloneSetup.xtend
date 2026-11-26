@@ -15,6 +15,7 @@ package org.openhab.core.model.script
 import com.google.inject.Guice
 import com.google.inject.Injector
 import org.openhab.core.model.script.engine.ScriptEngine
+import org.openhab.core.model.core.types.DisposableTypeProviderFactory
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.resource.IResourceServiceProvider
@@ -67,6 +68,8 @@ class ScriptStandaloneSetup extends ScriptStandaloneSetupGenerated {
     }
     
     def static void unregister() {
+        // the type providers hold the class loader of this bundle revision
+        injector?.getInstance(DisposableTypeProviderFactory)?.dispose()
         EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Script");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("script");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("script");
