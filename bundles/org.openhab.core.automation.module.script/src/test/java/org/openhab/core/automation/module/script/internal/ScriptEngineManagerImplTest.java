@@ -123,6 +123,9 @@ public class ScriptEngineManagerImplTest {
         when(invocable.invokeFunction("scriptUnloaded")).thenAnswer(invocation -> {
             RuntimeException failure = new RuntimeException("Test Exception");
             failure.setStackTrace(new StackTraceElement[0]);
+            RuntimeException cause = new RuntimeException("Cause");
+            failure.initCause(cause);
+            cause.initCause(failure);
             throw failure;
         });
 

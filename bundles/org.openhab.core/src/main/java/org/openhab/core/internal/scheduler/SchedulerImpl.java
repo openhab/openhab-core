@@ -19,7 +19,10 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -90,8 +93,13 @@ public class SchedulerImpl implements Scheduler {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                logger.warn("Scheduled job '{}' failed and stopped",
-                        Objects.requireNonNullElse(deferred.identifier, "<unknown>"), e);
+                if (isContextExecutionCancelled(e)) {
+                    logger.debug("Scheduled job '{}' was cancelled",
+                            Objects.requireNonNullElse(deferred.identifier, "<unknown>"));
+                } else {
+                    logger.warn("Scheduled job '{}' failed and stopped",
+                            Objects.requireNonNullElse(deferred.identifier, "<unknown>"), e);
+                }
                 deferred.completeExceptionally(e);
             }
         }, duration, TimeUnit.MILLISECONDS);
@@ -106,6 +114,19 @@ public class SchedulerImpl implements Scheduler {
             return null;
         });
         return deferred;
+    }
+
+    private static boolean isContextExecutionCancelled(Throwable throwable) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Throwable cause = throwable;
+        while (cause != null && visited.add(cause)) {
+            if ("org.graalvm.polyglot.PolyglotException".equals(cause.getClass().getName())
+                    && "Context execution was cancelled.".equals(cause.getMessage())) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     @Override

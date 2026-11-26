@@ -15,7 +15,9 @@ package org.openhab.core.automation.module.script.internal;
 import static org.openhab.core.automation.module.script.ScriptEngineFactory.*;
 
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -244,15 +246,15 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 } catch (ScriptException ex) {
                     logger.error("Error executing scriptUnloaded() of ScriptEngine '{}'", engineIdentifier, ex);
                 } catch (RuntimeException e) {
-                    Throwable cause = e;
-                    while (cause != null && cause.getCause() != null) {
-                        cause = cause.getCause();
-                    }
+                    Throwable cause = getInnermostCause(e);
                     if (cause instanceof IllegalStateException
                             && "The Context is already closed.".equals(cause.getMessage())) {
                         // Ignore ISE thrown by Graal languages if underlying org.graalvm.polyglot.Engine is closed
                         logger.debug("ScriptEngine '{}' already closed when attempting to execute scriptUnloaded()",
                                 engineIdentifier);
+                    } else if (isContextExecutionCancelled(e)) {
+                        logger.debug("ScriptEngine '{}' context was cancelled when attempting to execute "
+                                + "scriptUnloaded()", engineIdentifier);
                     } else {
                         // Do NOT rethrow, we always want to close the engine and remove script extensions.
                         logger.warn(
@@ -271,7 +273,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     try {
                         closeable.close();
                     } catch (Exception e) {
-                        logger.error("Error closing ScriptEngine '{}'", engineIdentifier, e);
+                        if (isContextExecutionCancelled(e)) {
+                            logger.debug("ScriptEngine '{}' context was cancelled when closing", engineIdentifier);
+                        } else {
+                            logger.error("Error closing ScriptEngine '{}'", engineIdentifier, e);
+                        }
                     }
                 }, 0, TimeUnit.SECONDS);
             } else {
@@ -288,6 +294,28 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         } catch (Exception ex) {
             logger.error("Error removing ScriptEngine '{}'", engineIdentifier, ex);
         }
+    }
+
+    private static boolean isContextExecutionCancelled(Throwable throwable) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Throwable cause = throwable;
+        while (cause != null && visited.add(cause)) {
+            if ("org.graalvm.polyglot.PolyglotException".equals(cause.getClass().getName())
+                    && "Context execution was cancelled.".equals(cause.getMessage())) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    private static Throwable getInnermostCause(Throwable throwable) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Throwable cause = throwable;
+        while (cause.getCause() != null && visited.add(cause)) {
+            cause = cause.getCause();
+        }
+        return cause;
     }
 
     /**

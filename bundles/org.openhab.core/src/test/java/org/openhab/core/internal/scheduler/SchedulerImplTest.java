@@ -125,6 +125,22 @@ public class SchedulerImplTest extends JavaTest {
 
     @Test
     @Timeout(value = 15, unit = TimeUnit.SECONDS)
+    public void testAfterWithCyclicExceptionCause() throws InterruptedException {
+        RuntimeException first = new RuntimeException("first");
+        RuntimeException second = new RuntimeException("second");
+        first.initCause(second);
+        second.initCause(first);
+
+        ScheduledCompletableFuture<Void> after = scheduler.after(() -> {
+            throw first;
+        }, Duration.ofMillis(100));
+
+        ExecutionException exception = assertThrows(ExecutionException.class, () -> after.get());
+        assertSame(first, exception.getCause());
+    }
+
+    @Test
+    @Timeout(value = 15, unit = TimeUnit.SECONDS)
     public void testBeforeTimeoutException() throws InterruptedException, ExecutionException {
         CompletableFuture<Integer> d = new CompletableFuture<>();
         ScheduledCompletableFuture<Integer> before = scheduler.before(d, Duration.ofMillis(100));
