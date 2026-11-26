@@ -14,11 +14,14 @@ package org.openhab.core.auth.oauth2client.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -27,7 +30,10 @@ import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.io.Content;
+import org.eclipse.jetty.util.BufferUtil;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
@@ -133,5 +139,33 @@ class OAuthConnectorTest {
                 .grantTypeClientCredentials("http://token.example.com", "clientId", "clientSecret", null, false));
 
         assertEquals("invalid_client", exception.getError());
+    }
+
+    /**
+     * The token request body must be sent as plain {@code application/x-www-form-urlencoded} without a charset
+     * parameter, as with Jetty 9; strict token endpoints may reject the parameter.
+     */
+    @Test
+    void testTokenRequestContentTypeHasNoCharsetParameter() throws Exception {
+        HttpClientFactory httpClientFactory = mock(HttpClientFactory.class);
+        HttpClient httpClient = mock(HttpClient.class);
+        Request request = mock(Request.class, Mockito.RETURNS_SELF);
+        ContentResponse contentResponse = mock(ContentResponse.class);
+        setupHttpMocks(httpClientFactory, httpClient, request, contentResponse, HttpStatus.OK_200,
+                "{\"access_token\":\"token\",\"token_type\":\"Bearer\"}");
+
+        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+        connector.grantTypePassword("http://token.example.com", "user", "pä&ss", "clientId", "clientSecret", null,
+                true);
+
+        ArgumentCaptor<Request.Content> content = ArgumentCaptor.forClass(Request.Content.class);
+        verify(request).body(content.capture());
+        assertEquals("application/x-www-form-urlencoded", content.getValue().getContentType());
+
+        Content.Chunk chunk = content.getValue().read();
+        String body = BufferUtil.toString(chunk.getByteBuffer(), StandardCharsets.UTF_8);
+        chunk.release();
+        assertTrue(body.contains("grant_type=password"), body);
+        assertTrue(body.contains("password=p%C3%A4%26ss"), body);
     }
 }
