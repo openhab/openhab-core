@@ -90,8 +90,13 @@ public class SchedulerImpl implements Scheduler {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                logger.warn("Scheduled job '{}' failed and stopped",
-                        Objects.requireNonNullElse(deferred.identifier, "<unknown>"), e);
+                if (isContextExecutionCancelled(e)) {
+                    logger.debug("Scheduled job '{}' was cancelled",
+                            Objects.requireNonNullElse(deferred.identifier, "<unknown>"));
+                } else {
+                    logger.warn("Scheduled job '{}' failed and stopped",
+                            Objects.requireNonNullElse(deferred.identifier, "<unknown>"), e);
+                }
                 deferred.completeExceptionally(e);
             }
         }, duration, TimeUnit.MILLISECONDS);
@@ -106,6 +111,18 @@ public class SchedulerImpl implements Scheduler {
             return null;
         });
         return deferred;
+    }
+
+    private static boolean isContextExecutionCancelled(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            if ("org.graalvm.polyglot.PolyglotException".equals(cause.getClass().getName())
+                    && "Context execution was cancelled.".equals(cause.getMessage())) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     @Override

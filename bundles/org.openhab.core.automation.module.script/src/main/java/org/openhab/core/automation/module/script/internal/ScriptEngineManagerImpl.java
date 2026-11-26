@@ -253,6 +253,9 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                         // Ignore ISE thrown by Graal languages if underlying org.graalvm.polyglot.Engine is closed
                         logger.debug("ScriptEngine '{}' already closed when attempting to execute scriptUnloaded()",
                                 engineIdentifier);
+                    } else if (isContextExecutionCancelled(e)) {
+                        logger.debug("ScriptEngine '{}' context was cancelled when attempting to execute "
+                                + "scriptUnloaded()", engineIdentifier);
                     } else {
                         // Do NOT rethrow, we always want to close the engine and remove script extensions.
                         logger.warn(
@@ -271,7 +274,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     try {
                         closeable.close();
                     } catch (Exception e) {
-                        logger.error("Error closing ScriptEngine '{}'", engineIdentifier, e);
+                        if (isContextExecutionCancelled(e)) {
+                            logger.debug("ScriptEngine '{}' context was cancelled when closing", engineIdentifier);
+                        } else {
+                            logger.error("Error closing ScriptEngine '{}'", engineIdentifier, e);
+                        }
                     }
                 }, 0, TimeUnit.SECONDS);
             } else {
@@ -288,6 +295,18 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         } catch (Exception ex) {
             logger.error("Error removing ScriptEngine '{}'", engineIdentifier, ex);
         }
+    }
+
+    private static boolean isContextExecutionCancelled(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            if ("org.graalvm.polyglot.PolyglotException".equals(cause.getClass().getName())
+                    && "Context execution was cancelled.".equals(cause.getMessage())) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     /**
