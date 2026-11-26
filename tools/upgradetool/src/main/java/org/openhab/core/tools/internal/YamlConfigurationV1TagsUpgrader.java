@@ -19,12 +19,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.tools.Upgrader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.nodes.Tag;
 import org.snakeyaml.engine.v2.resolver.ScalarResolver;
 import org.snakeyaml.engine.v2.schema.CoreSchema;
@@ -41,7 +43,6 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
@@ -81,7 +82,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
         // match the options used in {@link YamlModelRepositoryImpl}, except that empty values are read as null (as this
         // upgrader always did), so that e.g. an empty "synonyms:" is not written back as an empty String
         objectMapper = YAMLMapper
-                .builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE)
+                .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings())
                         .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build()) //
                 .configureForJackson2() //
                 .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
@@ -210,6 +211,27 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
             logger.info("{} converted to map format, and the original file saved as {}", filePath, backupPath);
         } catch (IOException e) {
             logger.error("Failed to save YAML file {}: {}", filePath, e.getMessage());
+        }
+    }
+
+    /**
+     * The YAML 1.2 core schema, but plain scalars with a leading zero and a digit 8 or 9 (e.g. {@code 09}) are read as
+     * Strings, as YAML 1.1 did; the core schema resolves them as integers, which Jackson fails to parse as octal. Same
+     * as {@code LeadingZeroStringCoreSchema} of the YAML model.
+     */
+    private static class LeadingZeroStringCoreSchema extends CoreSchema {
+        private static final Pattern LEADING_ZERO_NON_OCTAL = Pattern.compile("[-+]?0[0-9]*[89][0-9]*");
+
+        static LoadSettings loadSettings() {
+            return LoadSettings.builder().setSchema(new LeadingZeroStringCoreSchema()).build();
+        }
+
+        @Override
+        public ScalarResolver getScalarResolver() {
+            ScalarResolver coreResolver = super.getScalarResolver();
+            return (value, implicit) -> Boolean.TRUE.equals(implicit) && LEADING_ZERO_NON_OCTAL.matcher(value).matches()
+                    ? Tag.STR
+                    : coreResolver.resolve(value, implicit);
         }
     }
 

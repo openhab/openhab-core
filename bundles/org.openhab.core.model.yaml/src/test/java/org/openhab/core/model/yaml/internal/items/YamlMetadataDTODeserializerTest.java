@@ -21,12 +21,12 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.openhab.core.model.yaml.internal.util.LeadingZeroStringCoreSchema;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * Tests for {@link YamlMetadataDTODeserializer}.
@@ -35,7 +35,8 @@ import tools.jackson.dataformat.yaml.YAMLSchema;
  */
 class YamlMetadataDTODeserializerTest {
 
-    private final ObjectMapper mapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build())
+    private final ObjectMapper mapper = YAMLMapper
+            .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
             .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
 
     @ParameterizedTest

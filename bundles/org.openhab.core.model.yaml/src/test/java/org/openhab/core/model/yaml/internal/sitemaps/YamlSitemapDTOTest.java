@@ -22,12 +22,12 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.dto.SerializationException;
+import org.openhab.core.model.yaml.internal.util.LeadingZeroStringCoreSchema;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * The {@link YamlSitemapDTOTest} contains tests for the {@link YamlSitemapDTO} class.
@@ -164,7 +164,8 @@ public class YamlSitemapDTOTest {
         assertEquals(sitemap1.hashCode(), sitemap2.hashCode());
     }
 
-    private final ObjectMapper mapper = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build())
+    private final ObjectMapper mapper = YAMLMapper
+            .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
             .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
 
     private YamlWidgetDTO parseWidget(String widgetYaml) throws IOException, SerializationException {

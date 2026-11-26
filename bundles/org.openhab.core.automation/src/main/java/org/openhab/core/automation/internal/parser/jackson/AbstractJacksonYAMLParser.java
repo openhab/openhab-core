@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * Abstract class that can be used by YAML parsers for the different entity types.
@@ -43,7 +42,8 @@ public abstract class AbstractJacksonYAMLParser<T> implements Parser<T> {
     static {
         // the core schema (instead of the JSON schema Jackson 3 uses by default) and the Jackson 2 mapper defaults keep
         // the Jackson 2 interpretation of plain scalars, except YAML 1.1 only ones like yes/no/on/off
-        YAML_MAPPER = YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build())
+        YAML_MAPPER = YAMLMapper
+                .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
                 .configureForJackson2().addMixIn(RuleTemplate.class, RuleTemplateMixin.class).findAndAddModules()
                 .build();
     }

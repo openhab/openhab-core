@@ -22,7 +22,6 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * A generic utility class.
@@ -44,8 +43,9 @@ public class Utils {
      * @return a pre-configured {@link YAMLMapper.Builder}
      */
     public static YAMLMapper.Builder yamlMapperBuilder() {
-        return YAMLMapper.builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build()).configureForJackson2()
-                .findAndAddModules();
+        return YAMLMapper
+                .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
+                .configureForJackson2().findAndAddModules();
     }
 
     /**

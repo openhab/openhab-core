@@ -26,7 +26,6 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
@@ -39,7 +38,7 @@ import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 public class CoreSchemaStringQuotingCheckerTest {
 
     private final ObjectMapper mapper = YAMLMapper
-            .builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE)
+            .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings())
                     .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build())
             .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL)
             .enable(YAMLWriteFeature.MINIMIZE_QUOTES).enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS).build();

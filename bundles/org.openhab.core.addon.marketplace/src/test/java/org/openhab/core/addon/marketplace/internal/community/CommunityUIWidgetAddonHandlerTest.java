@@ -57,6 +57,7 @@ public class CommunityUIWidgetAddonHandlerTest {
             component: f7-card
             config:
               title: =props.title
+              zip: 09123
             """;
 
     private @Mock @NonNullByDefault({}) UIComponentRegistryFactory registryFactory;
@@ -85,6 +86,7 @@ public class CommunityUIWidgetAddonHandlerTest {
         assertThat(widget.getType(), is("f7-card"));
         assertThat(widget.getTags(), containsInAnyOrder("tag1", ADDON_UID));
         assertThat(widget.getConfig(), hasEntry("title", "=props.title"));
+        assertThat(widget.getConfig(), hasEntry("zip", "09123"));
         assertThat(widget.getProps().parameters, hasSize(1));
 
         Calendar timestamp = Calendar.getInstance();

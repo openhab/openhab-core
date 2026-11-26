@@ -54,6 +54,7 @@ import org.openhab.core.model.yaml.internal.uicomponents.YamlBlocksDTO;
 import org.openhab.core.model.yaml.internal.uicomponents.YamlPageDTO;
 import org.openhab.core.model.yaml.internal.uicomponents.YamlWidgetDTO;
 import org.openhab.core.model.yaml.internal.util.CoreSchemaStringQuotingChecker;
+import org.openhab.core.model.yaml.internal.util.LeadingZeroStringCoreSchema;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
@@ -81,7 +82,6 @@ import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
-import tools.jackson.dataformat.yaml.YAMLSchema;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
@@ -148,7 +148,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         // configureForJackson2() keeps the Jackson 2 defaults the YAML model relies on, e.g. properties are written
         // in declaration order and unknown properties are reported as errors.
         this.objectMapper = YAMLMapper
-                .builder(YAMLFactory.builder().yamlSchema(YAMLSchema.CORE)
+                .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings())
                         .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build()) //
                 .configureForJackson2() //
                 .disable(YAMLReadFeature.EMPTY_STRING_AS_NULL) //

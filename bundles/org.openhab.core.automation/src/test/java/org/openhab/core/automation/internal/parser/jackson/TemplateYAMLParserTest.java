@@ -15,7 +15,9 @@ package org.openhab.core.automation.internal.parser.jackson;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.Template;
@@ -49,5 +52,29 @@ public class TemplateYAMLParserTest {
         assertThat(yaml, startsWith("---\nuid: \"basic:yaml-rule-template\"\n"));
         assertThat(yaml, not(containsString("UID")));
         assertThat(yaml, containsString("label: \"Label\"\n"));
+    }
+
+    @Test
+    public void parseKeepsLeadingZeroValuesAsStrings() throws Exception {
+        String yaml = """
+                uid: basic:yaml-rule-template
+                label: Label
+                triggers:
+                  - id: "1"
+                    type: core.GenericCronTrigger
+                    configuration:
+                      cronExpression: 0 0 * * * ?
+                      code: 09
+                """;
+
+        Set<Template> templates;
+        try (InputStreamReader reader = new InputStreamReader(
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)) {
+            templates = new TemplateYAMLParser().parse(reader);
+        }
+
+        RuleTemplate template = (RuleTemplate) templates.iterator().next();
+        Trigger trigger = template.getTriggers().getFirst();
+        assertThat(trigger.getConfiguration().get("code"), is("09"));
     }
 }
