@@ -18,9 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.openhab.core.model.yaml.internal.util.LeadingZeroStringCoreSchema;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
 
 /**
  * Tests for {@link YamlMetadataDTOSerializer}.
@@ -28,7 +31,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  * @author Jimmy Tanagra - Initial contribution
  */
 class YamlMetadataDTOSerializerTest {
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = YAMLMapper
+            .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
+            .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
 
     @Test
     void testSerializeScalarWhenConfigEmpty() throws Exception {

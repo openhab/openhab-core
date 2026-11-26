@@ -91,20 +91,19 @@
 		<bundle>mvn:org.eclipse.jetty.ee10/jetty-ee10-proxy/${jetty.version}</bundle>
 	</feature>
 
-	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
+	<feature name="openhab.tp-jackson" description="Jackson 3 bundles" version="${project.version}">
 		<capability>openhab.tp;feature=jackson;version=${jackson.version}</capability>
+		<!-- Jackson 3 keeps using the 2.x annotations (com.fasterxml.jackson.annotation) -->
 		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jdk8/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/${jackson.version}</bundle>
+		<bundle dependency="true">mvn:tools.jackson.core/jackson-core/${jackson.version}</bundle>
+		<bundle dependency="true">mvn:tools.jackson.core/jackson-databind/${jackson.version}</bundle>
+		<bundle dependency="true">mvn:tools.jackson.dataformat/jackson-dataformat-cbor/${jackson.version}</bundle>
+		<bundle dependency="true">mvn:tools.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
+		<bundle dependency="true">mvn:tools.jackson.dataformat/jackson-dataformat-yaml/${jackson.version}</bundle>
 		<!-- Transitive dependency of jackson-dataformat-xml -->
 		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.3.1</bundle>
 		<!-- Transitive dependency of jackson-dataformat-yaml -->
-		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.5</bundle>
+		<bundle dependency="true">mvn:org.snakeyaml/snakeyaml-engine/3.0.1</bundle>
 	</feature>
 
 	<!-- The Eclipse Jakarta REST Whiteboard, backed by Jersey, implements the OSGi Jakarta RESTful Web Services
@@ -191,13 +190,6 @@
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
 		<capability>openhab.tp;feature=jaxb;version=4.0.9</capability>
-		<!-- swagger-core-jakarta has a mandatory import of jakarta.xml.bind.annotation [3.0,4), so the JAXB 3.0
-			API is installed next to 4.0 and cannot simply be dropped. Having both is safe: the openHAB bundles
-			with JAXB annotated classes import [4.0,5) and can only wire to 4.0, and swagger uses the annotations
-			only in ModelResolver/JAXBAnnotationsHelper, via instanceof, to fill the xml section of an OpenAPI
-			schema. Annotations of the other version are therefore not recognized instead of failing, and no
-			openHAB REST DTO carries JAXB annotations to begin with. Remove once swagger moves to JAXB 4.0. -->
-		<bundle start-level="10" dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.0</bundle>
 		<!-- JAXB 4.0 API + implementation (aligned with Karaf 4.5) -->
 		<bundle start-level="10">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.5</bundle>
 		<bundle start-level="15" dependency="true">mvn:com.sun.istack/istack-commons-runtime/4.1.2</bundle>
@@ -215,12 +207,13 @@
 	</feature>
 
 	<feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
-		<capability>openhab.tp;feature=jollyday;version=1.9.3</capability>
+		<capability>openhab.tp;feature=jollyday;version=2.24.0</capability>
 		<feature dependency="true">openhab.tp-jackson</feature>
 		<feature dependency="true">spifly</feature>
-		<bundle>mvn:org.threeten/threeten-extra/1.8.0</bundle>
-		<bundle>mvn:de.focus-shift/jollyday-core/1.9.3</bundle>
-		<bundle>mvn:de.focus-shift/jollyday-jackson/1.9.3</bundle>
+		<bundle>mvn:org.jspecify/jspecify/1.0.1</bundle>
+		<bundle>mvn:org.threeten/threeten-extra/1.11.0</bundle>
+		<bundle>mvn:de.focus-shift/jollyday-core/2.24.0</bundle>
+		<bundle>mvn:de.focus-shift/jollyday-jackson/2.24.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
@@ -322,11 +315,11 @@
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
 		<feature dependency="true">openhab.tp-jaxb</feature>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations-jakarta/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core-jakarta/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration-jakarta/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2-jakarta/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models-jakarta/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-rest/${swagger.version}</bundle>
 	</feature>
 
 </features>

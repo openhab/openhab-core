@@ -27,8 +27,8 @@ import org.openhab.core.automation.parser.ParsingNestedException;
 import org.openhab.core.automation.template.Template;
 import org.osgi.service.component.annotations.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 /**
  * This class can parse and serialize sets of {@link Template}s.

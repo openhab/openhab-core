@@ -27,7 +27,7 @@ import org.openhab.core.model.yaml.internal.util.FlexibleDateDeserializer;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponent;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * The {@link AbstractYamlRootUIComponentDTO} is a data transfer object used to serialize UI components in a YAML

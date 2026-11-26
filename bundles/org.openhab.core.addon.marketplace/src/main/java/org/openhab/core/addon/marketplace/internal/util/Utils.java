@@ -12,14 +12,16 @@
  */
 package org.openhab.core.addon.marketplace.internal.util;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * A generic utility class.
@@ -31,6 +33,19 @@ public class Utils {
 
     private Utils() {
         // Not to be instantiated
+    }
+
+    /**
+     * Creates a {@link YAMLMapper.Builder} that parses YAML close to Jackson 2: the YAML 1.2 core schema (instead of
+     * the JSON schema Jackson 3 uses by default), together with the Jackson 2 mapper defaults. YAML 1.1 only scalars
+     * like yes/no/on/off are read as strings.
+     *
+     * @return a pre-configured {@link YAMLMapper.Builder}
+     */
+    public static YAMLMapper.Builder yamlMapperBuilder() {
+        return YAMLMapper
+                .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
+                .configureForJackson2().findAndAddModules();
     }
 
     /**
@@ -52,7 +67,7 @@ public class Utils {
                 return "version".equals(entry.getKey());
             }
             return false;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return false;
         }
     }

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal.util;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +19,12 @@ import java.util.Map;
 import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParameterDTO;
 import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParameterDTO.YamlConfigDescriptionParameterListEntryDTO;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * A Jackson deserializer for a collection of configuration description parameters that can be specified in either
@@ -44,16 +43,14 @@ public class ConfigDescriptionParametersDeserializer
 
     @Override
     public Map<String, YamlConfigDescriptionParameterDTO> deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
-        ObjectMapper mapper = (ObjectMapper) p.getCodec();
-
+            throws JacksonException {
         if (p.hasToken(JsonToken.START_ARRAY)) {
             return convertArrayToStandardDTO(
-                    mapper.readValue(p, new TypeReference<List<YamlConfigDescriptionParameterListEntryDTO>>() {
+                    ctxt.readValue(p, new TypeReference<List<YamlConfigDescriptionParameterListEntryDTO>>() {
                     }));
         }
 
-        return mapper.readValue(p, new TypeReference<Map<String, YamlConfigDescriptionParameterDTO>>() {
+        return ctxt.readValue(p, new TypeReference<Map<String, YamlConfigDescriptionParameterDTO>>() {
         });
     }
 

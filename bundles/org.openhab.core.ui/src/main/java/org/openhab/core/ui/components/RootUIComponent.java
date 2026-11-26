@@ -25,6 +25,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -36,6 +38,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @NonNullByDefault
 public class RootUIComponent extends UIComponent implements Identifiable<String> {
+    // Jackson 3 derives the property name "UID" from getUID(), Jackson 2 derived "uid". Name both explicitly, so that
+    // the legacy marketplace YAML format and the OpenAPI schema keep using "uid", like the Gson serialized DTO.
+    @JsonProperty("uid")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     String uid;
 
@@ -79,6 +84,7 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
     }
 
     @Override
+    @JsonProperty("uid")
     public String getUID() {
         return uid;
     }

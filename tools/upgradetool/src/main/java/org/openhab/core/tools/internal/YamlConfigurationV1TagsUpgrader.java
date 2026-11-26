@@ -13,29 +13,38 @@
 package org.openhab.core.tools.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.tools.Upgrader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.nodes.Tag;
+import org.snakeyaml.engine.v2.resolver.ScalarResolver;
+import org.snakeyaml.engine.v2.schema.CoreSchema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
+import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 /**
  * The {@link YamlConfigurationV1TagsUpgrader} upgrades YAML Tags Configuration from List to Map.
@@ -70,22 +79,25 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
     private final ObjectMapper objectMapper;
 
     public YamlConfigurationV1TagsUpgrader() {
-        // match the options used in {@link YamlModelRepositoryImpl}
-        objectMapper = YAMLMapper.builder() //
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
-                .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
-                .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
-                                                                               // strings
-                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as booleans
+        // match the options used in {@link YamlModelRepositoryImpl}, except that empty values are read as null (as this
+        // upgrader always did), so that e.g. an empty "synonyms:" is not written back as an empty String
+        objectMapper = YAMLMapper
+                .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings())
+                        .stringQuotingChecker(new CoreSchemaStringQuotingChecker()).build()) //
+                .configureForJackson2() //
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+                .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
+                .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as strings
+                .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) //
                 .findAndAddModules() //
-                .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE) //
-                .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY) //
+                .changeDefaultVisibility(
+                        visibility -> visibility.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                                .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
                 // Correct compatible behavior with {@link YamlModelRepositoryImpl} for jackson > 2.8, don't use
                 // Include.ALWAYS as second argument (which would have been the behavior earlier)
-                .defaultPropertyInclusion(Value.construct(Include.NON_NULL, Include.NON_NULL)) //
-                .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN) //
+                .changeDefaultPropertyInclusion(inclusion -> Value.construct(Include.NON_NULL, Include.NON_NULL)) //
                 .build();
     }
 
@@ -167,7 +179,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                     ObjectNode tagsMap = objectMapper.createObjectNode();
                     for (JsonNode tag : node) {
                         if (tag.hasNonNull("uid")) {
-                            String uid = tag.get("uid").asText();
+                            String uid = tag.get("uid").asString("");
                             ((ObjectNode) tag).remove("uid");
                             tagsMap.set(uid, tag);
                         } else {
@@ -180,7 +192,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
             String output = objectMapper.writeValueAsString(fileContent);
             saveFile(filePath, output);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error("Failed to read YAML file {}: {}", filePath, e.getMessage());
             return;
         }
@@ -199,6 +211,45 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
             logger.info("{} converted to map format, and the original file saved as {}", filePath, backupPath);
         } catch (IOException e) {
             logger.error("Failed to save YAML file {}: {}", filePath, e.getMessage());
+        }
+    }
+
+    /**
+     * The YAML 1.2 core schema, but plain scalars with a leading zero and a digit 8 or 9 (e.g. {@code 09}) are read as
+     * Strings, as YAML 1.1 did; the core schema resolves them as integers, which Jackson fails to parse as octal. Same
+     * as {@code LeadingZeroStringCoreSchema} of the YAML model.
+     */
+    private static class LeadingZeroStringCoreSchema extends CoreSchema {
+        private static final Pattern LEADING_ZERO_NON_OCTAL = Pattern.compile("[-+]?0[0-9]*[89][0-9]*");
+
+        static LoadSettings loadSettings() {
+            return LoadSettings.builder().setSchema(new LeadingZeroStringCoreSchema()).build();
+        }
+
+        @Override
+        public ScalarResolver getScalarResolver() {
+            ScalarResolver coreResolver = super.getScalarResolver();
+            return (value, implicit) -> Boolean.TRUE.equals(implicit) && LEADING_ZERO_NON_OCTAL.matcher(value).matches()
+                    ? Tag.STR
+                    : coreResolver.resolve(value, implicit);
+        }
+    }
+
+    /**
+     * Also quotes String values the YAML 1.2 core schema would read as another type (e.g. {@code 0x1F}), like
+     * {@code CoreSchemaStringQuotingChecker} of the YAML model.
+     */
+    private static class CoreSchemaStringQuotingChecker extends StringQuotingChecker.Default {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private static final ScalarResolver CORE_SCHEMA_RESOLVER = new CoreSchema().getScalarResolver();
+
+        @Override
+        public boolean needToQuoteValue(@NonNullByDefault({}) String value) {
+            // blank values are always quoted by the emitter itself, so keep its choice of quote style
+            return super.needToQuoteValue(value)
+                    || (!value.isBlank() && !Tag.STR.equals(CORE_SCHEMA_RESOLVER.resolve(value, true)));
         }
     }
 }

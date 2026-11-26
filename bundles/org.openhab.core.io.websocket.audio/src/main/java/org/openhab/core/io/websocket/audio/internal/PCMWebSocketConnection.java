@@ -37,9 +37,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The {@link PCMWebSocketConnection} represents a WebSocket connection used to transmit PCM audio.
@@ -73,7 +74,7 @@ public class PCMWebSocketConnection {
     private boolean initialized = false;
     private @Nullable Runnable dialogTrigger = null;
 
-    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private final ObjectMapper jsonMapper = JsonMapper.builder().configureForJackson2().build();
     private String id = "";
     private @Nullable PCMWebSocketAudioSource audioSource = null;
 
@@ -128,9 +129,9 @@ public class PCMWebSocketConnection {
         var session = getSession();
         if (session != null) {
             try {
-                session.sendText(new ObjectMapper().writeValueAsString(msg), Callback.NOOP);
-            } catch (JsonProcessingException e) {
-                logger.warn("JsonProcessingException writing JSON message", e);
+                session.sendText(jsonMapper.writeValueAsString(msg), Callback.NOOP);
+            } catch (JacksonException e) {
+                logger.warn("JacksonException writing JSON message", e);
             }
         }
     }
@@ -163,7 +164,7 @@ public class PCMWebSocketConnection {
         try {
             JsonNode rootMessageNode = jsonMapper.readTree(message);
             if (rootMessageNode.has("cmd")) {
-                String cmd = rootMessageNode.get("cmd").asText().trim().toUpperCase();
+                String cmd = rootMessageNode.get("cmd").asString().trim().toUpperCase();
                 try {
                     logger.debug("Handling msg '{}'", cmd);
                     var messageType = WebSocketCommand.InputCommands.valueOf(cmd);
@@ -183,13 +184,13 @@ public class PCMWebSocketConnection {
                         }
                         case ON_SPOT -> onRemoteSpot();
                     }
-                } catch (IOException | IllegalStateException e) {
-                    logger.warn("Error handing command '{}' with message: {}. Disconnecting client", cmd,
+                } catch (JacksonException | IOException | IllegalStateException e) {
+                    logger.warn("Error handling command '{}' with message: {}. Disconnecting client", cmd,
                             e.getMessage());
                     disconnect();
                 }
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.warn("Exception parsing JSON message.", e);
             logger.warn("Disconnecting client.");
             disconnect();

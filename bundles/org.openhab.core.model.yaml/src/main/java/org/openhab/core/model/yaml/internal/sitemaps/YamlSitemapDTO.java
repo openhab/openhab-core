@@ -26,10 +26,11 @@ import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The {@link YamlSitemapDTO} is a data transfer object used to serialize a UI sitemap in a YAML configuration file.
@@ -144,7 +145,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                 }
                 result.widgets = widgets;
             }
-        } catch (JsonProcessingException | IllegalArgumentException e) {
+        } catch (JacksonException | IllegalArgumentException e) {
             throw new SerializationException(e.getMessage(), e);
         }
         return result;
@@ -181,7 +182,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
 
         if (partial.label != null) {
             if (partial.label.isValueNode()) {
-                String label = partial.label.asText();
+                String label = partial.label.asString();
                 String format = null;
                 if (label != null) {
                     int idx = label.indexOf("[");
@@ -201,7 +202,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                 widgetLabel.format = toStringDto(objectNode, "format");
                 if ((objNode = getField(objectNode, "labelColor", "labelcolor")) != null) {
                     if (objNode.isValueNode()) {
-                        widgetLabel.labelColor = objNode.asText();
+                        widgetLabel.labelColor = objNode.asString();
                     } else if (objNode.isArray()) {
                         widgetLabel.labelColor = toRulesDto(objNode);
                     } else {
@@ -210,7 +211,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                 }
                 if ((objNode = getField(objectNode, "valueColor", "valuecolor")) != null) {
                     if (objNode.isValueNode()) {
-                        widgetLabel.valueColor = objNode.asText();
+                        widgetLabel.valueColor = objNode.asString();
                     } else if (objNode.isArray()) {
                         widgetLabel.valueColor = toRulesDto(objNode);
                     } else {
@@ -224,13 +225,13 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         if (partial.icon != null) {
             if (partial.icon.isValueNode()) {
                 YamlWidgetIconDTO widgetIcon = new YamlWidgetIconDTO();
-                widgetIcon.name = partial.icon.asText();
+                widgetIcon.name = partial.icon.asString();
                 result.icon = widgetIcon;
             } else if (partial.icon instanceof ObjectNode objectNode) {
                 YamlWidgetIconDTO widgetIcon = new YamlWidgetIconDTO();
                 if ((objNode = objectNode.get("name")) != null) {
                     if (objNode.isValueNode()) {
-                        widgetIcon.name = objNode.asText();
+                        widgetIcon.name = objNode.asString();
                     } else if (objNode.isArray()) {
                         widgetIcon.name = toRulesDto(objNode);
                     } else {
@@ -242,7 +243,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                 }
                 if ((objNode = getField(objectNode, "color", "iconcolor")) != null) {
                     if (objNode.isValueNode()) {
-                        widgetIcon.color = objNode.asText();
+                        widgetIcon.color = objNode.asString();
                     } else if (objNode.isArray()) {
                         widgetIcon.color = toRulesDto(objNode);
                     } else {
@@ -254,7 +255,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         }
 
         if (partial.visibility != null) {
-            if (!partial.visibility.isContainerNode()) {
+            if (!partial.visibility.isContainer()) {
                 throw new SerializationException("Expected \"visibility\" to be a container node");
             }
             if (partial.visibility.isArray()) {
@@ -287,7 +288,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
 
     private @NonNull List<Object> toRulesDto(@NonNull JsonNode rulesNodes) throws SerializationException {
         List<Object> rules = new ArrayList<>(rulesNodes.size());
-        for (Iterator<JsonNode> iterator = rulesNodes.elements(); iterator.hasNext();) {
+        for (Iterator<JsonNode> iterator = rulesNodes.values().iterator(); iterator.hasNext();) {
             rules.add(toRuleDto(iterator.next()));
         }
         return rules;
@@ -295,8 +296,8 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
 
     private @NonNull Object toRuleDto(@NonNull JsonNode ruleNode) throws SerializationException {
         JsonNode conditionsNode, conditionNode;
-        if (ruleNode.isTextual()) {
-            return ruleNode.asText();
+        if (ruleNode.isString()) {
+            return ruleNode.asString();
         }
         if (!ruleNode.isObject()) {
             throw new SerializationException("Expected rule to be an object node");
@@ -307,7 +308,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
             }
             YamlRuleWithAndConditionsDTO rule = new YamlRuleWithAndConditionsDTO();
             List<YamlConditionDTO> conditions = new ArrayList<>(conditionsNode.size());
-            for (Iterator<JsonNode> iterator2 = conditionsNode.elements(); iterator2.hasNext();) {
+            for (Iterator<JsonNode> iterator2 = conditionsNode.values().iterator(); iterator2.hasNext();) {
                 conditionNode = iterator2.next();
                 if (!conditionNode.isObject()) {
                     throw new SerializationException("Expected condition to be an object node");
@@ -346,7 +347,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         JsonNode valueNode;
         if ((valueNode = objectNode.get(field)) != null) {
             if (valueNode.isValueNode()) {
-                return valueNode.asText();
+                return valueNode.asString();
             } else {
                 throw new SerializationException("Expected \"" + field + "\" to be a value node");
             }

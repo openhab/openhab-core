@@ -22,10 +22,12 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.dto.SerializationException;
+import org.openhab.core.model.yaml.internal.util.LeadingZeroStringCoreSchema;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
 
 /**
  * The {@link YamlSitemapDTOTest} contains tests for the {@link YamlSitemapDTO} class.
@@ -162,8 +164,9 @@ public class YamlSitemapDTOTest {
         assertEquals(sitemap1.hashCode(), sitemap2.hashCode());
     }
 
-    private final ObjectMapper mapper = new ObjectMapper(
-            YAMLFactory.builder().enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build());
+    private final ObjectMapper mapper = YAMLMapper
+            .builder(YAMLFactory.builder().loadSettings(LeadingZeroStringCoreSchema.loadSettings()).build())
+            .configureForJackson2().disable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
 
     private YamlWidgetDTO parseWidget(String widgetYaml) throws IOException, SerializationException {
         String yaml = "name: demo\nwidgets:\n" + widgetYaml.indent(2);
