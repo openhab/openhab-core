@@ -25,6 +25,7 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionProvider;
 import org.openhab.core.types.CommandOption;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * A {@link CommandDescription} provider from items' metadata
  *
  * @author Yannick Schaus - initial contribution
+ * @author Cody Cutrer - Metadata command description precedence
  *
  */
 @NonNullByDefault
@@ -47,10 +49,15 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
 
     private MetadataRegistry metadataRegistry;
 
+    private final Integer rank;
+
     @Activate
     public MetadataCommandDescriptionProvider(final @Reference MetadataRegistry metadataRegistry,
             Map<String, Object> properties) {
         this.metadataRegistry = metadataRegistry;
+        Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
+        // Item metadata takes precedence over providers using the default rank of zero.
+        rank = serviceRanking instanceof Integer rankValue ? rankValue : 1;
     }
 
     @Override
@@ -80,6 +87,11 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
         }
 
         return null;
+    }
+
+    @Override
+    public Integer getRank() {
+        return rank;
     }
 
     public static String[] parseValueLabelPair(String text) {

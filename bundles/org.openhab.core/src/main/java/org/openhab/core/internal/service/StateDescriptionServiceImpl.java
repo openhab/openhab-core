@@ -12,11 +12,10 @@
  */
 package org.openhab.core.internal.service;
 
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,19 +34,13 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * that returns a single {@link StateDescription} using all of the providers.
  *
  * @author Lyubomir Papazov - Initial contribution
+ * @author Cody Cutrer - Preserve equal-ranked providers
  */
 @NonNullByDefault
 @Component
 public class StateDescriptionServiceImpl implements StateDescriptionService {
 
-    private final Set<StateDescriptionFragmentProvider> stateDescriptionFragmentProviders = Collections
-            .synchronizedSet(new TreeSet<>(new Comparator<>() {
-                @Override
-                public int compare(StateDescriptionFragmentProvider provider1,
-                        StateDescriptionFragmentProvider provider2) {
-                    return provider2.getRank().compareTo(provider1.getRank());
-                }
-            }));
+    private final List<StateDescriptionFragmentProvider> stateDescriptionFragmentProviders = new CopyOnWriteArrayList<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addStateDescriptionFragmentProvider(StateDescriptionFragmentProvider provider) {
@@ -67,19 +60,18 @@ public class StateDescriptionServiceImpl implements StateDescriptionService {
     private @Nullable StateDescriptionFragment getMergedStateDescriptionFragments(String itemName,
             @Nullable Locale locale) {
         StateDescriptionFragmentImpl result = null;
-        for (StateDescriptionFragmentProvider provider : stateDescriptionFragmentProviders) {
+        for (StateDescriptionFragmentProvider provider : stateDescriptionFragmentProviders.stream()
+                .sorted(Comparator.comparing(StateDescriptionFragmentProvider::getRank).reversed()).toList()) {
             StateDescriptionFragment fragment = provider.getStateDescriptionFragment(itemName, locale);
             if (fragment == null) {
                 continue;
             }
 
-            // we pick up the first valid StateDescriptionFragment here:
             if (result == null) {
-                // create a deep copy of the first found fragment before merging other fragments into it
-                result = new StateDescriptionFragmentImpl((StateDescriptionFragmentImpl) fragment);
-            } else {
-                result.merge(fragment);
+                // Merge into a separate accumulator to preserve provider-owned fragments.
+                result = new StateDescriptionFragmentImpl();
             }
+            result.merge(fragment);
         }
         return result;
     }

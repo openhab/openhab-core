@@ -14,6 +14,7 @@ package org.openhab.core.internal.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,7 @@ import org.openhab.core.types.StateOption;
  * Tests for the {@link StateDescriptionServiceImpl}.
  *
  * @author Lyubomir Papazov - Initial contribution
+ * @author Cody Cutrer - Provider ranking regression tests
  */
 @NonNullByDefault
 public class StateDescriptionServiceImplTest {
@@ -226,12 +228,77 @@ public class StateDescriptionServiceImplTest {
         assertThat(fragment1Options.size(), is(0));
     }
 
-    private void registerStateDescriptionFragmentProvider(StateDescriptionFragment stateDescriptionFragment,
-            int serviceRanking) {
+    @Test
+    public void equalRanksPreserveRegistrationOrderAndMergeAllProviders() {
+        StateDescriptionFragment first = StateDescriptionFragmentBuilder.create().withPattern("first").build();
+        StateDescriptionFragment second = StateDescriptionFragmentBuilder.create().withPattern("second")
+                .withMinimum(BigDecimal.ONE).build();
+        registerStateDescriptionFragmentProvider(first, 0);
+        registerStateDescriptionFragmentProvider(second, 0);
+
+        StateDescription description = Objects.requireNonNull(item.getStateDescription());
+        assertEquals("first", description.getPattern());
+        assertEquals(BigDecimal.ONE, description.getMinimum());
+    }
+
+    @Test
+    public void removingEqualRankedProviderRetainsOtherProvider() {
+        StateDescriptionFragment first = StateDescriptionFragmentBuilder.create().withPattern("first").build();
+        StateDescriptionFragment second = StateDescriptionFragmentBuilder.create().withPattern("second").build();
+        StateDescriptionFragmentProvider firstProvider = registerStateDescriptionFragmentProvider(first, 0);
+        StateDescriptionFragmentProvider secondProvider = registerStateDescriptionFragmentProvider(second, 0);
+
+        stateDescriptionService.removeStateDescriptionFragmentProvider(secondProvider);
+        assertEquals("first", Objects.requireNonNull(item.getStateDescription()).getPattern());
+        stateDescriptionService.addStateDescriptionFragmentProvider(secondProvider);
+        stateDescriptionService.removeStateDescriptionFragmentProvider(firstProvider);
+        assertEquals("second", Objects.requireNonNull(item.getStateDescription()).getPattern());
+    }
+
+    @Test
+    public void higherRankedProviderCanArriveLateAndBeReplaced() {
+        StateDescriptionFragment lower = StateDescriptionFragmentBuilder.create().withPattern("lower").build();
+        StateDescriptionFragment higher = StateDescriptionFragmentBuilder.create().withPattern("higher").build();
+        registerStateDescriptionFragmentProvider(lower, Integer.MIN_VALUE);
+        StateDescriptionFragmentProvider higherProvider = registerStateDescriptionFragmentProvider(higher,
+                Integer.MAX_VALUE);
+        assertEquals("higher", Objects.requireNonNull(item.getStateDescription()).getPattern());
+        stateDescriptionService.removeStateDescriptionFragmentProvider(higherProvider);
+        assertEquals("lower", Objects.requireNonNull(item.getStateDescription()).getPattern());
+        registerStateDescriptionFragmentProvider(higher, Integer.MAX_VALUE);
+        assertEquals("higher", Objects.requireNonNull(item.getStateDescription()).getPattern());
+    }
+
+    @Test
+    public void customFragmentImplementationCanBeMergedWithoutModification() {
+        StateDescriptionFragment fragment = mock(StateDescriptionFragment.class);
+        List<StateOption> options = List.of(new StateOption("value", "Custom label"));
+        when(fragment.getMinimum()).thenReturn(BigDecimal.ONE);
+        when(fragment.getPattern()).thenReturn("custom");
+        when(fragment.isReadOnly()).thenReturn(Boolean.FALSE);
+        when(fragment.getOptions()).thenReturn(options);
+        registerStateDescriptionFragmentProvider(fragment, 1);
+        registerStateDescriptionFragmentProvider(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.TEN).withPattern("fallback").withReadOnly(Boolean.TRUE)
+                .withOption(new StateOption("other", "Fallback label")).build(), 0);
+
+        StateDescription description = Objects.requireNonNull(item.getStateDescription());
+        assertEquals(BigDecimal.ONE, description.getMinimum());
+        assertEquals(BigDecimal.TEN, description.getMaximum());
+        assertEquals("custom", description.getPattern());
+        assertFalse(description.isReadOnly());
+        assertEquals(options, description.getOptions());
+        assertNull(fragment.getMaximum());
+        assertEquals(options, fragment.getOptions());
+    }
+
+    private StateDescriptionFragmentProvider registerStateDescriptionFragmentProvider(
+            StateDescriptionFragment stateDescriptionFragment, int serviceRanking) {
         StateDescriptionFragmentProvider stateDescriptionProvider = mock(StateDescriptionFragmentProvider.class);
         when(stateDescriptionProvider.getRank()).thenReturn(serviceRanking);
         when(stateDescriptionProvider.getStateDescriptionFragment(ITEM_NAME, null))
                 .thenReturn(stateDescriptionFragment);
         stateDescriptionService.addStateDescriptionFragmentProvider(stateDescriptionProvider);
+        return stateDescriptionProvider;
     }
 }

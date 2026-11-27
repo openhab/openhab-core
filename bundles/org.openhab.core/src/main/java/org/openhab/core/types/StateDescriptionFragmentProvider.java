@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * {@link StateDescriptionFragmentBuilder} to create a {@link StateDescriptionFragment} with only the parts known.
  *
  * @author Henning Treu - Initial contribution
+ * @author Cody Cutrer - Default provider rank
  */
 @NonNullByDefault
 public interface StateDescriptionFragmentProvider {
@@ -39,12 +40,12 @@ public interface StateDescriptionFragmentProvider {
     StateDescriptionFragment getStateDescriptionFragment(String itemName, @Nullable Locale locale);
 
     /**
-     * Return the service rank.
+     * Returns the provider rank. Higher-ranked providers are queried first; providers with equal ranks retain their
+     * registration order. Implementations may use the {@code service.ranking} OSGi component property.
      *
-     * Usually an implementation should piggy-back on the <code>service.ranking</code> OSGi component property.
-     * The default is 0 - the higher, the more like it is going to win.
-     *
-     * @return an integer value
+     * @return the provider rank, defaulting to zero
      */
-    Integer getRank();
+    default Integer getRank() {
+        return 0;
+    }
 }
