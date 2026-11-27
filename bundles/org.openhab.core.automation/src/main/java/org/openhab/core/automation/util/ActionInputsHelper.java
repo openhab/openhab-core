@@ -245,19 +245,21 @@ public class ActionInputsHelper {
     public Object mapSerializedInputToActionInput(Input input, Object argument) throws IllegalArgumentException {
         try {
             Matcher matcher = QUANTITY_TYPE_PATTERN.matcher(input.getType());
-            if (argument instanceof Double valueDouble) {
-                // When an integer value is provided as input value, the value type in the Map is Double.
-                // We have to convert Double type into the target type.
+            if (argument instanceof Number valueNumber) {
+                // Configuration numbers can be represented by different Number implementations,
+                // including BigDecimal. Convert them to the declared action input type.
                 if (matcher.matches()) {
-                    return new QuantityType<>(valueDouble, getDefaultUnit(matcher.group("dimension")));
+                    return new QuantityType<>(valueNumber, getDefaultUnit(matcher.group("dimension")));
                 } else {
                     return switch (input.getType()) {
-                        case "byte", "java.lang.Byte" -> Byte.valueOf(valueDouble.byteValue());
-                        case "short", "java.lang.Short" -> Short.valueOf(valueDouble.shortValue());
-                        case "int", "java.lang.Integer" -> Integer.valueOf(valueDouble.intValue());
-                        case "long", "java.lang.Long" -> Long.valueOf(valueDouble.longValue());
-                        case "float", "java.lang.Float" -> Float.valueOf(valueDouble.floatValue());
-                        case "org.openhab.core.library.types.DecimalType" -> new DecimalType(valueDouble);
+                        case "byte", "java.lang.Byte" -> Byte.valueOf(valueNumber.byteValue());
+                        case "short", "java.lang.Short" -> Short.valueOf(valueNumber.shortValue());
+                        case "int", "java.lang.Integer" -> Integer.valueOf(valueNumber.intValue());
+                        case "long", "java.lang.Long" -> Long.valueOf(valueNumber.longValue());
+                        case "float", "java.lang.Float" -> Float.valueOf(valueNumber.floatValue());
+                        case "double", "java.lang.Double", "java.lang.Number" ->
+                            Double.valueOf(valueNumber.doubleValue());
+                        case "org.openhab.core.library.types.DecimalType" -> new DecimalType(valueNumber);
                         default -> argument;
                     };
                 }
