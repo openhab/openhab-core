@@ -39,8 +39,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "EnrichedConfigDescriptionParameter")
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
-    public Collection<String> defaultValues;
-
     @SuppressWarnings("unchecked")
     public EnrichedConfigDescriptionParameterDTO(String name, Type type, BigDecimal minimum, BigDecimal maximum,
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
