@@ -104,6 +104,7 @@ public class ConfigDescriptionParameter {
     private boolean limitToOptions = true;
     private boolean advanced = false;
     private boolean verify = false;
+    private boolean dynamic = true;
 
     /**
      * Default constructor.
@@ -149,6 +150,7 @@ public class ConfigDescriptionParameter {
      *            provide
      *            natural language units as iterations, runs, etc.
      * @param verify specifies whether the parameter should be considered dangerous
+     * @param dynamic specifies whether the parameter is dynamic, i.e. whether it can be changed by discovery
      * @throws IllegalArgumentException
      *             <ul>
      *             <li>if the name is null or empty, or the type is null</li>
@@ -167,7 +169,7 @@ public class ConfigDescriptionParameter {
             @Nullable List<ParameterOption> options, @Nullable List<FilterCriteria> filterCriteria,
             @Nullable String groupName, @Nullable Boolean advanced, @Nullable Boolean limitToOptions,
             @Nullable Integer multipleLimit, @Nullable String unit, @Nullable String unitLabel,
-            @Nullable Boolean verify) throws IllegalArgumentException {
+            @Nullable Boolean verify, @Nullable Boolean dynamic) throws IllegalArgumentException {
         if ((name == null) || (name.isEmpty())) {
             throw new IllegalArgumentException("The name must neither be null nor empty!");
         }
@@ -224,6 +226,9 @@ public class ConfigDescriptionParameter {
             this.filterCriteria = Collections.unmodifiableList(filterCriteria);
         } else {
             this.filterCriteria = List.of();
+        }
+        if (dynamic != null) {
+            this.dynamic = dynamic;
         }
     }
 
@@ -468,6 +473,13 @@ public class ConfigDescriptionParameter {
         return verify;
     }
 
+    /**
+     * @return true if the parameter is dynamic, otherwise false.
+     */
+    public boolean isDynamic() {
+        return dynamic;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -550,6 +562,9 @@ public class ConfigDescriptionParameter {
             sb.append("unitLabel=");
             sb.append(unitLabel);
         }
+        sb.append(", ");
+        sb.append("dynamic=");
+        sb.append(dynamic);
         sb.append("]");
         return sb.toString();
     }
